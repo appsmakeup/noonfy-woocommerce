@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 class Noonfy_Campaigns {
 
 	const STATUSES    = array( 'draft', 'scheduled', 'sending', 'paused', 'sent', 'cancelled' );
+	const AB_WAITS    = array( 1, 2, 4, 8, 12, 24, 48 );
 	const BLOCK_TYPES = array( 'header', 'image', 'text', 'products', 'button', 'countdown', 'reviews', 'coupon', 'footer' );
 	const EMOJIS      = array( '✉️', '🌾', '⚡', '🎁', '🏺', '🌷', '📦', '📖', '🏖️', '🛍️', '🎉', '❤️', '🔥', '⭐', '🎟️', '📣' );
 
@@ -63,6 +64,10 @@ class Noonfy_Campaigns {
 				started_at datetime DEFAULT NULL,
 				finished_at datetime DEFAULT NULL,
 				recipients_total int(10) unsigned NOT NULL DEFAULT 0,
+				ab longtext,
+				ab_phase varchar(10) NOT NULL DEFAULT '',
+				ab_winner char(1) NOT NULL DEFAULT '',
+				ab_decide_at datetime DEFAULT NULL,
 				created_at datetime NOT NULL,
 				updated_at datetime NOT NULL,
 				PRIMARY KEY  (id),
@@ -75,6 +80,7 @@ class Noonfy_Campaigns {
 				campaign_id bigint(20) unsigned NOT NULL,
 				contact_id bigint(20) unsigned NOT NULL,
 				email varchar(190) NOT NULL,
+				variant char(1) NOT NULL DEFAULT 'A',
 				status varchar(10) NOT NULL DEFAULT 'queued',
 				claim char(16) NOT NULL DEFAULT '',
 				sent_at datetime DEFAULT NULL,
@@ -109,7 +115,46 @@ class Noonfy_Campaigns {
 		if ( ! is_array( $row['content'] ) ) {
 			$row['content'] = self::default_content();
 		}
+		$row['ab'] = self::decode_ab( $row['ab'] );
 		return $row;
+	}
+
+	/**
+	 * @param string|null $json Stored A/B config.
+	 * @return array|null Config (enabled or not), null if never set.
+	 */
+	private static function decode_ab( $json ) {
+		$ab = $json ? json_decode( $json, true ) : null;
+		return is_array( $ab ) ? $ab : null;
+	}
+
+	/**
+	 * @param array $campaign Campaign row.
+	 * @return bool Whether it runs an A/B test.
+	 */
+	public static function is_ab( array $campaign ) {
+		return ! empty( $campaign['ab']['enabled'] );
+	}
+
+	/**
+	 * The campaign as variant B recipients receive it.
+	 *
+	 * @param array  $campaign Campaign row.
+	 * @param string $variant  'A' or 'B'.
+	 * @return array
+	 */
+	public static function for_variant( array $campaign, $variant ) {
+		$ab = $campaign['ab'] ?? null;
+		if ( 'B' !== $variant || ! self::is_ab( $campaign ) ) {
+			return $campaign;
+		}
+		if ( 'content' === $ab['type'] ) {
+			$campaign['content'] = $ab['contentB'];
+		} else {
+			$campaign['subject']   = $ab['subjectB'];
+			$campaign['preheader'] = '' !== ( $ab['preheaderB'] ?? '' ) ? $ab['preheaderB'] : ( $campaign['preheader'] ?? '' );
+		}
+		return $campaign;
 	}
 
 	/** @return array[] All campaigns (browser shape, with stats), newest first. */
@@ -121,6 +166,7 @@ class Noonfy_Campaigns {
 		return array_map(
 			static function ( $row ) use ( $stats ) {
 				$row['content'] = json_decode( $row['content'], true );
+				$row['ab']      = self::decode_ab( $row['ab'] );
 				return self::to_public( $row, $stats[ (int) $row['id'] ] ?? null );
 			},
 			(array) $rows
@@ -150,20 +196,30 @@ class Noonfy_Campaigns {
 		global $wpdb;
 		$table = self::recipients_table();
 		$where = $only ? $wpdb->prepare( 'WHERE campaign_id = %d', $only ) : '';
-		// phpcs:ignore WordPress.DB
-		$rows = $wpdb->get_results( "SELECT campaign_id, COUNT(*) AS total, SUM(status = 'sent') AS sent, SUM(status = 'failed') AS failed, SUM(status IN ('queued','sending')) AS pending, SUM(opened_at IS NOT NULL) AS opens, SUM(clicked_at IS NOT NULL) AS clicks, SUM(order_id > 0) AS orders, SUM(revenue) AS revenue FROM {$table} {$where} GROUP BY campaign_id", ARRAY_A );
-		$out  = array();
-		foreach ( (array) $rows as $r ) {
-			$out[ (int) $r['campaign_id'] ] = array(
+		$agg   = "COUNT(*) AS total, SUM(status = 'sent') AS sent, SUM(status = 'failed') AS failed, SUM(status IN ('queued','sending')) AS pending, SUM(status = 'held') AS held, SUM(opened_at IS NOT NULL) AS opens, SUM(clicked_at IS NOT NULL) AS clicks, SUM(order_id > 0) AS orders, SUM(revenue) AS revenue";
+		// phpcs:disable WordPress.DB
+		$rows     = $wpdb->get_results( "SELECT campaign_id, {$agg} FROM {$table} {$where} GROUP BY campaign_id", ARRAY_A );
+		$variants = $wpdb->get_results( "SELECT campaign_id, variant, {$agg} FROM {$table} {$where} " . ( $where ? 'AND' : 'WHERE' ) . " status <> 'held' GROUP BY campaign_id, variant", ARRAY_A );
+		// phpcs:enable
+		$shape = static function ( $r ) {
+			return array(
 				'total'   => (int) $r['total'],
 				'sent'    => (int) $r['sent'],
 				'failed'  => (int) $r['failed'],
 				'pending' => (int) $r['pending'],
+				'held'    => (int) $r['held'],
 				'opens'   => (int) $r['opens'],
 				'clicks'  => (int) $r['clicks'],
 				'orders'  => (int) $r['orders'],
 				'revenue' => round( (float) $r['revenue'], 2 ),
 			);
+		};
+		$out = array();
+		foreach ( (array) $rows as $r ) {
+			$out[ (int) $r['campaign_id'] ] = $shape( $r );
+		}
+		foreach ( (array) $variants as $r ) {
+			$out[ (int) $r['campaign_id'] ]['variants'][ $r['variant'] ] = $shape( $r );
 		}
 		return $out;
 	}
@@ -190,7 +246,11 @@ class Noonfy_Campaigns {
 			'startedAt'   => $iso( $row['started_at'] ),
 			'finishedAt'  => $iso( $row['finished_at'] ),
 			'updatedAt'   => $iso( $row['updated_at'] ),
-			'stats'       => $stats ? $stats : array( 'total' => 0, 'sent' => 0, 'failed' => 0, 'pending' => 0, 'opens' => 0, 'clicks' => 0, 'orders' => 0, 'revenue' => 0 ),
+			'ab'          => $row['ab'] ?? null,
+			'abPhase'     => $row['ab_phase'] ?? '',
+			'abWinner'    => $row['ab_winner'] ?? '',
+			'abDecideAt'  => $iso( $row['ab_decide_at'] ?? null ),
+			'stats'       => $stats ? $stats : array( 'total' => 0, 'sent' => 0, 'failed' => 0, 'pending' => 0, 'held' => 0, 'opens' => 0, 'clicks' => 0, 'orders' => 0, 'revenue' => 0 ),
 		);
 	}
 
@@ -308,6 +368,7 @@ class Noonfy_Campaigns {
 			'emoji'     => '✉️',
 			'segment'   => 'all',
 			'content'   => self::default_content(),
+			'ab'        => null,
 		);
 		$get  = static function ( $k ) use ( $in, $base ) {
 			return array_key_exists( $k, $in ) ? $in[ $k ] : $base[ $k ];
@@ -325,6 +386,34 @@ class Noonfy_Campaigns {
 			'emoji'     => in_array( $emoji, self::EMOJIS, true ) ? $emoji : '✉️',
 			'segment'   => array_key_exists( $segment, Noonfy_Contacts::SEGMENTS ) ? $segment : 'all',
 			'content'   => wp_json_encode( $content ),
+			'ab'        => wp_json_encode( self::sanitize_ab( $get( 'ab' ), $content ) ),
+		);
+	}
+
+	/**
+	 * A/B test config. Disabled configs are kept (so toggling off and on keeps variant B).
+	 *
+	 * @param mixed $ab      Submitted config.
+	 * @param array $content Variant A content (used as variant B's starting point).
+	 * @return array
+	 */
+	private static function sanitize_ab( $ab, array $content ) {
+		$ab = is_array( $ab ) ? $ab : array();
+		$text = static function ( $k, $default = '' ) use ( $ab ) {
+			return mb_substr( sanitize_text_field( (string) ( $ab[ $k ] ?? $default ) ), 0, 255 );
+		};
+		$wait = (int) ( $ab['waitHours'] ?? 4 );
+		return array(
+			'enabled'    => rest_sanitize_boolean( $ab['enabled'] ?? false ),
+			'type'       => in_array( $ab['type'] ?? '', array( 'subject', 'content' ), true ) ? $ab['type'] : 'subject',
+			'subjectB'   => $text( 'subjectB' ),
+			'preheaderB' => $text( 'preheaderB' ),
+			'contentB'   => isset( $ab['contentB'] ) ? self::sanitize_content( $ab['contentB'] ) : $content,
+			'labelA'     => $text( 'labelA', 'Version A' ),
+			'labelB'     => $text( 'labelB', 'Version B' ),
+			'metric'     => in_array( $ab['metric'] ?? '', array( 'opens', 'clicks', 'revenue' ), true ) ? $ab['metric'] : 'opens',
+			'testPct'    => max( 10, min( 50, (int) ( $ab['testPct'] ?? 20 ) ) ),
+			'waitHours'  => in_array( $wait, self::AB_WAITS, true ) ? $wait : 4,
 		);
 	}
 
@@ -407,5 +496,15 @@ class Noonfy_Campaigns {
 		global $wpdb;
 		$table = self::recipients_table();
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE campaign_id = %d AND status IN ('queued','sending')", (int) $id ) ); // phpcs:ignore WordPress.DB
+	}
+
+	/**
+	 * @param int $id Campaign id.
+	 * @return int Recipients waiting for the A/B winner.
+	 */
+	public static function held_count( $id ) {
+		global $wpdb;
+		$table = self::recipients_table();
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE campaign_id = %d AND status = 'held'", (int) $id ) ); // phpcs:ignore WordPress.DB
 	}
 }

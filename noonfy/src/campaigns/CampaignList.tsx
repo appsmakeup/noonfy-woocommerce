@@ -34,7 +34,7 @@ export function CampaignList({ campaigns, filter, segments }: { campaigns: Campa
                 <span className="nf-row" style={{ gap: 11 }}>
                   <span style={{ width: 34, height: 34, borderRadius: 9, background: TINTS[c.status], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15, flexShrink: 0 }}>{c.emoji}</span>
                   <span className="nf-grow">
-                    <span className="nf-block nf-ellipsis" style={{ fontSize: 13, fontWeight: 700 }}>{c.name}</span>
+                    <span className="nf-block nf-ellipsis" style={{ fontSize: 13, fontWeight: 700 }}>{c.name}{c.ab?.enabled && <span className="nf-ab-chip">A/B</span>}</span>
                     <span className="nf-block nf-ellipsis" style={{ fontSize: 11, color: '#8A8DA3', fontWeight: 600 }}>{c.subject || 'No subject yet'}</span>
                   </span>
                 </span>

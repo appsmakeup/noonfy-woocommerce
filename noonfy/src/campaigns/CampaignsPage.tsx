@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { app } from '../config';
 import { Shell, readHash } from '../shared/Shell';
-import { SoonBadge } from '../shared/ui';
+import { AbTests } from './AbTests';
 import { Builder } from './Builder';
 import { CampaignList } from './CampaignList';
 import { SettingsModal } from './SettingsModal';
@@ -80,15 +80,7 @@ export function CampaignsPage() {
       {(['all', 'scheduled', 'drafts', 'sent'] as Page[]).includes(route.page) && (
         <CampaignList campaigns={campaigns} filter={route.page as 'all' | 'scheduled' | 'drafts' | 'sent'} segments={api.overview.segments} />
       )}
-      {route.page === 'ab' && (
-        <div className="nf-card nf-empty-card">
-          <div style={{ fontSize: 30 }}>🧪</div>
-          <div className="nf-row" style={{ justifyContent: 'center', gap: 8, marginTop: 10 }}><span className="nf-empty-title" style={{ fontSize: 15 }}>A/B testing</span><SoonBadge /></div>
-          <div className="nf-card-sub" style={{ maxWidth: 460, margin: '6px auto 0', lineHeight: 1.5 }}>
-            Send two subject lines to a sample of your audience, then automatically send the winner to everyone else.
-          </div>
-        </div>
-      )}
+      {route.page === 'ab' && <AbTests campaigns={campaigns} />}
       {route.page === 'builder' && (
         <Builder key={route.arg || 'new'} api={api} campaign={editing} missing={!!route.arg && !editing} onOpenSettings={() => setSettingsOpen(true)} />
       )}

@@ -52,6 +52,7 @@ class Noonfy_Campaigns_REST {
 		$route( $id . '/pause', WP_REST_Server::CREATABLE, 'pause' );
 		$route( $id . '/resume', WP_REST_Server::CREATABLE, 'resume' );
 		$route( $id . '/cancel', WP_REST_Server::CREATABLE, 'cancel' );
+		$route( $id . '/winner', WP_REST_Server::CREATABLE, 'winner' );
 	}
 
 	/**
@@ -156,14 +157,26 @@ class Noonfy_Campaigns_REST {
 	}
 
 	/**
+	 * Ends an A/B test now: `variant` A or B, or empty to pick by the campaign's metric.
+	 *
+	 * @param WP_REST_Request $r Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public static function winner( WP_REST_Request $r ) {
+		$v = strtoupper( (string) $r->get_param( 'variant' ) );
+		return rest_ensure_response( Noonfy_Campaign_Sender::decide( (int) $r['id'], in_array( $v, array( 'A', 'B' ), true ) ? $v : null ) );
+	}
+
+	/**
 	 * Rendered HTML of (possibly unsaved) campaign content, as the first recipient would see it.
 	 *
 	 * @param WP_REST_Request $r Request with subject, preheader, content.
 	 * @return WP_REST_Response
 	 */
 	public static function preview( WP_REST_Request $r ) {
-		$html = Noonfy_Email_Renderer::render(
-			(array) $r->get_json_params(),
+		$params = (array) $r->get_json_params();
+		$html   = Noonfy_Email_Renderer::render(
+			Noonfy_Campaign_Sender::with_ab( $params, strtoupper( (string) ( $params['variant'] ?? 'A' ) ) ),
 			array(
 				'contact'         => Noonfy_Campaign_Sender::admin_contact( wp_get_current_user()->user_email ),
 				'unsubscribe_url' => '#',
@@ -179,7 +192,7 @@ class Noonfy_Campaigns_REST {
 	public static function test( WP_REST_Request $r ) {
 		$params = (array) $r->get_json_params();
 		$to     = ! empty( $params['to'] ) ? sanitize_email( $params['to'] ) : wp_get_current_user()->user_email;
-		$result = Noonfy_Campaign_Sender::send_test( $params, $to );
+		$result = Noonfy_Campaign_Sender::send_test( $params, $to, strtoupper( (string) ( $params['variant'] ?? 'A' ) ) );
 		return is_wp_error( $result ) ? $result : rest_ensure_response( array( 'to' => $to ) );
 	}
 

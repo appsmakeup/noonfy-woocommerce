@@ -18,17 +18,35 @@ export interface Block {
 
 export interface Content { accent: string; blocks: Block[] }
 
-export interface CampaignStats { total: number; sent: number; failed: number; pending: number; opens: number; clicks: number; orders: number; revenue: number }
+export interface VariantStats { total: number; sent: number; failed: number; pending: number; opens: number; clicks: number; orders: number; revenue: number }
+export interface CampaignStats extends VariantStats { held: number; variants?: Partial<Record<'A' | 'B', VariantStats>> }
+
+export type AbMetric = 'opens' | 'clicks' | 'revenue';
+export interface AbConfig {
+  enabled: boolean;
+  type: 'subject' | 'content';
+  subjectB: string; preheaderB: string;
+  contentB: Content;
+  labelA: string; labelB: string;
+  metric: AbMetric;
+  testPct: number;
+  waitHours: number;
+}
 
 export interface Campaign {
   id: number; name: string; subject: string; preheader: string; emoji: string; segment: string;
   status: CampaignStatus; content: Content;
   scheduledAt: string | null; startedAt: string | null; finishedAt: string | null; updatedAt: string | null;
+  ab: AbConfig | null;
+  /** '' (no test), 'testing' (test group sending), 'waiting' (for results), 'final' (winner sent to the rest). */
+  abPhase: '' | 'testing' | 'waiting' | 'final';
+  abWinner: '' | 'A' | 'B';
+  abDecideAt: string | null;
   stats: CampaignStats;
 }
 
 /** Fields the builder edits (an unsaved campaign has id 0). */
-export type Draft = Pick<Campaign, 'id' | 'name' | 'subject' | 'preheader' | 'emoji' | 'segment' | 'content'>;
+export type Draft = Pick<Campaign, 'id' | 'name' | 'subject' | 'preheader' | 'emoji' | 'segment' | 'content'> & { ab: AbConfig };
 
 export interface Segment { id: string; label: string; count: number }
 export interface ContactSummary { subscribed: number; customersNotOptedIn: number; unsubscribed: number; total: number }

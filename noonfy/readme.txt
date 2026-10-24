@@ -4,7 +4,7 @@ Tags: woocommerce, email marketing, smtp, deliverability, automation
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -22,6 +22,7 @@ Adds an **AI Customer Engagement** menu to wp-admin with two screens: **SMTP & E
 * Test sends, send now or schedule, batched sending through your SMTP connections (never PHP mail()), pause, resume and cancel.
 * Every email includes your store address, an unsubscribe link and one-click unsubscribe headers (Gmail/Yahoo bulk-sender rules). Unsubscribes are honoured everywhere.
 * Open and click tracking, and revenue attribution from WooCommerce orders (after a click, or within 5 days of opening).
+* A/B testing: test two subject lines or two versions of the email on a sample (10–50% of the audience). The winner by open rate, click rate or revenue per email is picked automatically after a wait you choose (or by you), then sent to everyone else. Results show per-variant numbers and statistical confidence.
 
 = SMTP & Email Delivery =
 
@@ -32,11 +33,14 @@ Adds an **AI Customer Engagement** menu to wp-admin with two screens: **SMTP & E
 
 With no connection enabled, WordPress keeps sending email as before (still logged).
 
-Still in preview (clearly marked in the screen): A/B testing, AI subject lines, conditional routing rules, alerts, DNS checks, deliverability and bounce/complaint tracking.
+Still in preview (clearly marked in the screen): AI subject lines, conditional routing rules, alerts, DNS checks, deliverability and bounce/complaint tracking.
 
 Requires WooCommerce.
 
 == Changelog ==
+
+= 0.4.0 =
+* A/B testing for campaigns: subject line or email content, configurable test group, wait time and winner metric, automatic or manual winner, A/B results tab.
 
 = 0.3.0 =
 * Email Campaigns: builder, audiences, consent and opt-in, test/schedule/send, batched sending, unsubscribe, open/click tracking, revenue attribution.

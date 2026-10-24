@@ -15,6 +15,7 @@ foreach ( array( 'noonfy_smtp_settings', 'noonfy_smtp_connections', 'noonfy_db_v
 wp_clear_scheduled_hook( 'noonfy_purge_email_log' );
 wp_unschedule_hook( 'noonfy_campaign_start' );
 wp_unschedule_hook( 'noonfy_campaign_batch' );
+wp_unschedule_hook( 'noonfy_campaign_decide' );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'noonfy\\_campaign\\_lock\\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 foreach ( array( 'noonfy_email_log', 'noonfy_campaign_recipients', 'noonfy_campaigns', 'noonfy_contacts' ) as $noonfy_table ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}{$noonfy_table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared

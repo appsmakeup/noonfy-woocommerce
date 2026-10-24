@@ -6,7 +6,9 @@ import { campaignsApi } from './api';
 import { BlockPanel } from './BlockPanel';
 import { Canvas } from './Canvas';
 import { STATUS_STYLE } from './CampaignList';
-import { campaignsConfig, type Block, type BlockType, type Campaign, type Draft, type Product } from './types';
+import { AbPanel, AbResults } from './AbPanel';
+import { defaultAb } from './ab';
+import { campaignsConfig, type Block, type BlockType, type Campaign, type Content, type Draft, type Product } from './types';
 import { money, pct, type CampaignsApi } from './useCampaigns';
 
 const PALETTE: [BlockType, string, string][] = [
@@ -34,9 +36,7 @@ function newBlock(type: BlockType): Block {
 
 /** Mirrors Noonfy_Campaigns::default_content(). */
 function blankDraft(): Draft {
-  return {
-    id: 0, name: 'Untitled campaign', subject: '', preheader: '', emoji: '✉️', segment: 'all',
-    content: {
+  const content: Content = {
       accent: '#4F46E5',
       blocks: [
         { id: uid(), type: 'header', eyebrow: app.site.name.toUpperCase(), title: 'Something new is here' },
@@ -44,11 +44,14 @@ function blankDraft(): Draft {
         { id: uid(), type: 'button', label: 'Shop now', url: app.site.home },
         { id: uid(), type: 'footer' },
       ],
-    },
   };
+  return { id: 0, name: 'Untitled campaign', subject: '', preheader: '', emoji: '✉️', segment: 'all', content, ab: defaultAb(content) };
 }
 
-const fromCampaign = (c: Campaign): Draft => ({ id: c.id, name: c.name, subject: c.subject, preheader: c.preheader, emoji: c.emoji, segment: c.segment, content: c.content });
+const fromCampaign = (c: Campaign): Draft => ({
+  id: c.id, name: c.name, subject: c.subject, preheader: c.preheader, emoji: c.emoji, segment: c.segment, content: c.content,
+  ab: { ...defaultAb(c.content), ...(c.ab ?? {}) },
+});
 const toLocalInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 const fmtDate = (iso: string) => new Date(iso).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -65,6 +68,8 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
   const [when, setWhen] = useState<'now' | 'later'>(campaign?.scheduledAt && campaign.status === 'scheduled' ? 'later' : 'now');
   const [sendAt, setSendAt] = useState(() => toLocalInput(campaign?.scheduledAt ? new Date(campaign.scheduledAt) : new Date(Date.now() + 86400000)));
   const [testTo, setTestTo] = useState(app.user.email);
+  /** A/B: which variant the canvas edits (content tests) and previews/tests use. */
+  const [variant, setVariant] = useState<'A' | 'B'>('A');
 
   const status = campaign?.status ?? 'draft';
   const editable = status === 'draft' || status === 'scheduled';
@@ -73,7 +78,7 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
 
   // Product names/prices for blocks already in the email.
   useEffect(() => {
-    const ids = [...new Set(draft.content.blocks.flatMap(b => b.productIds ?? []))].filter(id => !products[id]);
+    const ids = [...new Set([...draft.content.blocks, ...draft.ab.contentB.blocks].flatMap(b => b.productIds ?? []))].filter(id => !products[id]);
     if (ids.length) campaignsApi.products({ ids }).then(addProducts).catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -88,7 +93,15 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
   }, [dirty, editable]);
 
   const edit = (patch: Partial<Draft>) => { setDraft(d => ({ ...d, ...patch })); setDirty(true); };
-  const setBlocks = (fn: (b: Block[]) => Block[]) => { setDraft(d => ({ ...d, content: { ...d.content, blocks: fn(d.content.blocks) } })); setDirty(true); };
+  const contentTest = draft.ab.enabled && draft.ab.type === 'content';
+  const editingB = contentTest && variant === 'B';
+  const activeContent = editingB ? draft.ab.contentB : draft.content;
+  /** Edits whichever version the canvas shows (variant B's content during a content A/B test). */
+  const setContent = (fn: (c: Content) => Content) => {
+    setDraft(d => (d.ab.enabled && d.ab.type === 'content' && variant === 'B' ? { ...d, ab: { ...d.ab, contentB: fn(d.ab.contentB) } } : { ...d, content: fn(d.content) }));
+    setDirty(true);
+  };
+  const setBlocks = (fn: (b: Block[]) => Block[]) => setContent(c => ({ ...c, blocks: fn(c.blocks) }));
   const changeBlock = (id: string, patch: Partial<Block>) => setBlocks(bs => bs.map(b => (b.id === id ? { ...b, ...patch } : b)));
   const addBlock = (type: BlockType) => {
     const b = newBlock(type);
@@ -139,7 +152,9 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
     const later = when === 'later';
     const at = later ? new Date(sendAt) : null;
     if (later && (!at || at.getTime() < Date.now())) { api.showToast('warn', 'Pick a future time', 'Or choose "Now" to send immediately.'); return; }
-    if (!later && !window.confirm(`Send “${draft.subject || draft.name}” to ${audience?.count.toLocaleString() ?? 0} contacts now?`)) return;
+    const n = audience?.count ?? 0;
+    const abNote = draft.ab.enabled ? `\n\nA/B test: ${Math.max(2, Math.round((n * draft.ab.testPct) / 100))} contacts get A or B first; the winner goes to the rest after ${draft.ab.waitHours}h.` : '';
+    if (!later && !window.confirm(`Send “${draft.subject || draft.name}” to ${n.toLocaleString()} contacts now?${abNote}`)) return;
     const c = dirty || !draft.id ? await save(true) : campaign;
     if (!c) return;
     setBusy('send');
@@ -159,7 +174,7 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
     (document.activeElement as HTMLElement | null)?.blur?.();
     await new Promise(r => setTimeout(r, 0));
     setBusy('test');
-    campaignsApi.test(draft, testTo)
+    campaignsApi.test(draft, testTo, draft.ab.enabled ? variant : 'A')
       .then(r => api.showToast('ok', 'Test email sent', `Check ${r.to}.`))
       .catch(e => api.showToast('warn', 'Test failed', errorMessage(e)))
       .finally(() => setBusy(''));
@@ -169,7 +184,7 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
     (document.activeElement as HTMLElement | null)?.blur?.();
     await new Promise(r => setTimeout(r, 0));
     setBusy('preview');
-    campaignsApi.preview(draft).then(r => setPreview(r.html)).catch(e => api.showToast('warn', 'Preview failed', errorMessage(e))).finally(() => setBusy(''));
+    campaignsApi.preview(draft, draft.ab.enabled ? variant : 'A').then(r => setPreview(r.html)).catch(e => api.showToast('warn', 'Preview failed', errorMessage(e))).finally(() => setBusy(''));
   };
 
   const act = (action: 'pause' | 'resume' | 'cancel') => {
@@ -188,8 +203,8 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
       .catch(e => api.showToast('warn', 'Couldn’t delete', errorMessage(e)));
   };
 
-  const block = draft.content.blocks.find(b => b.id === selected) ?? null;
-  const hasFooter = draft.content.blocks.some(b => b.type === 'footer');
+  const block = activeContent.blocks.find(b => b.id === selected) ?? null;
+  const hasFooter = activeContent.blocks.some(b => b.type === 'footer');
   const width = device === 'desktop' ? 600 : 375;
   const sendLabel = when === 'later' ? (status === 'scheduled' ? 'Update schedule' : 'Schedule campaign') : 'Send now';
   const stats = campaign?.stats;
@@ -222,16 +237,26 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
             <button key={d} type="button" className={'nf-device-btn' + (device === d ? ' nf-device-btn--active' : '')} onClick={() => setDevice(d)}>{d === 'desktop' ? '🖥️ Desktop' : '📱 Mobile'}</button>
           ))}
           <button type="button" className="nf-device-btn" onClick={openPreview} disabled={busy === 'preview'}>{busy === 'preview' ? 'Rendering…' : '👁 Preview email'}</button>
+          {draft.ab.enabled && (
+            <span className="nf-ab-switch" title={contentTest ? 'Which version you are editing' : 'Which subject preview and test emails use'}>
+              <span>{contentTest ? 'Editing' : 'Preview as'}</span>
+              {(['A', 'B'] as const).map(k => (
+                <button key={k} type="button" className={variant === k ? 'nf-ab-switch--on' : ''} onClick={() => { setVariant(k); setSelected(null); }}>
+                  {k}{contentTest ? ' · ' + (k === 'A' ? draft.ab.labelA : draft.ab.labelB) : ''}
+                </button>
+              ))}
+            </span>
+          )}
           {editable && <span style={{ fontSize: 11.5, fontWeight: 700, color: '#A5A8BD', marginLeft: 6 }}>Click a block to select · click text to edit</span>}
         </div>
-        <Canvas content={draft.content} editable={editable} selected={selected} products={products} settings={api.settings} width={width}
+        <Canvas key={editingB ? 'B' : 'A'} content={activeContent} editable={editable} selected={selected} products={products} settings={api.settings} width={width}
           onSelect={setSelected} onChange={changeBlock} onRemove={removeBlock} onMove={moveBlock} onPickImage={pickImage} />
       </div>
 
       <div className="nf-builder-side" style={{ width: 244 }}>
         {editable && block ? (
-          <BlockPanel block={block} accent={draft.content.accent} products={products} onBack={() => setSelected(null)}
-            onChange={patch => changeBlock(block.id, patch)} onAccent={accent => { setDraft(d => ({ ...d, content: { ...d.content, accent } })); setDirty(true); }}
+          <BlockPanel block={block} accent={activeContent.accent} products={products} onBack={() => setSelected(null)}
+            onChange={patch => changeBlock(block.id, patch)} onAccent={accent => setContent(c => ({ ...c, accent }))}
             onProducts={addProducts} onPickImage={() => pickImage(block.id)} onOpenSettings={onOpenSettings} />
         ) : (
           <>
@@ -257,6 +282,7 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
                   <div><span>Failed</span><b style={{ color: stats.failed ? '#E02424' : undefined }}>{stats.failed.toLocaleString()}</b></div>
                 </div>
                 {campaign.finishedAt && <div className="nf-hint">Finished {fmtDate(campaign.finishedAt)}</div>}
+                {campaign.ab?.enabled && campaign.abPhase && <AbResults campaign={campaign} api={api} />}
                 <div className="nf-col" style={{ gap: 6, marginTop: 10 }}>
                   {status === 'sending' && <button type="button" className="nf-btn-ghost" disabled={!!busy} onClick={() => act('pause')}>Pause sending</button>}
                   {status === 'paused' && <button type="button" className="nf-btn-primary" disabled={!!busy} onClick={() => act('resume')}>Resume sending</button>}
@@ -283,6 +309,13 @@ export function Builder({ api, campaign, missing, onOpenSettings }: { api: Campa
                 <label><span style={LABEL}>Preview text</span>
                   <input className="nf-field" value={draft.preheader} placeholder="Shown after the subject in the inbox" onChange={e => edit({ preheader: e.target.value })} />
                 </label>
+                <AbPanel ab={draft.ab} audience={audience?.count ?? 0} onChange={patch => {
+                  // Variant B content starts as a copy of A the first time a content test is switched on.
+                  const next = { ...draft.ab, ...patch };
+                  if (patch.type === 'content' && !draft.ab.contentB.blocks.length) next.contentB = JSON.parse(JSON.stringify(draft.content));
+                  if (patch.enabled === false) setVariant('A');
+                  edit({ ab: next });
+                }} onCopyContent={() => edit({ ab: { ...draft.ab, contentB: JSON.parse(JSON.stringify(draft.content)) } })} />
                 <label><span style={LABEL}>Audience</span>
                   <select className="nf-field" value={draft.segment} onChange={e => edit({ segment: e.target.value })}>
                     {segments.map(s => <option key={s.id} value={s.id}>{s.label} ({s.count.toLocaleString()})</option>)}

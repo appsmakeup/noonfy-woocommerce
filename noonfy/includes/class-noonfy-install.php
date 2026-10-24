@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Noonfy_Install {
 
-	const DB_VERSION = '2';
+	const DB_VERSION = '3';
 	const OPTION     = 'noonfy_db_version';
 
 	/** Creates or upgrades all tables. */

@@ -3,7 +3,7 @@
  * Plugin Name:          Noonfy – AI Customer Engagement
  * Plugin URI:           https://noonfy.com
  * Description:          Email marketing, automation and multi-provider SMTP delivery for WooCommerce stores.
- * Version:              0.3.0
+ * Version:              0.4.0
  * Requires at least:    6.6
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NOONFY_VERSION', '0.3.0' );
+define( 'NOONFY_VERSION', '0.4.0' );
 define( 'NOONFY_FILE', __FILE__ );
 define( 'NOONFY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NOONFY_URL', plugin_dir_url( __FILE__ ) );

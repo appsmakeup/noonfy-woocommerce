@@ -59,13 +59,14 @@ For development, symlink or copy this folder into `wp-content/plugins/noonfy` an
 2. **Audience mode:** in "opt-in only" (default) campaigns reach `subscribed` contacts; in "all customers" they also reach customers who never opted in. Unsubscribed contacts are never sent to, and consent is re-checked just before each email.
 3. **Sending:** starting a campaign snapshots the audience into `{prefix}noonfy_campaign_recipients`. WP-Cron batches claim rows, render each email with `Noonfy_Email_Renderer` and send it with `wp_mail()`, so it goes through Noonfy's SMTP routing and email log. Admin screens nudge overdue batches when they poll, so sending progresses on quiet sites. If no connection can send (none enabled, or all at their daily limit), recipients stay queued and are retried every 15 minutes. Campaigns never use PHP `mail()`.
 4. **Compliance:** every email carries the store address, an unsubscribe link (`?noonfy_unsub=token`: GET shows a confirmation, POST unsubscribes) and `List-Unsubscribe` / `List-Unsubscribe-Post` headers for one-click unsubscribe.
-5. **Tracking:** an open pixel (`?noonfy_o`) and click redirects (`?noonfy_c`, HMAC-signed over the destination so they can't be used as open redirects). A click sets a 7-day cookie, which is captured on the order at checkout. When an order is paid, its revenue goes to that recipient, or else to the most recent campaign the same email address opened or clicked within 5 days.
+5. **A/B tests:** the campaign's `ab` config holds the variant B subject (and preview text) or variant B content, version names, the winner metric (opens, clicks or revenue per email), the test group size (10–50%) and the wait (1–48h). At start, a shuffled test group is queued half as A and half as B, and everyone else is `held`. When the test group has been sent, the campaign waits (`ab_phase` = `waiting`). At `ab_decide_at` (or on "Send A/B" / "End test now"), the leader on the metric (A on a tie) becomes `ab_winner`, and held recipients are queued with that variant. Per-variant stats, and a two-proportion z-test confidence for open and click rates, are shown in the builder and on the A/B tab.
+6. **Tracking:** an open pixel (`?noonfy_o`) and click redirects (`?noonfy_c`, HMAC-signed over the destination so they can't be used as open redirects). A click sets a 7-day cookie, which is captured on the order at checkout. When an order is paid, its revenue goes to that recipient, or else to the most recent campaign the same email address opened or clicked within 5 days.
 
 ## What's real and what's still a preview
 
 **Real:** connections, routing, failover, daily limits, logs, the Dashboard / Queue & Logs / Routing numbers, connection tests, test emails, the SMTP-connection and send-test-email tools, system monitoring, default sender, and log retention (purged daily by cron).
 
-**Campaigns:** everything above is real. A/B testing and AI subject lines are marked "Coming soon".
+**Campaigns:** everything above is real, including A/B tests. AI subject lines are marked "Coming soon".
 
 **Preview (marked "Coming soon" or "Preview" in the screen):**
 - Conditional routing rules and alert rules (shown but disabled).
@@ -77,6 +78,7 @@ For development, symlink or copy this folder into `wp-content/plugins/noonfy` an
 
 Tested end-to-end on WordPress 6.6 with MariaDB, using a local SMTP server. Real WooCommerce couldn't be downloaded in the build environment, so a placeholder `woocommerce` plugin stood in, faking the few WooCommerce functions Noonfy calls (products, orders, prices).
 - **SMTP:** every REST route, plus real email through PHPMailer, including failover, auth failures, daily limits and log/stat queries.
+- **A/B testing:** test-group split, variant subjects and content, waiting, the automatic winner by open rate, the manual winner, rollout to the held recipients, cancelling during the wait, and duplicating.
 - **Campaigns:** audiences and consent modes, preview and test sends, scheduling and unscheduling, batched sending to the right contacts, personalisation, unsubscribe headers and page, open and click tracking, revenue attribution, and the daily-limit wait.
 - **UI:** both screens driven in a browser against that backend.
 - **Not covered:** the WooCommerce hooks against real WooCommerce (checkout checkbox, block checkout field, order status changes). Check these on a real store.
