@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="{{ sidebarKey }}" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:10px">
+        <button style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8A8DA3" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"></path></svg>
+          Export CSV
+        </button>
+        <button style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Last 30 days</button>
+      </div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="7">
+        <a href="{{ tb.href }}" style="padding:9px 13px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:15px 18px">
+          <div style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ k.label }}</div>
+          <div style="font-size:22px;font-weight:800;color:#14152A;margin-top:6px">{{ k.value }}</div>
+          <div style="font-size:11px;font-weight:800;color:{{ k.deltaColor }};margin-top:2px">{{ k.delta }}</div>
+        </div>
+      </sc-for>
+    </section>
+    <section style="display:grid;grid-template-columns:1.7fr 1fr;gap:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">{{ chartTitle }}</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ chartSub }}</div>
+        <div style="height:270px;margin-top:12px"><canvas ref="{{ mainRef }}"></canvas></div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">{{ sideTitle }}</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ sideSub }}</div>
+        <div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
+          <sc-for list="{{ sideRows }}" as="r" hint-placeholder-count="6">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#3C3F55"><span>{{ r.glyph }}</span><span>{{ r.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ r.value }}</span></div>
+              <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:{{ r.color }};width:{{ r.width }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+    <section style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">By device</div>
+        <div style="height:170px;margin-top:12px;display:flex;justify-content:center"><canvas ref="{{ deviceRef }}"></canvas></div>
+        <div style="display:flex;justify-content:center;gap:14px;margin-top:10px;font-size:11px;font-weight:700;color:#5B5E75">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:3px;background:#4F46E5"></span>Mobile 62%</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:3px;background:#8B5CF6"></span>Desktop 31%</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:3px;background:#DDD6FE"></span>Tablet 7%</span>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">By country</div>
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+          <sc-for list="{{ countries }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:9px"><span style="font-size:14px">{{ c.flag }}</span><span style="font-size:12px;font-weight:700;color:#3C3F55;width:92px">{{ c.name }}</span><span style="flex:1;height:6px;border-radius:99px;background:#F3F3FA"><span style="display:block;height:6px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ c.width }}"></span></span><span style="font-size:11.5px;font-weight:800;color:#14152A">{{ c.pct }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">By email client</div>
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+          <sc-for list="{{ clients }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:9px"><span style="font-size:13px">{{ c.glyph }}</span><span style="font-size:12px;font-weight:700;color:#3C3F55;width:92px">{{ c.name }}</span><span style="flex:1;height:6px;border-radius:99px;background:#F3F3FA"><span style="display:block;height:6px;border-radius:99px;background:{{ c.color }};width:{{ c.width }}"></span></span><span style="font-size:11.5px;font-weight:800;color:#14152A">{{ c.pct }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#revenue').slice(1) };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#revenue').slice(1) }); this.rebuild(); };
+    window.addEventListener('hashchange', this.hh);
+    this.rebuild();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearTimeout(this.rt); this.destroy(); }
+  destroy() { [this.mc, this.dc].forEach(c => c && c.destroy()); this.mc = null; this.dc = null; }
+  cfg() {
+    const days = Array.from({length: 30}, (_, i) => 'Jun ' + (i + 1));
+    const wave = (base, amp, slope, f = 3.5) => days.map((_, i) => base + Math.sin(i / f) * amp + i * slope);
+    const map = {
+      revenue: { type: 'line', label: v => '$' + (v / 1000).toFixed(1) + 'k', sets: [['Total', wave(3200, 700, 45), '#4F46E5'], ['Email-attributed', wave(1300, 380, 22), '#C4B5FD']] },
+      open: { type: 'line', label: v => v.toFixed(0) + '%', sets: [['Open rate', wave(36, 4, 0.08), '#4F46E5'], ['Industry avg', days.map(() => 24.8), '#E0D7FE']] },
+      click: { type: 'line', label: v => v.toFixed(1) + '%', sets: [['Click rate', wave(4.6, 0.9, 0.012), '#8B5CF6']] },
+      conversions: { type: 'bar', label: v => v.toFixed(0), sets: [['Conversions', wave(130, 34, 1.2), '#4F46E5']] },
+      autorev: { type: 'line', label: v => '$' + (v / 1000).toFixed(1) + 'k', sets: [['Automation revenue', wave(1500, 420, 18), '#7C3AED']] },
+      performance: { type: 'line', label: v => v.toFixed(0) + '%', sets: [['Delivered', wave(99, 0.4, 0), '#0E9F6E'], ['Opened', wave(37, 3, 0.06), '#4F46E5'], ['Clicked', wave(4.9, 0.8, 0.01), '#C4B5FD']] },
+      clv: { type: 'bar', label: v => '$' + v.toFixed(0), sets: [['Avg CLV by cohort month', [310, 348, 365, 402, 421, 456, 480, 512, 540, 575, 590, 618].concat(Array(18).fill(null)), '#8B5CF6']] },
+    };
+    return { days, ...(map[this.pageKey()] || map.revenue) };
+  }
+  pageKey() {
+    const valid = ['revenue', 'open', 'click', 'conversions', 'autorev', 'performance', 'clv'];
+    return valid.includes(this.state.page) ? this.state.page : 'revenue';
+  }
+  rebuild() {
+    clearTimeout(this.rt);
+    const ok = window.Chart && this.mainEl && this.mainEl.isConnected && this.deviceEl && this.deviceEl.isConnected;
+    if (!ok) { this.rt = setTimeout(() => this.rebuild(), 150); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    this.destroy();
+    if (this.mainEl) {
+      const c = this.cfg();
+      this.mc = new Chart(this.mainEl, { type: c.type,
+        data: { labels: c.days, datasets: c.sets.map((s, i) => ({ label: s[0], data: s[1],
+          borderColor: s[2], backgroundColor: c.type === 'bar' ? s[2] : s[2] + '22',
+          fill: c.type === 'line' && i === 0, tension: .4, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4, borderRadius: 5, barPercentage: .6 })) },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: c.sets.length > 1, labels: { boxWidth: 9, boxHeight: 9, font: { size: 11, weight: 700 } } } },
+          scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 8, font: { size: 10, weight: 600 } } },
+            y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: c.label } } } } });
+      if (!this.mc.canvas.isConnected) { this.destroy(); this.rt = setTimeout(() => this.rebuild(), 150); return; }
+    }
+    if (this.deviceEl) {
+      this.dc = new Chart(this.deviceEl, { type: 'pie',
+        data: { labels: ['Mobile', 'Desktop', 'Tablet'], datasets: [{ data: [62, 31, 7], backgroundColor: ['#4F46E5', '#8B5CF6', '#DDD6FE'], borderWidth: 2, borderColor: '#fff' }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+    }
+  }
+  renderVals() {
+    const page = this.pageKey();
+    const meta = {
+      revenue: ['Revenue', 'Store revenue and what email drove', 'Revenue over time', 'Total vs. email-attributed, daily', 'Revenue by source', 'Attributed last-click',
+        [['REVENUE', '$128,460', '+18.2%', 1], ['EMAIL-ATTRIBUTED', '$52,740', '41% of total', 1], ['AVG ORDER VALUE', '$45.10', '+$3.20', 1], ['REVENUE / RECIPIENT', '$0.38', '+$0.06', 1]],
+        [['⚙️', 'Automations', '$52.7k', '82%', '#4F46E5'], ['✉️', 'Campaigns', '$41.2k', '64%', '#8B5CF6'], ['🛒', 'Organic', '$24.9k', '39%', '#C4B5FD'], ['🔍', 'Search', '$6.2k', '10%', '#E0D7FE'], ['📣', 'Social', '$3.5k', '5%', '#EFEFF7']]],
+      open: ['Open Rate', 'Who opens, when, and on what', 'Open rate trend', 'Daily unique opens vs. industry average', 'Top flows by open rate', 'Last 30 days',
+        [['OPEN RATE', '38.4%', '+2.1pt', 1], ['UNIQUE OPENS', '130,346', '+8.4%', 1], ['BOUNCE RATE', '0.8%', '-0.1pt', 1], ['SPAM RATE', '0.02%', 'Healthy', 1]],
+        [['👑', 'VIP Loyalty', '64.8%', '92%', '#4F46E5'], ['👋', 'Welcome Series', '58.1%', '83%', '#8B5CF6'], ['📦', 'Back In Stock', '51.6%', '74%', '#C4B5FD'], ['🛒', 'Cart Recovery', '46.2%', '66%', '#E0D7FE'], ['💫', 'Win Back', '31.4%', '45%', '#EFEFF7']]],
+      click: ['Click Rate', 'Engagement past the open', 'Click rate trend', 'Daily unique clicks / delivered', 'Most-clicked content', 'By block type',
+        [['CLICK RATE', '4.9%', '+0.6pt', 1], ['CLICK-TO-OPEN', '12.8%', '+0.9pt', 1], ['UNIQUE CLICKS', '16,633', '+12.1%', 1], ['UNSUBSCRIBE', '0.14%', 'Stable', 1]],
+        [['🔘', 'CTA buttons', '6,910', '86%', '#4F46E5'], ['🛍️', 'Product cards', '4,820', '60%', '#8B5CF6'], ['🖼️', 'Hero images', '2,410', '30%', '#C4B5FD'], ['🎟️', 'Coupon blocks', '1,890', '24%', '#E0D7FE'], ['⭐', 'Review blocks', '603', '8%', '#EFEFF7']]],
+      conversions: ['Conversions', 'From click to order', 'Daily conversions', 'Orders attributed to email clicks', 'Conversion by flow', 'Orders / enrolled',
+        [['CONVERSIONS', '4,172', '+9.8%', 1], ['CONV RATE', '3.2%', '-0.2pt', 0], ['REVENUE / CONV', '$46.20', '+$2.80', 1], ['TIME TO CONVERT', '9.4h', 'median', 1]],
+        [['🛒', 'Cart Recovery', '23.4%', '88%', '#4F46E5'], ['📦', 'Back In Stock', '18.2%', '68%', '#8B5CF6'], ['👋', 'Welcome Series', '13.9%', '52%', '#C4B5FD'], ['💫', 'Win Back', '9.1%', '34%', '#E0D7FE'], ['👀', 'Browse Abandon', '7.2%', '27%', '#EFEFF7']]],
+      autorev: ['Automation Revenue', 'What your flows earn while you sleep', 'Automation revenue', 'Daily revenue from all live flows', 'Revenue by flow', 'Last 30 days',
+        [['AUTOMATION REVENUE', '$52,740', '+24.1%', 1], ['SHARE OF TOTAL', '41%', '+4pt', 1], ['PER RECIPIENT', '$1.42', '+$0.18', 1], ['LIVE FLOWS', '6', '+2', 1]],
+        [['🛒', 'Cart Recovery', '$18.4k', '92%', '#4F46E5'], ['👋', 'Welcome Series', '$12.8k', '64%', '#8B5CF6'], ['💫', 'Win Back', '$9.3k', '47%', '#C4B5FD'], ['👀', 'Browse Abandon', '$7.6k', '38%', '#E0D7FE'], ['👑', 'VIP Loyalty', '$3.9k', '20%', '#EFEFF7']]],
+      performance: ['Email Performance', 'Deliverability and engagement health', 'Engagement over time', 'Delivered, opened and clicked rates', 'Health checks', 'Deliverability signals',
+        [['DELIVERED', '99.2%', 'Excellent', 1], ['BOUNCE', '0.8%', '-0.1pt', 1], ['SPAM COMPLAINTS', '0.02%', 'Healthy', 1], ['UNSUBSCRIBE', '0.14%', 'Stable', 1]],
+        [['✅', 'SPF / DKIM / DMARC', 'Pass', '100%', '#0E9F6E'], ['📬', 'Inbox placement', '96.4%', '96%', '#4F46E5'], ['🔥', 'Sender reputation', '94 / 100', '94%', '#8B5CF6'], ['⏱️', 'Avg send latency', '1.2s', '30%', '#C4B5FD'], ['📤', 'Queue backlog', '0', '4%', '#EFEFF7']]],
+      clv: ['Customer Lifetime Value', 'How value compounds by cohort', 'CLV by signup cohort', 'Average 12-month value per cohort month', 'CLV by segment', 'Average lifetime value',
+        [['AVG CLV', '$486', '+$42', 1], ['VIP AVG CLV', '$2,640', '+$180', 1], ['PAYBACK PERIOD', '38 days', '-6 days', 1], ['REPEAT RATE', '31.4%', '+3.8pt', 1]],
+        [['👑', 'VIP', '$2,640', '96%', '#4F46E5'], ['💜', 'Loyal', '$1,180', '44%', '#8B5CF6'], ['🌱', 'New', '$212', '9%', '#C4B5FD'], ['⚠️', 'At risk', '$820', '31%', '#E0D7FE'], ['😴', 'Lapsed', '$640', '24%', '#EFEFF7']]],
+    };
+    const m = meta[page];
+    return {
+      sidebarKey: page,
+      pageTitle: m[0], pageSub: m[1], chartTitle: m[2], chartSub: m[3], sideTitle: m[4], sideSub: m[5],
+      tabs: [['Revenue', '#revenue'], ['Open Rate', '#open'], ['Click Rate', '#click'], ['Conversions', '#conversions'], ['Automation Rev', '#autorev'], ['Performance', '#performance'], ['CLV', '#clv']].map(t => {
+        const key = t[1].slice(1);
+        return { label: t[0], href: t[1], weight: page === key ? 800 : 600, color: page === key ? '#4F46E5' : '#8A8DA3', border: page === key ? '#4F46E5' : 'transparent' };
+      }),
+      kpis: m[6].map(k => ({ label: k[0], value: k[1], delta: k[2], deltaColor: k[3] ? '#0E9F6E' : '#E02424' })),
+      sideRows: m[7].map(r => ({ glyph: r[0], label: r[1], value: r[2], width: r[3], color: r[4] })),
+      countries: [
+        { flag: '🇺🇸', name: 'United States', pct: '48%', width: '96%' }, { flag: '🇬🇧', name: 'United Kingdom', pct: '16%', width: '32%' },
+        { flag: '🇨🇦', name: 'Canada', pct: '12%', width: '24%' }, { flag: '🇦🇺', name: 'Australia', pct: '9%', width: '18%' },
+        { flag: '🇩🇪', name: 'Germany', pct: '6%', width: '12%' },
+      ],
+      clients: [
+        { glyph: '📮', name: 'Apple Mail', pct: '44%', width: '88%', color: '#4F46E5' }, { glyph: '📧', name: 'Gmail', pct: '38%', width: '76%', color: '#8B5CF6' },
+        { glyph: '📨', name: 'Outlook', pct: '11%', width: '22%', color: '#C4B5FD' }, { glyph: '📬', name: 'Yahoo', pct: '4%', width: '8%', color: '#E0D7FE' },
+        { glyph: '✉️', name: 'Other', pct: '3%', width: '6%', color: '#EFEFF7' },
+      ],
+      mainRef: (el) => { if (el && el !== this.mainEl) { this.mainEl = el; this.rebuild(); } }, deviceRef: (el) => { if (el && el !== this.deviceEl) { this.deviceEl = el; this.rebuild(); } },
+    };
+  }
+}
+</script>
+</body>
+</html>

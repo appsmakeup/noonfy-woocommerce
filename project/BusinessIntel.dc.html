@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="bi" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Business Intelligence</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">One AI dashboard combining data from every connected plugin</p>
+      </div>
+      <button style="margin-left:auto;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Export report</button>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="6">
+        <a href="{{ tb.href }}" style="padding:9px 13px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:21px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:{{ k.deltaColor }};margin-top:2px">{{ k.delta }}</div></div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">{{ chartTitle }}</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ chartSub }}</div>
+        <div style="height:250px;margin-top:12px"><canvas ref="{{ chartRef }}"></canvas></div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">{{ listTitle }}</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+          <sc-for list="{{ listRows }}" as="r" hint-placeholder-count="6">
+            <div>
+              <div style="display:flex;align-items:center;font-size:12px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px">{{ r.glyph }} {{ r.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ r.value }}</span></div>
+              <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ r.width }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <sc-if value="{{ isExecutive }}" hint-placeholder-val="{{ true }}">
+      <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px">
+        <sc-for list="{{ domainCards }}" as="d" hint-placeholder-count="8">
+          <a href="{{ d.href }}" style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px;color:#14152A;display:block" style-hover="box-shadow:0 8px 22px rgba(20,21,42,.07);color:#14152A">
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:32px;height:32px;border-radius:9px;background:{{ d.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ d.glyph }}</span><span style="font-size:12.5px;font-weight:800">{{ d.name }}</span></div>
+            <div style="font-size:20px;font-weight:800;margin-top:11px">{{ d.value }}</div>
+            <div style="font-size:11px;font-weight:800;color:{{ d.deltaColor }};margin-top:2px">{{ d.delta }}</div>
+          </a>
+        </sc-for>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#executive').slice(1) };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#executive').slice(1) }); setTimeout(() => this.build(), 60); };
+    window.addEventListener('hashchange', this.hh);
+    this.build();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); this.ch && this.ch.destroy(); }
+  build() {
+    if (!window.Chart || !this.chartEl || !this.chartEl.isConnected) { setTimeout(() => this.build(), 140); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    if (this.ch) this.ch.destroy();
+    const cfg = this.chartCfg(this.pageKey());
+    this.ch = new Chart(this.chartEl, cfg);
+  }
+  pageKey() { const v = ['executive', 'revenue', 'learning', 'membership', 'booking', 'support']; return v.includes(this.state.page) ? this.state.page : 'executive'; }
+  chartCfg(page) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const line = (data, color) => ({ type: 'line', data: { labels: months, datasets: [{ data, borderColor: color, backgroundColor: color + '22', fill: true, tension: .4, borderWidth: 2.6, pointRadius: 0 }] }, options: this.opts() });
+    const bar = (data, color) => ({ type: 'bar', data: { labels: months, datasets: [{ data, backgroundColor: color, borderRadius: 5, barPercentage: .6 }] }, options: this.opts() });
+    if (page === 'executive') return { type: 'bar', data: { labels: months, datasets: [
+      { label: 'Ecommerce', data: [42, 45, 48, 52, 55, 58, 62, 60, 64, 68, 72, 76].map(v => v * 1000), backgroundColor: '#4F46E5', borderRadius: 4, stack: 's' },
+      { label: 'Memberships', data: months.map(() => 12000), backgroundColor: '#8B5CF6', borderRadius: 4, stack: 's' },
+      { label: 'Courses', data: [8, 9, 10, 11, 13, 14, 16, 15, 17, 18, 20, 22].map(v => v * 1000), backgroundColor: '#C4B5FD', borderRadius: 4, stack: 's' },
+      { label: 'Donations', data: months.map(() => 3000), backgroundColor: '#DDD6FE', borderRadius: 4, stack: 's' },
+    ] }, options: this.opts(true, true) };
+    if (page === 'revenue') return line([42, 45, 48, 52, 55, 58, 62, 60, 64, 68, 72, 76].map(v => v * 1000), '#4F46E5');
+    if (page === 'learning') return bar([210, 240, 280, 320, 360, 410, 440, 480, 520, 560, 600, 640], '#0E9F6E');
+    if (page === 'membership') return line([820, 860, 910, 980, 1040, 1120, 1180, 1240, 1310, 1380, 1440, 1520], '#C2620A');
+    if (page === 'booking') return bar([120, 140, 160, 155, 180, 210, 230, 220, 250, 270, 290, 310], '#4F46E5');
+    return line([88, 84, 79, 74, 68, 64, 58, 54, 49, 44, 40, 36], '#E02424');
+  }
+  opts(legend, stacked) {
+    return { maintainAspectRatio: false, plugins: { legend: { display: !!legend, labels: { boxWidth: 9, boxHeight: 9, font: { size: 11, weight: 700 } } } },
+      scales: { x: { stacked: !!stacked, grid: { display: false }, ticks: { font: { size: 10, weight: 600 } } }, y: { stacked: !!stacked, border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 } } } } };
+  }
+  renderVals() {
+    const page = this.pageKey();
+    const tabs = [['Executive', '#executive'], ['Revenue', '#revenue'], ['Learning', '#learning'], ['Membership', '#membership'], ['Booking', '#booking'], ['Support', '#support']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const meta = {
+      executive: { kpis: [['TOTAL REVENUE', '$1.18M', '▲ 18%', '#14152A', 1], ['ACTIVE CUSTOMERS', '48,212', '▲ 6%', '#14152A', 1], ['COURSES SOLD', '3,410', '▲ 24%', '#14152A', 1], ['MEMBERS', '2,840', '▲ 9%', '#14152A', 1]],
+        chartTitle: 'Revenue by product line', chartSub: 'All plugins combined, monthly', listTitle: 'Revenue by source',
+        rows: [['🛒', 'Ecommerce', '$684k', '100%'], ['🎫', 'Memberships', '$204k', '30%'], ['🎓', 'Courses', '$186k', '27%'], ['📅', 'Bookings', '$68k', '10%'], ['❤️', 'Donations', '$36k', '5%']] },
+      revenue: { kpis: [['MRR', '$142.8k', '▲ 11%', '#14152A', 1], ['ARR', '$1.68M', '▲ 18%', '#14152A', 1], ['ARPU', '$24.60', '▲ $2.10', '#14152A', 1], ['REFUND RATE', '1.4%', '▼ 0.3pt', '#0E9F6E', 1]],
+        chartTitle: 'Revenue trend', chartSub: 'Monthly, all sources', listTitle: 'Top revenue drivers',
+        rows: [['⚙️', 'Automations', '$52.7k', '100%'], ['🤖', 'AI agents', '$38.4k', '73%'], ['✉️', 'Campaigns', '$41.2k', '78%'], ['🛒', 'Organic', '$24.9k', '47%']] },
+      learning: { kpis: [['ENROLLMENTS', '3,410', '▲ 24%', '#14152A', 1], ['COMPLETION RATE', '68%', '▲ 5pt', '#0E9F6E', 1], ['CERTIFICATES', '1,840', '▲ 18%', '#14152A', 1], ['COURSE REVENUE', '$186k', '▲ 22%', '#14152A', 1]],
+        chartTitle: 'Enrollments per month', chartSub: 'Tutor LMS + LearnDash', listTitle: 'Top courses',
+        rows: [['🎨', 'Ceramics 101', '640', '100%'], ['🔥', 'Glazing Masterclass', '480', '75%'], ['🪴', 'Home Styling', '360', '56%'], ['📸', 'Product Photography', '280', '44%']] },
+      membership: { kpis: [['ACTIVE MEMBERS', '2,840', '▲ 9%', '#14152A', 1], ['MEMBER MRR', '$34k', '▲ 7%', '#14152A', 1], ['RENEWAL RATE', '84%', '▲ 3pt', '#0E9F6E', 1], ['CHURN', '4.2%', '▼ 0.6pt', '#0E9F6E', 1]],
+        chartTitle: 'Member growth', chartSub: 'MemberPress, cumulative', listTitle: 'Plans',
+        rows: [['🥇', 'Gold annual', '1,240', '100%'], ['🥈', 'Silver monthly', '980', '79%'], ['🥉', 'Bronze monthly', '620', '50%']] },
+      booking: { kpis: [['APPOINTMENTS', '2,410', '▲ 15%', '#14152A', 1], ['SHOW RATE', '92%', '▲ 4pt', '#0E9F6E', 1], ['UTILIZATION', '78%', '▲ 6pt', '#14152A', 1], ['BOOKING REVENUE', '$68k', '▲ 12%', '#14152A', 1]],
+        chartTitle: 'Appointments per month', chartSub: 'Amelia', listTitle: 'By service',
+        rows: [['🎨', 'Studio session', '840', '100%'], ['👤', '1:1 coaching', '620', '74%'], ['👥', 'Group workshop', '540', '64%'], ['📞', 'Consultation', '410', '49%']] },
+      support: { kpis: [['OPEN TICKETS', '284', '▼ 12%', '#0E9F6E', 1], ['AI RESOLVED', '82%', '▲ 6pt', '#0E9F6E', 1], ['AVG RESOLUTION', '4.2m', '▼ 38%', '#0E9F6E', 1], ['CSAT', '4.7/5', '▲ 0.3', '#0E9F6E', 1]],
+        chartTitle: 'Ticket volume trend', chartSub: 'Declining — AI deflection working', listTitle: 'By category',
+        rows: [['🚚', 'Shipping', '410', '100%'], ['↩️', 'Returns', '280', '68%'], ['❓', 'Product Q', '240', '59%'], ['💳', 'Billing', '120', '29%']] },
+    };
+    const m = meta[page];
+    return {
+      tabs, isExecutive: page === 'executive',
+      kpis: m.kpis.map(k => ({ label: k[0], value: k[1], delta: k[2], color: k[3], deltaColor: k[4] ? '#0E9F6E' : '#E02424' })),
+      chartTitle: m.chartTitle, chartSub: m.chartSub, listTitle: m.listTitle,
+      listRows: m.rows.map(r => ({ glyph: r[0], label: r[1], value: r[2], width: r[3] })),
+      chartRef: (el) => { if (el && el !== this.chartEl) { this.chartEl = el; this.build(); } },
+      domainCards: [
+        { name: 'Revenue', glyph: '💰', tint: '#EEF0FE', value: '$1.18M', delta: '▲ 18%', deltaColor: '#0E9F6E', href: '#revenue' },
+        { name: 'Learning', glyph: '🎓', tint: '#EDF9F1', value: '3,410', delta: '▲ 24% enrollments', deltaColor: '#0E9F6E', href: '#learning' },
+        { name: 'Membership', glyph: '🎫', tint: '#FFF3E8', value: '2,840', delta: '▲ 9% members', deltaColor: '#0E9F6E', href: '#membership' },
+        { name: 'Booking', glyph: '📅', tint: '#EEF0FE', value: '2,410', delta: '▲ 15% appts', deltaColor: '#0E9F6E', href: '#booking' },
+        { name: 'Marketplace', glyph: '🏪', tint: '#F1EBFE', value: '$142k', delta: '▲ 11% GMV', deltaColor: '#0E9F6E', href: '#revenue' },
+        { name: 'Donations', glyph: '❤️', tint: '#FDEDED', value: '$36k', delta: '▲ 8%', deltaColor: '#0E9F6E', href: '#revenue' },
+        { name: 'Support', glyph: '🎧', tint: '#EDF9F1', value: '82%', delta: 'AI resolved', deltaColor: '#0E9F6E', href: '#support' },
+        { name: 'Projects', glyph: '📋', tint: '#EEF0FE', value: '96%', delta: 'on-time tasks', deltaColor: '#0E9F6E', href: '#executive' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

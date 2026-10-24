@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="crossauto" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Cross-Plugin Automation</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Chain actions across WooCommerce, LMS, memberships, bookings and more</p>
+      </div>
+      <a href="Builder.dc.html" style="margin-left:auto;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:800;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92;color:#fff">Open in builder</a>
+    </header>
+
+    <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap">
+      <sc-for list="{{ examples }}" as="e" hint-placeholder-count="3">
+        <button onClick="{{ e.onClick }}" style="border:1px solid {{ e.border }};background:{{ e.bg }};color:{{ e.color }};border-radius:99px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">{{ e.label }}</button>
+      </sc-for>
+    </div>
+
+    <section style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">{{ flowName }}</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 10px">{{ stepCount }} steps · {{ pluginCount }} plugins</span></div>
+        <div style="display:flex;flex-direction:column;align-items:center;margin-top:18px">
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="8">
+            <div style="width:100%;display:flex;flex-direction:column;align-items:center">
+              <div style="width:100%;max-width:400px;border:1.5px solid {{ s.border }};background:{{ s.bg }};border-radius:13px;padding:12px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(20,21,42,.05)">
+                <span style="width:32px;height:32px;border-radius:9px;background:{{ s.iconBg }};display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">{{ s.glyph }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font-size:9.5px;font-weight:800;letter-spacing:.5px;color:{{ s.kindColor }}">{{ s.kind }}</span><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ s.label }}</span></span>
+                <span style="font-size:9.5px;font-weight:800;color:{{ s.plColor }};background:{{ s.plBg }};border-radius:99px;padding:3px 8px;white-space:nowrap">{{ s.plugin }}</span>
+              </div>
+              <sc-if value="{{ s.arrow }}" hint-placeholder-val="{{ true }}"><div style="height:18px;width:2px;background:#DDD6FE"></div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff">
+          <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">✨</span><span style="font-size:13px;font-weight:800">Why this works</span></div>
+          <div style="font-size:12.5px;font-weight:600;color:#E6E4F5;line-height:1.55;margin-top:10px">{{ insight }}</div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Plugins in this flow</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+            <sc-for list="{{ pluginsUsed }}" as="p" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;background:{{ p.tint }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:{{ p.fg }}">{{ p.mark }}</span><span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ p.name }}</span><span style="font-size:10.5px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 8px">CONNECTED</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Performance</div>
+          <div style="display:flex;flex-direction:column;gap:11px;margin-top:12px">
+            <sc-for list="{{ perf }}" as="m" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;font-size:12px;font-weight:700;color:#5B5E75"><span>{{ m.label }}</span><span style="margin-left:auto;font-weight:800;color:{{ m.color }}">{{ m.value }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { flow: 'onboard' };
+  flows() {
+    const pl = { Woo: ['#7C3AED', '#F1EBFE', 'W'], LMS: ['#0E9F6E', '#EDF9F1', 'TL'], Member: ['#C2620A', '#FFF3E8', 'MP'], Booking: ['#4F46E5', '#EEF0FE', 'AM'], Invoice: ['#4F46E5', '#EEF0FE', '$'], Slack: ['#7C3AED', '#F1EBFE', 'SL'], Project: ['#0E9F6E', '#EDF9F1', 'PM'], Support: ['#E02424', '#FDEDED', 'FS'], WhatsApp: ['#0E9F6E', '#EDF9F1', 'WA'], Core: ['#4F46E5', '#EEF0FE', '⚙'] };
+    const s = (kind, kindColor, label, glyph, iconBg, plugin, plKey, tone) => ({ kind, kindColor, label, glyph, iconBg, plugin, plColor: pl[plKey][0], plBg: pl[plKey][1],
+      border: tone === 'trigger' ? '#DDD6FE' : tone === 'goal' ? '#BEE9D2' : '#ECEDF4', bg: tone === 'trigger' ? '#FBFAFF' : tone === 'goal' ? '#F7FCF9' : '#fff' });
+    return {
+      onboard: { name: 'New customer onboarding journey', insight: 'One WooCommerce purchase spins up the entire customer relationship — course access, membership, an onboarding call, invoicing and internal handoff — with zero manual work across 8 plugins.',
+        plugins: [['WooCommerce', 'W', 'Woo'], ['Tutor LMS', 'TL', 'LMS'], ['MemberPress', 'MP', 'Member'], ['Amelia', 'AM', 'Booking'], ['WP Project Manager', 'PM', 'Project']],
+        steps: [
+          s('TRIGGER', '#7C3AED', 'Customer buys product', '🛒', '#F1EBFE', 'WooCommerce', 'Woo', 'trigger'),
+          s('ACTION', '#0E9F6E', 'Enroll into Tutor LMS course', '🎓', '#EDF9F1', 'Tutor LMS', 'LMS'),
+          s('ACTION', '#0E9F6E', 'Send WhatsApp welcome', '💬', '#EDF9F1', 'WhatsApp', 'WhatsApp'),
+          s('ACTION', '#C2620A', 'Create MemberPress membership', '🎫', '#FFF3E8', 'MemberPress', 'Member'),
+          s('ACTION', '#4F46E5', 'Book onboarding meeting', '📅', '#EEF0FE', 'Amelia', 'Booking'),
+          s('ACTION', '#4F46E5', 'Generate invoice', '🧾', '#EEF0FE', 'Invoicing', 'Invoice'),
+          s('ACTION', '#7C3AED', 'Notify team in Slack', '📢', '#F1EBFE', 'Slack', 'Slack'),
+          s('ACTION', '#0E9F6E', 'Create project + assign task', '📋', '#EDF9F1', 'Project Mgr', 'Project'),
+          s('GOAL', '#0E9F6E', 'Schedule follow-up ticket', '🎧', '#FDEDED', 'Fluent Support', 'Support', 'goal'),
+        ],
+        perf: [['Customers processed', '284', '#14152A'], ['Avg completion', '96%', '#0E9F6E'], ['Manual hours saved', '48/mo', '#0E9F6E']] },
+      course: { name: 'Course completion → upsell', insight: 'Finishing a course is the perfect moment to sell the next one. This flow celebrates, certifies, rewards and alerts sales — turning graduates into repeat buyers.',
+        plugins: [['Tutor LMS', 'TL', 'LMS'], ['WooCommerce', 'W', 'Woo'], ['Slack', 'SL', 'Slack']],
+        steps: [
+          s('TRIGGER', '#0E9F6E', 'Course completed', '🎓', '#EDF9F1', 'Tutor LMS', 'LMS', 'trigger'),
+          s('ACTION', '#7C3AED', 'Offer premium course', '🛍️', '#F1EBFE', 'WooCommerce', 'Woo'),
+          s('ACTION', '#0E9F6E', 'Send certificate', '📜', '#EDF9F1', 'Tutor LMS', 'LMS'),
+          s('ACTION', '#7C3AED', 'Create coupon', '🎟️', '#F1EBFE', 'WooCommerce', 'Woo'),
+          s('ACTION', '#4F46E5', 'Add VIP tag', '🏷️', '#EEF0FE', 'Core CDP', 'Core'),
+          s('GOAL', '#0E9F6E', 'Notify sales team', '📢', '#F1EBFE', 'Slack', 'Slack', 'goal'),
+        ],
+        perf: [['Graduates enrolled', '96', '#14152A'], ['Upsell conversion', '31%', '#0E9F6E'], ['Revenue · flow', '$8.2k', '#0E9F6E']] },
+      member: { name: 'Recover abandoned membership checkout', insight: 'Membership checkouts abandon just like carts. This flow re-engages across WhatsApp and email, offers a nudge, and alerts a human only if it stalls.',
+        plugins: [['MemberPress', 'MP', 'Member'], ['WhatsApp', 'WA', 'WhatsApp'], ['Fluent Support', 'FS', 'Support']],
+        steps: [
+          s('TRIGGER', '#C2620A', 'Membership checkout abandoned', '🎫', '#FFF3E8', 'MemberPress', 'Member', 'trigger'),
+          s('DELAY', '#C2620A', 'Wait 1 hour', '⏱️', '#FFF3E8', 'Core', 'Core'),
+          s('ACTION', '#0E9F6E', 'Send WhatsApp reminder', '💬', '#EDF9F1', 'WhatsApp', 'WhatsApp'),
+          s('CONDITION', '#0E9F6E', 'Completed signup?', '🔀', '#EDF9F1', 'Core', 'Core'),
+          s('ACTION', '#7C3AED', 'Offer 20% first-month coupon', '🎟️', '#F1EBFE', 'MemberPress', 'Member'),
+          s('GOAL', '#0E9F6E', 'Escalate to success team', '🎧', '#FDEDED', 'Fluent Support', 'Support', 'goal'),
+        ],
+        perf: [['Abandoned checkouts', '142', '#14152A'], ['Recovery rate', '38%', '#0E9F6E'], ['Recovered MRR', '$3.4k', '#0E9F6E']] },
+    };
+  }
+  renderVals() {
+    const flows = this.flows();
+    const f = flows[this.state.flow];
+    const examples = [['New customer onboarding', 'onboard'], ['Course completion upsell', 'course'], ['Recover membership checkout', 'member']].map(e => ({
+      label: e[0], onClick: () => this.setState({ flow: e[1] }), border: this.state.flow === e[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.flow === e[1] ? '#EEF0FE' : '#fff', color: this.state.flow === e[1] ? '#4F46E5' : '#8A8DA3' }));
+    const plMark = { Woo: ['#7C3AED', '#F1EBFE'], LMS: ['#0E9F6E', '#EDF9F1'], Member: ['#C2620A', '#FFF3E8'], Booking: ['#4F46E5', '#EEF0FE'], Slack: ['#7C3AED', '#F1EBFE'], Project: ['#0E9F6E', '#EDF9F1'], WhatsApp: ['#0E9F6E', '#EDF9F1'], Support: ['#E02424', '#FDEDED'] };
+    const steps = f.steps.map((s, i) => ({ ...s, arrow: i < f.steps.length - 1 }));
+    const plugins = f.plugins.map(p => ({ name: p[0], mark: p[1], tint: plMark[p[2]][1], fg: plMark[p[2]][0] }));
+    const pluginNames = {};
+    return {
+      examples, flowName: f.name, stepCount: f.steps.length, pluginCount: f.plugins.length,
+      steps, insight: f.insight, pluginsUsed: plugins,
+      perf: f.perf.map(p => ({ label: p[0], value: p[1], color: p[2] })),
+    };
+  }
+}
+</script>
+</body>
+</html>

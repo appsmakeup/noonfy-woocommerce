@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#0C0D1E;}
+a{color:#A5B4FC;text-decoration:none;}a:hover{color:#C7D2FE;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#26284A;border-radius:8px;}
+@keyframes liveDot{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:none;}}
+@keyframes flow{to{stroke-dashoffset:-40;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#0C0D1E">
+  <dc-import name="Sidebar" active="monitor" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 26px 40px 26px;color:#E6E7F5">
+    <header style="display:flex;align-items:center;gap:14px;padding:20px 0 18px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.3px">Live Email Sending Monitor</h1>
+        <p style="margin:3px 0 0 0;font-size:12.5px;color:#8E90B8;font-weight:500">Flash Sale batch · 12,406 recipients in flight</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;color:#34D399">
+        <span style="width:7px;height:7px;border-radius:99px;background:#34D399;animation:liveDot 1.4s ease infinite"></span>SENDING
+      </div>
+      <button onClick="{{ togglePause }}" style="background:{{ pauseBg }};border:1px solid {{ pauseBorder }};border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:800;color:{{ pauseColor }};cursor:pointer;font-family:inherit">{{ pauseLabel }}</button>
+      <button onClick="{{ retry }}" style="background:#1A1B36;border:1px solid #2C2E52;border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:800;color:#C7D2FE;cursor:pointer;font-family:inherit" style-hover="border-color:#4F46E5">Retry failed ({{ bounced }})</button>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:14px;padding:16px 18px">
+        <div style="font-size:10.5px;font-weight:800;color:rgba(255,255,255,.75);letter-spacing:.5px">EMAILS / SECOND</div>
+        <div style="font-size:30px;font-weight:800;color:#fff;margin-top:5px;font-variant-numeric:tabular-nums">{{ eps }}</div>
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.75);margin-top:2px">{{ epm }}/min · {{ eph }}/hr</div>
+      </div>
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:16px 18px">
+        <div style="font-size:10.5px;font-weight:800;color:#8E90B8;letter-spacing:.5px">SENT / TOTAL</div>
+        <div style="font-size:30px;font-weight:800;color:#fff;margin-top:5px;font-variant-numeric:tabular-nums">{{ sentK }}</div>
+        <div style="height:5px;border-radius:99px;background:#24264A;margin-top:8px"><div style="height:5px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ progressPct }};transition:width .4s ease"></div></div>
+      </div>
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:16px 18px">
+        <div style="font-size:10.5px;font-weight:800;color:#8E90B8;letter-spacing:.5px">EST. COMPLETION</div>
+        <div style="font-size:30px;font-weight:800;color:#fff;margin-top:5px">{{ eta }}</div>
+        <div style="font-size:11px;font-weight:700;color:#8E90B8;margin-top:2px">at current throughput</div>
+      </div>
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:16px 18px">
+        <div style="font-size:10.5px;font-weight:800;color:#8E90B8;letter-spacing:.5px">WORKERS ACTIVE</div>
+        <div style="font-size:30px;font-weight:800;color:#fff;margin-top:5px">8 / 8</div>
+        <div style="display:flex;gap:3px;margin-top:9px">
+          <sc-for list="{{ workers }}" as="w" hint-placeholder-count="8">
+            <span style="flex:1;height:6px;border-radius:3px;background:{{ w.color }}"></span>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#fff">Email routing · SMTP rotation</div>
+        <div style="font-size:11.5px;color:#8E90B8;font-weight:600;margin-top:2px">Live flow from queue through the sending pool</div>
+        <svg viewBox="0 0 460 220" style="width:100%;height:200px;margin-top:10px">
+          <defs>
+            <linearGradient id="pipe" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4F46E5"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient>
+          </defs>
+          <rect x="14" y="86" width="96" height="48" rx="10" fill="#1E1F3D" stroke="#2C2E52"/>
+          <text x="62" y="106" fill="#C7D2FE" font-size="11" font-weight="800" text-anchor="middle" font-family="Manrope">QUEUE</text>
+          <text x="62" y="122" fill="#8E90B8" font-size="10" font-weight="700" text-anchor="middle" font-family="Manrope">{{ queued }}</text>
+          <sc-for list="{{ pipes }}" as="p" hint-placeholder-count="3">
+            <path d="{{ p.d }}" stroke="url(#pipe)" stroke-width="2.5" fill="none" stroke-dasharray="6 8" style="animation:flow .8s linear infinite;opacity:.85"></path>
+          </sc-for>
+          <sc-for list="{{ smtpNodes }}" as="s" hint-placeholder-count="3">
+            <g>
+              <rect x="320" y="{{ s.y }}" width="126" height="46" rx="10" fill="#1E1F3D" stroke="{{ s.stroke }}"></rect>
+              <circle cx="336" cy="{{ s.cy }}" r="4" fill="{{ s.dot }}"></circle>
+              <text x="348" y="{{ s.ty1 }}" fill="#E6E7F5" font-size="11" font-weight="800" font-family="Manrope">{{ s.name }}</text>
+              <text x="348" y="{{ s.ty2 }}" fill="#8E90B8" font-size="9.5" font-weight="700" font-family="Manrope">{{ s.load }}</text>
+            </g>
+          </sc-for>
+        </svg>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px">
+          <sc-for list="{{ smtpHealth }}" as="s" hint-placeholder-count="3">
+            <div style="background:#1A1B36;border:1px solid #24264A;border-radius:10px;padding:10px 12px">
+              <div style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:{{ s.dot }}"></span><span style="font-size:11px;font-weight:800;color:#E6E7F5">{{ s.name }}</span></div>
+              <div style="font-size:10px;font-weight:700;color:#8E90B8;margin-top:5px">Health {{ s.health }} · {{ s.share }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#fff">Delivery status</div>
+        <div style="font-size:11.5px;color:#8E90B8;font-weight:600;margin-top:2px">This batch, updating live</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px">
+          <sc-for list="{{ statuses }}" as="s" hint-placeholder-count="9">
+            <div style="background:#1A1B36;border:1px solid #24264A;border-radius:11px;padding:12px 13px">
+              <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:3px;background:{{ s.color }}"></span><span style="font-size:10.5px;font-weight:800;color:#8E90B8;letter-spacing:.3px">{{ s.label }}</span></div>
+              <div style="font-size:18px;font-weight:800;color:#fff;margin-top:6px;font-variant-numeric:tabular-nums">{{ s.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#fff">Live email log</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#34D399;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:#34D399;animation:liveDot 1.4s ease infinite"></span>STREAMING</span></div>
+        <div style="margin-top:12px;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px">
+          <sc-for list="{{ logs }}" as="l" hint-placeholder-count="8">
+            <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #1E1F3D;animation:rowIn .3s ease">
+              <span style="color:#5B5E88;flex-shrink:0">{{ l.time }}</span>
+              <span style="font-weight:800;color:{{ l.color }};width:74px;flex-shrink:0">{{ l.status }}</span>
+              <span style="color:#9EA0C8;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.email }}</span>
+              <span style="color:#5B5E88;flex-shrink:0">{{ l.smtp }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#fff">World delivery map</div>
+          <div style="position:relative;margin-top:12px;background:#10112A;border-radius:10px;overflow:hidden;height:150px">
+            <svg viewBox="0 0 400 150" style="width:100%;height:100%">
+              <sc-for list="{{ landmasses }}" as="m" hint-placeholder-count="5">
+                <path d="{{ m.d }}" fill="#1E1F3D"></path>
+              </sc-for>
+              <sc-for list="{{ pings }}" as="p" hint-placeholder-count="6">
+                <g><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.color }}" opacity="{{ p.opacity }}"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="2.5" fill="{{ p.color }}"></circle></g>
+              </sc-for>
+            </svg>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+            <sc-for list="{{ geo }}" as="g" hint-placeholder-count="5">
+              <span style="font-size:11px;font-weight:700;color:#9EA0C8">{{ g.flag }} {{ g.name }} <span style="color:#fff;font-weight:800">{{ g.pct }}</span></span>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px;flex:1">
+          <div style="font-size:13.5px;font-weight:800;color:#fff">Webhook events · retry queue</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+            <sc-for list="{{ webhooks }}" as="w" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px"><span style="font-size:9.5px;font-weight:800;color:{{ w.color }};background:{{ w.bg }};border-radius:6px;padding:3px 8px;font-family:monospace">{{ w.event }}</span><span style="font-size:11px;font-weight:600;color:#9EA0C8;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ w.detail }}</span><span style="font-size:10px;font-weight:700;color:#5B5E88">{{ w.time }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { sent: 7420, tick: 0, paused: false, eps: 214, logs: [], pingSeed: 0 };
+  componentDidMount() {
+    this.total = 12406;
+    this.seedLogs();
+    this.iv = setInterval(() => {
+      if (this.state.paused) return;
+      this.setState(s => {
+        const inc = 180 + Math.round(Math.random() * 90);
+        const sent = Math.min(this.total, s.sent + inc);
+        return { sent, tick: s.tick + 1, eps: 190 + Math.round(Math.random() * 60), pingSeed: s.pingSeed + 1, logs: this.nextLogs(s.logs) };
+      });
+    }, 1400);
+  }
+  componentWillUnmount() { clearInterval(this.iv); }
+  domains() { return ['gmail.com', 'outlook.com', 'icloud.com', 'yahoo.com', 'proton.me', 'gmx.de', 'orange.fr', 'libero.it']; }
+  names() { return ['maya.okafor', 'j.lindqvist', 'priya.raman', 't.becker', 'a.fontaine', 's.ricci', 'd.chen', 'h.suzuki', 'm.webb', 'elena.m', 'noah.p', 'ava.k']; }
+  mkLog() {
+    const r = Math.random();
+    const st = r < 0.72 ? ['DELIVERED', '#34D399'] : r < 0.85 ? ['OPENED', '#60A5FA'] : r < 0.93 ? ['CLICKED', '#A78BFA'] : r < 0.97 ? ['DEFERRED', '#FBBF24'] : ['BOUNCED', '#F87171'];
+    const n = this.names()[Math.floor(Math.random() * this.names().length)];
+    const d = this.domains()[Math.floor(Math.random() * this.domains().length)];
+    const smtp = ['ses-1', 'ses-2', 'postmark'][Math.floor(Math.random() * 3)];
+    const now = new Date();
+    return { time: now.toLocaleTimeString([], { hour12: false }), status: st[0], color: st[1], email: n + '@' + d, smtp };
+  }
+  seedLogs() { const logs = []; for (let i = 0; i < 9; i++) logs.push(this.mkLog()); this.setState({ logs }); }
+  nextLogs(prev) { const add = [this.mkLog(), this.mkLog()]; return add.concat(prev).slice(0, 10); }
+  renderVals() {
+    const sent = this.state.sent, total = this.total || 12406;
+    const remaining = total - sent;
+    const eps = this.state.paused ? 0 : this.state.eps;
+    const secs = eps > 0 ? Math.round(remaining / eps) : 0;
+    const eta = this.state.paused ? 'Paused' : (secs > 60 ? Math.floor(secs / 60) + 'm ' + (secs % 60) + 's' : secs + 's');
+    const pct = ((sent / total) * 100);
+    const delivered = Math.round(sent * 0.982);
+    const opened = Math.round(delivered * 0.412);
+    const clicked = Math.round(delivered * 0.068);
+    const statuses = [
+      ['QUEUED', remaining.toLocaleString(), '#6366F1'],
+      ['SENDING', this.state.paused ? '0' : String(eps), '#8B5CF6'],
+      ['DELIVERED', delivered.toLocaleString(), '#34D399'],
+      ['DEFERRED', '84', '#FBBF24'],
+      ['BOUNCED', '112', '#F87171'],
+      ['SPAM', '9', '#EF4444'],
+      ['OPENED', opened.toLocaleString(), '#60A5FA'],
+      ['CLICKED', clicked.toLocaleString(), '#A78BFA'],
+      ['UNSUB', '38', '#94A3B8'],
+    ].map(s => ({ label: s[0], value: s[1], color: s[2] }));
+    const pipes = [
+      { d: 'M110 110 C200 110, 240 60, 320 63' },
+      { d: 'M110 110 C200 110, 250 110, 320 110' },
+      { d: 'M110 110 C200 110, 240 158, 320 157' },
+    ];
+    const smtpNodes = [
+      { y: 40, cy: 63, ty1: 60, ty2: 74, name: 'Amazon SES-1', load: '70% · 149/s', stroke: '#34D399', dot: '#34D399' },
+      { y: 87, cy: 110, ty1: 107, ty2: 121, name: 'Amazon SES-2', load: '20% · 43/s', stroke: '#34D399', dot: '#34D399' },
+      { y: 134, cy: 157, ty1: 154, ty2: 168, name: 'Postmark', load: '10% · 22/s', stroke: '#FBBF24', dot: '#FBBF24' },
+    ];
+    const geo = [
+      { flag: '🇺🇸', name: 'US', pct: '48%' }, { flag: '🇬🇧', name: 'UK', pct: '16%' },
+      { flag: '🇨🇦', name: 'CA', pct: '12%' }, { flag: '🇦🇺', name: 'AU', pct: '9%' }, { flag: '🇩🇪', name: 'DE', pct: '6%' },
+    ];
+    const landmasses = [
+      { d: 'M30 40 C50 30 90 34 110 46 C120 66 96 84 70 82 C44 80 22 62 30 40 Z' },
+      { d: 'M78 92 C92 88 104 104 98 122 C90 140 74 138 70 120 C68 106 70 96 78 92 Z' },
+      { d: 'M180 34 C210 26 250 30 262 46 C258 66 236 74 210 72 C186 70 168 52 180 34 Z' },
+      { d: 'M198 82 C220 78 236 92 232 112 C226 132 206 130 198 112 C194 100 192 86 198 82 Z' },
+      { d: 'M300 40 C340 30 372 44 368 66 C360 86 326 86 308 74 C294 64 290 48 300 40 Z' },
+      { d: 'M320 96 C344 92 360 104 356 118 C350 132 332 130 324 116 C320 108 316 98 320 96 Z' },
+    ];
+    const anchors = [[70, 50], [210, 46], [330, 54], [200, 100], [340, 108], [96, 108]];
+    const pings = anchors.map((a, i) => {
+      const phase = (this.state.pingSeed + i) % 4;
+      return { x: a[0], y: a[1], r: 4 + phase * 3, opacity: (0.5 - phase * 0.11).toFixed(2), color: i % 3 === 0 ? '#34D399' : i % 3 === 1 ? '#60A5FA' : '#A78BFA' };
+    });
+    const workers = Array.from({ length: 8 }, (_, i) => ({ color: this.state.paused ? '#3A3C64' : (i < 7 ? '#34D399' : '#FBBF24') }));
+    const webhooks = [
+      { event: 'delivered', color: '#34D399', bg: 'rgba(52,211,153,.14)', detail: 'maya.okafor@gmail.com · 250 OK', time: 'now' },
+      { event: 'opened', color: '#60A5FA', bg: 'rgba(96,165,250,.14)', detail: 'd.chen@outlook.com · Apple Mail', time: '2s' },
+      { event: 'bounced', color: '#F87171', bg: 'rgba(248,113,113,.14)', detail: 'old.addr@gmx.de · 550 mailbox unavailable → retry', time: '5s' },
+      { event: 'clicked', color: '#A78BFA', bg: 'rgba(167,139,250,.14)', detail: 's.ricci@libero.it · CTA “Shop the drop”', time: '8s' },
+    ];
+    return {
+      eps: this.state.paused ? '0' : String(eps),
+      epm: (eps * 60).toLocaleString(), eph: (eps * 3600).toLocaleString(),
+      sentK: sent.toLocaleString() + ' / ' + total.toLocaleString(),
+      progressPct: pct.toFixed(1) + '%', eta, queued: remaining.toLocaleString(), bounced: '112',
+      statuses, pipes, smtpNodes, geo, landmasses, pings, workers, webhooks,
+      logs: this.state.logs,
+      smtpHealth: [
+        { name: 'SES-1', dot: '#34D399', health: '99', share: '70%' },
+        { name: 'SES-2', dot: '#34D399', health: '98', share: '20%' },
+        { name: 'Postmark', dot: '#FBBF24', health: '94', share: '10%' },
+      ],
+      togglePause: () => this.setState(s => ({ paused: !s.paused })),
+      pauseLabel: this.state.paused ? '▶ Resume queue' : '⏸ Pause queue',
+      pauseBg: this.state.paused ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.14)',
+      pauseBorder: this.state.paused ? 'rgba(16,185,129,.4)' : 'rgba(239,68,68,.4)',
+      pauseColor: this.state.paused ? '#34D399' : '#F87171',
+    };
+  }
+}
+</script>
+</body>
+</html>

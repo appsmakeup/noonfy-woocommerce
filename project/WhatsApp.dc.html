@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="whatsapp" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;color:#0E9F6E"><span style="font-size:13px">🟢</span>WhatsApp Business API · Connected</div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:#14152A;margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.delta }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">WhatsApp revenue</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Attributed to WhatsApp conversations, daily</div>
+            <div style="height:210px;margin-top:12px"><canvas ref="{{ chartRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Shared inbox</div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+              <sc-for list="{{ inbox }}" as="c" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:30px;height:30px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.msg }}</span></span><span style="font-size:9.5px;font-weight:800;color:{{ c.agentColor }};background:{{ c.agentBg }};border-radius:99px;padding:2px 7px">{{ c.agent }}</span></div>
+              </sc-for>
+            </div>
+            <a href="Inbox.dc.html" style="display:block;text-align:center;margin-top:14px;border:1px solid #C4E9D3;background:#F7FCF9;border-radius:9px;padding:8px;font-size:12px;font-weight:800;color:#0E9F6E" style-hover="background:#EDF9F1;color:#0E9F6E">Open shared inbox →</a>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Message templates</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+              <sc-for list="{{ templates }}" as="t" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px"><span style="font-size:14px">{{ t.glyph }}</span><span style="flex:1"><span style="display:block;font-size:12px;font-weight:800;color:#14152A">{{ t.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ t.detail }}</span></span><span style="font-size:9.5px;font-weight:800;color:{{ t.stColor }};background:{{ t.stBg }};border-radius:99px;padding:2px 8px">{{ t.status }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Automations on WhatsApp</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+              <sc-for list="{{ flows }}" as="f" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px"><span style="width:28px;height:28px;border-radius:8px;background:{{ f.tint }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ f.glyph }}</span><span style="flex:1"><span style="display:block;font-size:12px;font-weight:800;color:#14152A">{{ f.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ f.detail }}</span></span><span style="font-size:12px;font-weight:800;color:#0E9F6E">{{ f.rev }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isBroadcast }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1.1fr .9fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">New broadcast campaign</div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">Template</div>
+          <div style="border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;color:#14152A;background:#F8F8FC">🌾 Summer Linen Drop — Product carousel</div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">Audience segment</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <sc-for list="{{ segments }}" as="s" hint-placeholder-count="4"><button onClick="{{ s.onClick }}" style="border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:99px;padding:6px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ s.label }}</button></sc-for>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">Message</div>
+          <textarea style="width:100%;height:90px;border:1px solid #ECEDF4;border-radius:11px;padding:11px 13px;font-size:12.5px;font-weight:600;font-family:'Manrope',sans-serif;color:#14152A;outline:none;background:#F8F8FC;resize:none">🌿 The Summer Linen Drop is here! Six new colors, free shipping this week. Reply SHOP to see the collection or tap below 👇</textarea>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid #F3F3FA">
+            <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">Reaches <strong style="color:#14152A">{{ reach }}</strong> contacts · est. cost {{ cost }}</span>
+            <button style="margin-left:auto;border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Schedule</button>
+            <button style="border:none;background:linear-gradient(135deg,#0E9F6E,#059669);color:#fff;border-radius:9px;padding:9px 18px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(16,159,110,.3)" style-hover="opacity:.92">Send broadcast</button>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Phone preview</div>
+          <div style="margin:14px auto 0 auto;width:260px;background:#E5DDD5;border-radius:20px;padding:14px 12px;min-height:300px;border:6px solid #14152A">
+            <div style="background:#075E54;border-radius:10px 10px 0 0;margin:-14px -12px 12px -12px;padding:12px 14px;display:flex;align-items:center;gap:9px"><span style="width:28px;height:28px;border-radius:99px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px">🏡</span><div><div style="font-size:12px;font-weight:800;color:#fff">Bruma Home</div><div style="font-size:9px;color:#B4D4CE">business account</div></div></div>
+            <div style="background:#fff;border-radius:9px;padding:10px 11px;box-shadow:0 1px 2px rgba(0,0,0,.1)">
+              <div style="height:80px;background:linear-gradient(135deg,#EDF9F1,#F1EBFE);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:26px">🌿</div>
+              <div style="font-size:11px;font-weight:600;color:#14152A;line-height:1.5;margin-top:8px">🌿 The Summer Linen Drop is here! Six new colors, free shipping this week.</div>
+              <div style="border-top:1px solid #F0F0F0;margin-top:9px;padding-top:8px;text-align:center;font-size:11px;font-weight:800;color:#075E54">🛒 Shop the collection</div>
+            </div>
+            <div style="font-size:9px;color:#667781;text-align:right;margin-top:4px">10:02 ✓✓</div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAnalytics }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <sc-for list="{{ analyticsKpis }}" as="k" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:15px 18px"><div style="font-size:11px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:22px;font-weight:800;color:#14152A;margin-top:6px">{{ k.value }}</div><div style="font-size:11px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.delta }}</div></div>
+        </sc-for>
+        <div style="grid-column:1 / -1;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Broadcast campaign performance</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;padding:12px 0 8px 0;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Campaign</span><span>Sent</span><span>Read</span><span>Replied</span><span style="text-align:right">Revenue</span></div>
+          <sc-for list="{{ campaigns }}" as="c" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:11px 0;border-bottom:1px solid #F7F7FB"><span style="display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:#14152A"><span style="font-size:14px">{{ c.glyph }}</span>{{ c.name }}</span><span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.sent }}</span><span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.read }}</span><span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.replied }}</span><span style="font-size:13px;font-weight:800;color:#0E9F6E;text-align:right">{{ c.rev }}</span></div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isContacts }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr .9fr;gap:8px;padding:12px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Contact</span><span>Phone</span><span>Opt-in</span><span>Conversations</span><span style="text-align:right">Spent</span></div>
+        <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr .9fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB" style-hover="background:#FAFAFE"><span style="display:flex;align-items:center;gap:10px"><span style="width:30px;height:30px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span><span style="font-size:12.5px;font-weight:700;color:#14152A">{{ c.name }}</span></span><span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.phone }}</span><span><span style="font-size:9.5px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 9px">OPTED IN</span></span><span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.convos }}</span><span style="font-size:12.5px;font-weight:800;color:#14152A;text-align:right">{{ c.spent }}</span></div>
+        </sc-for>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#dashboard').slice(1), seg: 'Engaged' };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#dashboard').slice(1) }); setTimeout(() => this.initChart(), 60); };
+    window.addEventListener('hashchange', this.hh);
+    this.initChart();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); this.ch && this.ch.destroy(); }
+  initChart() {
+    if ((location.hash || '#dashboard').slice(1) !== 'dashboard') return;
+    if (!window.Chart || !this.chartEl || !this.chartEl.isConnected) { setTimeout(() => this.initChart(), 140); return; }
+    if (this.ch) return;
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    const days = Array.from({ length: 30 }, (_, i) => 'D' + (i + 1));
+    const data = days.map((_, i) => 400 + Math.sin(i / 4) * 180 + i * 14 + (i % 7 === 0 ? 260 : 0));
+    const g = this.chartEl.getContext('2d').createLinearGradient(0, 0, 0, 210);
+    g.addColorStop(0, 'rgba(16,159,110,.2)'); g.addColorStop(1, 'rgba(16,159,110,0)');
+    this.ch = new Chart(this.chartEl, { type: 'line', data: { labels: days, datasets: [{ data, borderColor: '#0E9F6E', backgroundColor: g, fill: true, tension: .4, borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 4 }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' $' + Math.round(c.raw).toLocaleString() } } },
+        scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10, weight: 600 } } }, y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: v => '$' + (v / 1000).toFixed(1) + 'k' } } } } });
+  }
+  renderVals() {
+    const valid = ['dashboard', 'broadcast', 'analytics', 'contacts'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'dashboard';
+    const titles = { dashboard: ['WhatsApp Business', 'AI sales & support on WhatsApp'], broadcast: ['WhatsApp Broadcast', 'Send template campaigns to opted-in contacts'], analytics: ['WhatsApp Analytics', 'Delivery, engagement and revenue'], contacts: ['WhatsApp Contacts', '9,214 opted-in contacts'] };
+    const tabs = [['Dashboard', '#dashboard'], ['Broadcast', '#broadcast'], ['Analytics', '#analytics'], ['Contacts', '#contacts']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#0E9F6E' : '#8A8DA3', border: page === k ? '#0E9F6E' : 'transparent' };
+    });
+    const segs = ['Engaged', 'VIP', 'Cart abandoners', 'All opted-in'];
+    const reachMap = { Engaged: '6,240', VIP: '214', 'Cart abandoners': '1,284', 'All opted-in': '9,214' };
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isDashboard: page === 'dashboard', isBroadcast: page === 'broadcast', isAnalytics: page === 'analytics', isContacts: page === 'contacts',
+      kpis: [
+        { label: 'CONVERSATIONS', value: '1,120', delta: '▲ 16%' }, { label: 'WHATSAPP REVENUE', value: '$12,140', delta: '▲ 28%' },
+        { label: 'READ RATE', value: '94%', delta: '▲ 2pt' }, { label: 'REPLY RATE', value: '41%', delta: '▲ 5pt' }, { label: 'OPTED-IN', value: '9,214', delta: '▲ 340' },
+      ],
+      inbox: [
+        { name: 'Maya Okafor', msg: 'Is the duvet back in sage?', agent: '🤖 AI', agentColor: '#7C3AED', agentBg: '#F1EBFE', initials: 'MO', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: 'Hana Suzuki', msg: 'Just ordered, thank you!', agent: '✅ Done', agentColor: '#0E9F6E', agentBg: '#EDF9F1', initials: 'HS', tint: '#FDEDED', fg: '#E02424' },
+        { name: 'David Chen', msg: 'Any new kitchen arrivals?', agent: '🤖 AI', agentColor: '#7C3AED', agentBg: '#F1EBFE', initials: 'DC', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: 'Marcus Webb', msg: 'Wholesale pricing?', agent: '👤 Lena', agentColor: '#4F46E5', agentBg: '#EEF0FE', initials: 'MW', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { name: 'Sofia Ricci', msg: 'YES to the 15% offer', agent: '✅ Done', agentColor: '#0E9F6E', agentBg: '#EDF9F1', initials: 'SR', tint: '#FFF3E8', fg: '#C2620A' },
+      ],
+      templates: [
+        { name: 'Order confirmation', detail: 'Utility · auto-sent', glyph: '🧾', status: 'APPROVED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Shipping update', detail: 'Utility · with tracking', glyph: '🚚', status: 'APPROVED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Abandoned cart', detail: 'Marketing · product carousel', glyph: '🛒', status: 'APPROVED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Summer Linen Drop', detail: 'Marketing · under review', glyph: '🌾', status: 'PENDING', stColor: '#C2620A', stBg: '#FFF3E8' },
+      ],
+      flows: [
+        { name: 'Abandoned cart recovery', detail: 'Cart idle 2h → WhatsApp', glyph: '🛒', tint: '#EDF9F1', rev: '$5.2k' },
+        { name: 'COD confirmation', detail: 'Verify order by reply', glyph: '✅', tint: '#EEF0FE', rev: '$3.1k' },
+        { name: 'Back-in-stock alert', detail: 'On restock → waitlist', glyph: '📦', tint: '#F1EBFE', rev: '$2.4k' },
+        { name: 'Order tracking', detail: 'Auto shipping updates', glyph: '🚚', tint: '#FFF3E8', rev: '$1.4k' },
+      ],
+      segments: segs.map(s => ({ label: s, onClick: () => this.setState({ seg: s }), border: this.state.seg === s ? '#0E9F6E' : '#ECEDF4', bg: this.state.seg === s ? '#EDF9F1' : '#fff', color: this.state.seg === s ? '#0E9F6E' : '#8A8DA3' })),
+      reach: reachMap[this.state.seg], cost: '$' + (Math.round(parseInt(reachMap[this.state.seg].replace(/,/g, '')) * 0.012)).toLocaleString(),
+      analyticsKpis: [
+        { label: 'MESSAGES SENT', value: '48,210', delta: '▲ 12%' }, { label: 'READ RATE', value: '94.2%', delta: '▲ 2pt' },
+        { label: 'CTR', value: '18.6%', delta: '▲ 3pt' }, { label: 'REVENUE / MSG', value: '$0.25', delta: '▲ $0.04' },
+      ],
+      campaigns: [
+        { name: 'July Flash Sale', glyph: '⚡', sent: '9,214', read: '8,680', replied: '3,120', rev: '$8,420' },
+        { name: 'Restock — Alpaca Throw', glyph: '📦', sent: '1,240', read: '1,180', replied: '620', rev: '$4,120' },
+        { name: 'VIP Early Access', glyph: '👑', sent: '214', read: '208', replied: '142', rev: '$3,860' },
+        { name: 'Spring Refresh', glyph: '🌷', sent: '6,240', read: '5,810', replied: '1,840', rev: '$5,240' },
+      ],
+      contacts: [
+        { name: 'Maya Okafor', phone: '+1 ••• ••84', convos: '12', spent: '$1,840', initials: 'MO', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: 'Hana Suzuki', phone: '+81 ••• ••02', convos: '9', spent: '$1,960', initials: 'HS', tint: '#FDEDED', fg: '#E02424' },
+        { name: 'David Chen', phone: '+44 ••• ••71', convos: '7', spent: '$2,910', initials: 'DC', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: 'Sofia Ricci', phone: '+39 ••• ••02', convos: '6', spent: '$2,480', initials: 'SR', tint: '#FFF3E8', fg: '#C2620A' },
+        { name: 'Marcus Webb', phone: '+1 ••• ••55', convos: '5', spent: '$2,120', initials: 'MW', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { name: 'Elena Moreau', phone: '+33 ••• ••84', convos: '14', spent: '$3,840', initials: 'EM', tint: '#F1EBFE', fg: '#7C3AED' },
+      ],
+      chartRef: (el) => { if (el && el !== this.chartEl) { this.chartEl = el; this.initChart(); } },
+    };
+  }
+}
+</script>
+</body>
+</html>

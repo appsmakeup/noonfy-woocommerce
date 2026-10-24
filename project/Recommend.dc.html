@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="recommend2" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Smart Recommendation Engine</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Per-customer product picks powering emails, flows and the storefront</p>
+      </div>
+      <span style="margin-left:auto;font-size:11px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px">MODEL HEALTHY · retrained 4h ago</span>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:15px 18px">
+          <div style="font-size:11px;font-weight:800;color:#8A8DA3">{{ k.label }}</div>
+          <div style="font-size:22px;font-weight:800;color:#14152A;margin-top:6px">{{ k.value }}</div>
+          <div style="font-size:11px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.delta }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="margin-top:14px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <sc-for list="{{ strategies }}" as="s" hint-placeholder-count="8">
+          <button onClick="{{ s.onClick }}" style="border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ s.label }}</button>
+        </sc-for>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">{{ stratName }}</span><span style="margin-left:auto;font-size:11.5px;font-weight:700;color:#8A8DA3">{{ stratDesc }}</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px">
+          <sc-for list="{{ picks }}" as="p" hint-placeholder-count="4">
+            <div style="border:1px solid #F3F3FA;border-radius:13px;overflow:hidden">
+              <div style="height:100px;background:{{ p.tint }};display:flex;align-items:center;justify-content:center;font-size:34px;position:relative">{{ p.glyph }}<span style="position:absolute;top:8px;right:8px;font-size:10px;font-weight:800;color:#fff;background:rgba(20,21,42,.55);border-radius:99px;padding:3px 8px">{{ p.match }}</span></div>
+              <div style="padding:11px 13px">
+                <div style="font-size:12px;font-weight:800;color:#14152A;line-height:1.3">{{ p.name }}</div>
+                <div style="display:flex;align-items:center;margin-top:6px"><span style="font-size:12.5px;font-weight:800;color:#4F46E5">{{ p.price }}</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#0E9F6E">{{ p.lift }}</span></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Frequently bought together</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Real purchase-pair strength across your store</div>
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px">
+          <sc-for list="{{ pairs }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="display:flex;align-items:center;gap:5px"><span style="width:30px;height:30px;border-radius:8px;background:{{ p.tintA }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ p.a }}</span><span style="font-size:13px;color:#C4C6D4;font-weight:800">+</span><span style="width:30px;height:30px;border-radius:8px;background:{{ p.tintB }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ p.b }}</span></span>
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.names }}</span>
+              <span style="width:80px;height:6px;border-radius:99px;background:#F3F3FA"><span style="display:block;height:6px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ p.strength }}"></span></span>
+              <span style="font-size:11.5px;font-weight:800;color:#7C3AED;width:34px;text-align:right">{{ p.pct }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Where recommendations run</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+          <sc-for list="{{ placements }}" as="p" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+              <span style="width:30px;height:30px;border-radius:8px;background:{{ p.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ p.glyph }}</span>
+              <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ p.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ p.detail }}</span></span>
+              <span style="text-align:right"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ p.revenue }}</span><span style="display:block;font-size:10px;font-weight:800;color:{{ p.stColor }}">{{ p.status }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { strat: 'fbt' };
+  data() {
+    const P = '#F1EBFE', B = '#EEF0FE', G = '#EDF9F1', O = '#FFF3E8', W = '#F8F1E7';
+    const pk = (name, glyph, tint, price, match, lift) => ({ name, glyph, tint, price, match, lift });
+    return {
+      fbt: ['Frequently bought together', 'Based on real basket pairs', [
+        pk('Waffle Bath Towel Set', '🛁', B, '$48', '92% match', '+31% AOV'), pk('Linen Pillowcase Pair', '🛏️', G, '$42', '88% match', '+24% AOV'),
+        pk('Alpaca Throw — Oat', '🧶', P, '$120', '84% match', '+19% AOV'), pk('Stoneware Vase, Tall', '🏺', O, '$68', '77% match', '+14% AOV')]],
+      also: ['Customers also bought', 'Collaborative filtering', [
+        pk('Ceramic Table Lamp', '💡', B, '$110', '90% match', '+2.1× CTR'), pk('Oak Serving Board', '🪵', W, '$60', '85% match', '+1.8× CTR'),
+        pk('Pour-Over Kettle', '☕', O, '$75', '81% match', '+1.6× CTR'), pk('Ceramic Mug Set', '🍵', G, '$38', '74% match', '+1.4× CTR')]],
+      trending: ['Trending & popular', 'Rising velocity this week', [
+        pk('Linen Duvet — Terracotta', '🛏️', O, '$189', '96% hot', '+180 orders'), pk('Waffle Robe', '🧖', B, '$88', '89% hot', '+120 orders'),
+        pk('Stoneware Bowl Set', '🥣', G, '$54', '82% hot', '+96 orders'), pk('Rattan Pendant', '🪔', W, '$140', '78% hot', '+72 orders')]],
+      seasonal: ['Seasonal picks', 'Matched to season + weather', [
+        pk('Linen Beach Throw', '🏖️', O, '$64', '94% fit', '+summer'), pk('Cotton Sun Hat', '👒', P, '$34', '88% fit', '+summer'),
+        pk('Ceramic Pitcher', '🫖', G, '$46', '83% fit', '+summer'), pk('Outdoor Cushion Set', '🪑', B, '$98', '79% fit', '+summer')]],
+      pricedrop: ['Price drop alerts', 'Wishlisted items that dropped', [
+        pk('Alpaca Throw — Slate', '🧶', P, '$96', 'was $120', '-20%'), pk('Oak Serving Board L', '🪵', W, '$48', 'was $60', '-20%'),
+        pk('Ceramic Lamp', '💡', B, '$88', 'was $110', '-20%'), pk('Stoneware Vase', '🏺', O, '$54', 'was $68', '-21%')]],
+      stock: ['Back in stock', 'Restocked waitlist items', [
+        pk('Linen Duvet — Sage', '🛏️', G, '$189', '4,820 waiting', 'restocked'), pk('Waffle Towel Set', '🛁', B, '$48', '1,240 waiting', 'restocked'),
+        pk('Pour-Over Kettle', '☕', O, '$75', '890 waiting', 'restocked'), pk('Alpaca Throw', '🧶', P, '$120', '640 waiting', 'restocked')]],
+      similar: ['Similar products', 'Same style & material', [
+        pk('Linen Duvet — Clay', '🛏️', O, '$189', '95% similar', 'swap'), pk('Linen Duvet — Fog', '🛏️', B, '$189', '93% similar', 'swap'),
+        pk('Cotton Duvet — Sage', '🛏️', G, '$149', '86% similar', 'swap'), pk('Linen Sheet Set', '🛏️', P, '$129', '82% similar', 'swap')]],
+      bundle: ['Bundle & upgrade', 'Higher-value combinations', [
+        pk('Complete Bed Bundle', '🎁', P, '$389', 'save $60', '+premium'), pk('Bath Spa Bundle', '🧖', B, '$156', 'save $24', '+premium'),
+        pk('Kitchen Starter Set', '🍽️', O, '$210', 'save $38', '+premium'), pk('Cozy Living Bundle', '🛋️', G, '$298', 'save $46', '+premium')]],
+    };
+  }
+  renderVals() {
+    const d = this.data();
+    const order = [['fbt', 'Frequently Bought'], ['also', 'Also Bought'], ['trending', 'Trending'], ['seasonal', 'Seasonal'], ['pricedrop', 'Price Drop'], ['stock', 'Back In Stock'], ['similar', 'Similar'], ['bundle', 'Bundle & Upgrade']];
+    const strategies = order.map(o => ({ label: o[1], onClick: () => this.setState({ strat: o[0] }),
+      border: this.state.strat === o[0] ? '#4F46E5' : '#ECEDF4', bg: this.state.strat === o[0] ? '#EEF0FE' : '#fff', color: this.state.strat === o[0] ? '#4F46E5' : '#8A8DA3' }));
+    const cur = d[this.state.strat];
+    const pair = (a, b, tintA, tintB, names, strength, pct) => ({ a, b, tintA, tintB, names, strength, pct });
+    return {
+      strategies, stratName: cur[0], stratDesc: cur[1], picks: cur[2],
+      kpis: [
+        { label: 'REC-DRIVEN REVENUE', value: '$14,280', delta: '+34% MoM' },
+        { label: 'CLICK-THROUGH LIFT', value: '2.3×', delta: 'vs. static blocks' },
+        { label: 'AOV UPLIFT', value: '+$8.40', delta: 'per order' },
+        { label: 'COVERAGE', value: '99.4%', delta: 'of catalog' },
+      ],
+      pairs: [
+        pair('🛏️', '🛁', '#EDF9F1', '#EEF0FE', 'Linen Duvet + Waffle Towels', '92%', '31%'),
+        pair('☕', '🪵', '#FFF3E8', '#F8F1E7', 'Pour-Over Kettle + Oak Board', '84%', '24%'),
+        pair('🧶', '🛏️', '#F1EBFE', '#EDF9F1', 'Alpaca Throw + Pillowcases', '78%', '19%'),
+        pair('💡', '🏺', '#EEF0FE', '#FFF3E8', 'Table Lamp + Stoneware Vase', '71%', '16%'),
+        pair('🛁', '🧖', '#EEF0FE', '#F1EBFE', 'Towel Set + Waffle Robe', '66%', '12%'),
+      ],
+      placements: [
+        { glyph: '✉️', tint: '#EEF0FE', name: 'Email “Products” block', detail: 'Cart Recovery, Welcome, Cross-sell', revenue: '$5,640', status: 'LIVE', stColor: '#0E9F6E' },
+        { glyph: '🤖', tint: '#F1EBFE', name: 'AI Recommendations flow', detail: 'Per-customer weekly picks', revenue: '$4,120', status: 'LIVE', stColor: '#0E9F6E' },
+        { glyph: '🛒', tint: '#EDF9F1', name: 'Storefront widget', detail: 'Product & cart pages', revenue: '$3,380', status: 'LIVE', stColor: '#0E9F6E' },
+        { glyph: '📦', tint: '#FFF3E8', name: 'Post-purchase page', detail: 'Order confirmation upsell', revenue: '$1,140', status: 'LIVE', stColor: '#0E9F6E' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

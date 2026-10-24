@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="marketinghub" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Marketing Command Center</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">One campaign, every channel — orchestrated together</p>
+      </div>
+      <button style="margin-left:auto;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border:none;border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">+ Unified campaign</button>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(4,2fr);gap:12px">
+      <sc-for list="{{ channels }}" as="c" hint-placeholder-count="8">
+        <div onClick="{{ c.onClick }}" style="background:#fff;border:1.5px solid {{ c.border }};border-radius:14px;padding:15px 17px;cursor:pointer" style-hover="border-color:#C7C3F5">
+          <div style="display:flex;align-items:center;gap:9px"><span style="width:32px;height:32px;border-radius:9px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ c.glyph }}</span><span style="font-size:12.5px;font-weight:800;color:#14152A">{{ c.name }}</span><span style="margin-left:auto;width:8px;height:8px;border-radius:99px;background:{{ c.dot }}"></span></div>
+          <div style="font-size:19px;font-weight:800;color:#14152A;margin-top:10px">{{ c.reach }}</div>
+          <div style="font-size:10.5px;font-weight:700;color:#8A8DA3">{{ c.status }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Unified campaign builder</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">“Summer Linen Drop” · sequenced across channels</div>
+        <div style="display:flex;flex-direction:column;gap:0;margin-top:16px">
+          <sc-for list="{{ sequence }}" as="s" hint-placeholder-count="5">
+            <div style="display:flex;gap:12px">
+              <div style="display:flex;flex-direction:column;align-items:center">
+                <span style="width:34px;height:34px;border-radius:9px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">{{ s.glyph }}</span>
+                <sc-if value="{{ s.line }}" hint-placeholder-val="{{ true }}"><span style="width:2px;flex:1;background:#EFEFF7;margin:4px 0"></span></sc-if>
+              </div>
+              <div style="flex:1;padding-bottom:16px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12.5px;font-weight:800;color:#14152A">{{ s.channel }}</span><span style="font-size:10px;font-weight:800;color:#8A8DA3;background:#F3F3FA;border-radius:99px;padding:2px 8px">{{ s.timing }}</span></div>
+                <div style="font-size:11.5px;color:#5B5E75;font-weight:600;margin-top:3px;line-height:1.45">{{ s.message }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Channel performance</div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+            <sc-for list="{{ perf }}" as="p" hint-placeholder-count="5">
+              <div>
+                <div style="display:flex;align-items:center;font-size:12px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px">{{ p.glyph }} {{ p.name }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ p.revenue }}</span></div>
+                <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:{{ p.color }};width:{{ p.width }}"></div></div>
+                <div style="font-size:10.5px;font-weight:700;color:#8A8DA3;margin-top:3px">{{ p.detail }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff;flex:1">
+          <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">✨</span><span style="font-size:13px;font-weight:800">AI orchestration</span></div>
+          <div style="font-size:12px;font-weight:600;color:#E6E4F5;margin-top:10px;line-height:1.55">Noonfy picks the best channel per customer and suppresses duplicates — VIPs get email + SMS, price-sensitive get a single push.</div>
+          <div style="display:flex;gap:16px;margin-top:14px"><div><div style="font-size:18px;font-weight:800">-38%</div><div style="font-size:10px;font-weight:700;color:#A5B4FC">FATIGUE</div></div><div><div style="font-size:18px;font-weight:800">+27%</div><div style="font-size:10px;font-weight:700;color:#A5B4FC">CONVERSION</div></div></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const CH = (name, glyph, tint, reach, status, live) => ({ name, glyph, tint, reach, status,
+      dot: live ? '#0E9F6E' : '#C4C6D4', border: live ? '#ECEDF4' : '#ECEDF4', onClick: () => {} });
+    return {
+      channels: [
+        CH('Email', '✉️', '#EEF0FE', '48,212', 'Connected · sending', 1),
+        CH('SMS', '💬', '#EDF9F1', '9,214', 'Connected · Twilio', 1),
+        CH('WhatsApp', '🟢', '#EDF9F1', '3,120', 'Connected · beta', 1),
+        CH('Push', '🔔', '#F1EBFE', '12,480', 'Connected · web + app', 1),
+        CH('Telegram', '✈️', '#EEF0FE', '840', 'Connected', 1),
+        CH('Slack', '#️⃣', '#FFF3E8', 'Internal', 'Alerts only', 1),
+        CH('Messenger', '💠', '#EEF0FE', '2,410', 'Connect to enable', 0),
+        CH('Webhook', '🔗', '#F3F3FA', 'Custom', 'Any endpoint', 1),
+      ],
+      sequence: [
+        { channel: 'Email · announcement', glyph: '✉️', tint: '#EEF0FE', timing: 'Day 0 · 10:00', message: '“The Summer Linen Drop is here” to the full engaged list (18,204).', line: true },
+        { channel: 'Push · reminder', glyph: '🔔', tint: '#F1EBFE', timing: 'Day 1 · 18:00', message: 'Web + app push to non-openers who browsed bedding.', line: true },
+        { channel: 'SMS · VIP early access', glyph: '💬', tint: '#EDF9F1', timing: 'Day 0 · 08:00', message: 'VIP segment (214) gets a 2-hour head start via text.', line: true },
+        { channel: 'WhatsApp · restock', glyph: '🟢', tint: '#EDF9F1', timing: 'Day 3 · 11:00', message: 'Waitlist gets a WhatsApp note when a color restocks.', line: true },
+        { channel: 'Email · last chance', glyph: '✉️', tint: '#EEF0FE', timing: 'Day 5 · 10:00', message: 'Free-shipping-ends reminder to clickers who didn\u2019t buy.', line: false },
+      ],
+      perf: [
+        { name: 'Email', glyph: '✉️', revenue: '$52.7k', width: '100%', color: 'linear-gradient(90deg,#4F46E5,#8B5CF6)', detail: '38.4% open · 4.9% click' },
+        { name: 'SMS', glyph: '💬', revenue: '$14.2k', width: '27%', color: '#0E9F6E', detail: '98% delivered · 21% click' },
+        { name: 'Push', glyph: '🔔', revenue: '$8.9k', width: '17%', color: '#8B5CF6', detail: '12% open · 6% click' },
+        { name: 'WhatsApp', glyph: '🟢', revenue: '$4.1k', width: '8%', color: '#22C55E', detail: '84% read · 18% click' },
+        { name: 'Telegram', glyph: '✈️', revenue: '$1.2k', width: '3%', color: '#60A5FA', detail: '71% read · 9% click' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

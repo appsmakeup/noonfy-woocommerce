@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="marketplace" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="padding:20px 0 16px 0;display:flex;align-items:flex-end">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Automation Marketplace</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">One-click install proven workflows from Noonfy and the community</p>
+      </div>
+      <input onInput="{{ onSearch }}" placeholder="Search the marketplace…" style="margin-left:auto;border:1px solid #ECEDF4;border-radius:9px;padding:8px 13px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:250px;background:#fff"></input>
+    </header>
+
+    <section style="background:linear-gradient(120deg,#4F46E5,#7C3AED);border-radius:16px;padding:22px 26px;color:#fff;display:flex;align-items:center;gap:20px">
+      <span style="width:52px;height:52px;border-radius:13px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:24px">🥂</span>
+      <div style="flex:1">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;opacity:.8">FEATURED · VERIFIED</div>
+        <div style="font-size:19px;font-weight:800;margin-top:5px">Premium Customer Journey — 5-touch VIP flow</div>
+        <div style="font-size:12.5px;font-weight:600;opacity:.85;margin-top:4px">The white-glove sequence top stores use to grow VIP LTV. Avg +$9.4k/store · ⭐ 4.9 (312)</div>
+      </div>
+      <a href="Builder.dc.html" style="background:#fff;color:#4C1D95;border-radius:10px;padding:11px 20px;font-size:13px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.2)" style-hover="opacity:.92;color:#4C1D95">Install now</a>
+    </section>
+
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin:20px 0">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="9">
+        <button onClick="{{ c.onClick }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.label }}</button>
+      </sc-for>
+    </div>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px">
+      <sc-for list="{{ items }}" as="t" hint-placeholder-count="9">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:15px;padding:18px;display:flex;flex-direction:column" style-hover="box-shadow:0 10px 28px rgba(20,21,42,.08);transform:translateY(-2px)">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:38px;height:38px;border-radius:11px;background:{{ t.tint }};display:flex;align-items:center;justify-content:center;font-size:17px">{{ t.glyph }}</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:800;color:#14152A">{{ t.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:700">by {{ t.author }}</span></span>
+            <sc-if value="{{ t.verified }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:#4F46E5" title="Verified">✔️</span></sc-if>
+          </div>
+          <p style="margin:11px 0 0 0;font-size:12px;color:#8A8DA3;font-weight:600;line-height:1.55;flex:1">{{ t.desc }}</p>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:12px;font-size:11px;font-weight:800;color:#A5A8BD">
+            <span style="color:#F59E0B">★ {{ t.rating }}</span><span>{{ t.installs }} installs</span>
+            <span style="margin-left:auto;font-size:10px;font-weight:800;color:{{ t.tagColor }};background:{{ t.tagBg }};border-radius:99px;padding:3px 8px">{{ t.tag }}</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:13px">
+            <a href="Automations.dc.html#detail" style="flex:1;text-align:center;border:1px solid #ECEDF4;border-radius:9px;padding:7px;font-size:12px;font-weight:800;color:#3C3F55;background:#fff" style-hover="border-color:#D9DBEA;color:#14152A">Preview</a>
+            <a href="Builder.dc.html" style="flex:1;text-align:center;border:none;border-radius:9px;padding:8px;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(135deg,#4F46E5,#8B5CF6)" style-hover="opacity:.92;color:#fff">{{ t.installed }}</a>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+    <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:60px 0;color:#8A8DA3"><div style="font-size:32px">🔍</div><div style="font-size:14px;font-weight:800;color:#14152A;margin-top:10px">Nothing matches</div></div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { cat: 'All', q: '' };
+  data() {
+    const P = '#F1EBFE', B = '#EEF0FE', G = '#EDF9F1', O = '#FFF3E8', R = '#FDEDED';
+    const I = (name, cat, author, glyph, tint, rating, installs, tag, tagColor, tagBg, verified, desc, installed) => ({ name, cat, author, glyph, tint, rating, installs, tag, tagColor, tagBg, verified, desc, installed: installed || 'Install' });
+    return [
+      I('Premium VIP Journey', 'Membership', 'Noonfy', '🥂', P, '4.9', '3.1k', 'FEATURED', '#7C3AED', '#F1EBFE', 1, 'Five-touch white-glove flow that grows VIP lifetime value with early access and perks.'),
+      I('Fashion Drop Engine', 'Fashion', 'Noonfy', '👗', B, '4.8', '2.4k', 'POPULAR', '#4F46E5', '#EEF0FE', 1, 'Tease → reveal → restock sequence tuned for limited apparel drops with waitlists.'),
+      I('Replenishment Pro', 'Retail', 'FlowLabs', '🔄', G, '4.7', '1.9k', 'TRENDING', '#0E9F6E', '#EDF9F1', 1, 'Predicts reorder timing for consumables and sends a reminder right on schedule.'),
+      I('Electronics Warranty', 'Electronics', 'VoltKit', '🔌', B, '4.6', '1.2k', 'VERIFIED', '#4F46E5', '#EEF0FE', 1, 'Registration, warranty reminders and accessory cross-sell for electronics stores.'),
+      I('Restaurant Reorder', 'Food', 'Community', '🍜', O, '4.5', '870', 'COMMUNITY', '#C2620A', '#FFF3E8', 0, 'Weekly menu highlights and a nudge when a favorite dish is back.'),
+      I('Course Onboarding', 'Digital Products', 'LearnFlow', '🎓', P, '4.8', '1.5k', 'VERIFIED', '#4F46E5', '#EEF0FE', 1, 'Welcome, module reminders and completion celebration for digital course sellers.'),
+      I('Subscription Saver', 'Subscriptions', 'Noonfy', '🗓️', B, '4.9', '2.8k', 'POPULAR', '#4F46E5', '#EEF0FE', 1, 'Pre-renewal reminders, dunning recovery and win-back for subscription boxes.'),
+      I('Membership Renewal', 'Membership', 'GuildOps', '🎫', P, '4.4', '640', 'RECENTLY ADDED', '#0E9F6E', '#EDF9F1', 0, 'Tiered renewal nudges with loyalty perks for membership communities.'),
+      I('Service Booking Nurture', 'Services', 'BookFlow', '📅', G, '4.6', '910', 'VERIFIED', '#4F46E5', '#EEF0FE', 1, 'Reminders, no-show recovery and rebooking prompts for appointment-based stores.'),
+      I('Back In Stock Blitz', 'Retail', 'Noonfy', '📦', B, '4.7', '2.0k', 'POPULAR', '#4F46E5', '#EEF0FE', 1, 'Instant waitlist alerts the moment inventory returns — with urgency countdowns.'),
+      I('Flash Sale Countdown', 'Retail', 'Community', '⚡', R, '4.5', '1.1k', 'TRENDING', '#0E9F6E', '#EDF9F1', 0, 'High-urgency sale sequence with live timers and last-chance reminders.'),
+      I('Beauty Regimen Refill', 'Retail', 'GlowKit', '💄', P, '4.8', '1.3k', 'VERIFIED', '#4F46E5', '#EEF0FE', 1, 'Skincare replenishment timed to product usage cycles with routine tips.'),
+    ];
+  }
+  renderVals() {
+    const all = this.data();
+    const cats = ['All', 'Retail', 'Fashion', 'Electronics', 'Food', 'Digital Products', 'Subscriptions', 'Membership', 'Services'];
+    const q = this.state.q.toLowerCase();
+    let items = all.filter(t => (this.state.cat === 'All' || t.cat === this.state.cat) && (!q || (t.name + ' ' + t.desc + ' ' + t.author).toLowerCase().includes(q)));
+    return {
+      items, empty: items.length === 0,
+      cats: cats.map(c => ({ label: c, onClick: () => this.setState({ cat: c }),
+        border: this.state.cat === c ? '#4F46E5' : '#ECEDF4', bg: this.state.cat === c ? '#EEF0FE' : '#fff', color: this.state.cat === c ? '#4F46E5' : '#8A8DA3' })),
+      onSearch: (e) => this.setState({ q: e.target.value }),
+    };
+  }
+}
+</script>
+</body>
+</html>

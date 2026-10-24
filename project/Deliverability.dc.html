@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="deliverability" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Email Deliverability Center</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Authentication, reputation and inbox placement</p>
+      </div>
+      <button style="margin-left:auto;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border:none;border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Run authentication wizard</button>
+    </header>
+
+    <section style="display:grid;grid-template-columns:1fr 2fr;gap:14px">
+      <div style="background:linear-gradient(135deg,#0E9F6E,#059669);border-radius:16px;padding:22px 24px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.7px;opacity:.85">INBOX PLACEMENT SCORE</div>
+        <div style="font-size:54px;font-weight:800;letter-spacing:-1px;margin-top:6px">96.4</div>
+        <div style="font-size:12.5px;font-weight:800;background:rgba(255,255,255,.2);border-radius:99px;padding:4px 14px;margin-top:6px">EXCELLENT</div>
+        <div style="font-size:11.5px;font-weight:600;opacity:.85;margin-top:10px;text-align:center;line-height:1.5">Your emails reliably reach the primary inbox across major providers.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <sc-for list="{{ scoreCards }}" as="s" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:15px 17px">
+            <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">{{ s.glyph }}</span><span style="font-size:11px;font-weight:800;color:#8A8DA3">{{ s.label }}</span></div>
+            <div style="font-size:22px;font-weight:800;color:{{ s.color }};margin-top:7px">{{ s.value }}</div>
+            <div style="font-size:11px;font-weight:700;color:#A5A8BD;margin-top:1px">{{ s.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Domain authentication</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">mail.brumahome.com</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+          <sc-for list="{{ auth }}" as="a" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px">
+              <span style="width:30px;height:30px;border-radius:8px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ a.fg }}">{{ a.mark }}</span>
+              <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ a.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ a.desc }}</span></span>
+              <span style="font-size:10.5px;font-weight:800;color:{{ a.stColor }};background:{{ a.stBg }};border-radius:99px;padding:4px 11px">{{ a.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Health analysis</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+            <sc-for list="{{ health }}" as="h" hint-placeholder-count="4">
+              <div style="border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px">
+                <div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ h.label }}</div>
+                <div style="font-size:19px;font-weight:800;color:{{ h.color }};margin-top:4px">{{ h.value }}</div>
+                <div style="font-size:10.5px;font-weight:700;color:#A5A8BD">{{ h.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff;flex:1">
+          <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">✨</span><span style="font-size:13px;font-weight:800">AI deliverability suggestions</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+            <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="3">
+              <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;font-size:11.5px;font-weight:600;color:#E6E4F5;line-height:1.5">{{ s }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Blacklist monitoring</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Checked hourly across 32 RBLs</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+          <sc-for list="{{ blacklists }}" as="b" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#5B5E75"><span style="width:8px;height:8px;border-radius:99px;background:{{ b.dot }}"></span><span>{{ b.name }}</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:{{ b.color }}">{{ b.status }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Inbox preview</span>
+          <div style="margin-left:auto;display:flex;gap:5px">
+            <sc-for list="{{ clients }}" as="c" hint-placeholder-count="4">
+              <button onClick="{{ c.onClick }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:8px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="border:1px solid #ECEDF4;border-radius:12px;overflow:hidden;margin-top:14px">
+          <div style="background:{{ clientBar }};padding:9px 14px;display:flex;align-items:center;gap:8px"><span style="font-size:12px;font-weight:800;color:#fff">{{ clientName }}</span><span style="margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:rgba(255,255,255,.22);border-radius:99px;padding:2px 8px">{{ clientTab }}</span></div>
+          <div style="padding:12px 14px;display:flex;gap:11px;background:#fff;border-bottom:1px solid #F3F3FA">
+            <span style="width:34px;height:34px;border-radius:99px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800">B</span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center"><span style="font-size:12.5px;font-weight:800;color:#14152A">Bruma Home</span><span style="margin-left:auto;font-size:10.5px;font-weight:700;color:#A5A8BD">10:02 AM</span></div>
+              <div style="font-size:12px;font-weight:700;color:#14152A;margin-top:1px">The Summer Linen Drop is here ☀️</div>
+              <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Breathable European flax in six new colors — ships free this week…</div>
+            </div>
+          </div>
+          <div style="padding:10px 14px;background:#FAFAFE;display:flex;align-items:center;gap:8px"><span style="font-size:10.5px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 9px">PRIMARY INBOX</span><span style="font-size:11px;font-weight:700;color:#8A8DA3">Not promotions · not spam</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { client: 'gmail' };
+  renderVals() {
+    const clientMeta = {
+      gmail: ['Gmail', '#EA4335', 'Primary'], outlook: ['Outlook', '#0F6CBD', 'Focused'], yahoo: ['Yahoo Mail', '#6001D2', 'Inbox'], apple: ['Apple Mail', '#1D1D1F', 'Inbox'],
+    };
+    const clients = [['Gmail', 'gmail'], ['Outlook', 'outlook'], ['Yahoo', 'yahoo'], ['Apple', 'apple']].map(c => ({
+      label: c[0], onClick: () => this.setState({ client: c[1] }),
+      border: this.state.client === c[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.client === c[1] ? '#EEF0FE' : '#fff', color: this.state.client === c[1] ? '#4F46E5' : '#8A8DA3' }));
+    const cm = clientMeta[this.state.client];
+    return {
+      clients, clientName: cm[0], clientBar: cm[1], clientTab: cm[2],
+      scoreCards: [
+        { glyph: '🛡️', label: 'SPAM SCORE', value: '0.4 / 10', color: '#0E9F6E', note: 'Low — inbox safe' },
+        { glyph: '🔥', label: 'DOMAIN REPUTATION', value: '94 / 100', color: '#0E9F6E', note: 'Google Postmaster' },
+        { glyph: '📤', label: 'DELIVERED', value: '99.2%', color: '#0E9F6E', note: '30-day average' },
+        { glyph: '↩️', label: 'BOUNCE RATE', value: '0.8%', color: '#0E9F6E', note: 'Below 2% target' },
+        { glyph: '🚩', label: 'COMPLAINT RATE', value: '0.02%', color: '#0E9F6E', note: 'Below 0.1% limit' },
+        { glyph: '🔌', label: 'SMTP HEALTH', value: '98 / 100', color: '#0E9F6E', note: '3 pools active' },
+      ],
+      auth: [
+        { mark: 'SPF', name: 'SPF', desc: 'v=spf1 include:amazonses.com ~all', status: 'PASS', stColor: '#0E9F6E', stBg: '#EDF9F1', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { mark: 'DK', name: 'DKIM', desc: '2048-bit key · selector noonfy1', status: 'PASS', stColor: '#0E9F6E', stBg: '#EDF9F1', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { mark: 'DM', name: 'DMARC', desc: 'p=quarantine · rua reporting on', status: 'PASS', stColor: '#0E9F6E', stBg: '#EDF9F1', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { mark: 'BI', name: 'BIMI', desc: 'Verified logo + VMC certificate', status: 'ACTIVE', stColor: '#4F46E5', stBg: '#EEF0FE', tint: '#EEF0FE', fg: '#4F46E5' },
+        { mark: 'DNS', name: 'Reverse DNS (PTR)', desc: 'Matches HELO hostname', status: 'PASS', stColor: '#0E9F6E', stBg: '#EDF9F1', tint: '#EDF9F1', fg: '#0E9F6E' },
+      ],
+      health: [
+        { label: 'BOUNCE ANALYSIS', value: '0.8%', color: '#0E9F6E', note: 'Mostly soft bounces' },
+        { label: 'COMPLAINTS', value: '0.02%', color: '#0E9F6E', note: '7 this month' },
+        { label: 'SPAM TRAPS', value: '0', color: '#0E9F6E', note: 'None hit' },
+        { label: 'UNSUB RATE', value: '0.14%', color: '#0E9F6E', note: 'Healthy' },
+      ],
+      suggestions: [
+        'Warm up news.brumahome.com over 14 days before moving campaign volume — it\u2019s a fresh subdomain.',
+        'Suppress the 412 addresses that haven\u2019t opened in 180 days to protect your sender score.',
+        'Your Tuesday sends see 1.3× more Gmail promotions-tab placement — shift to Thursday.',
+      ],
+      blacklists: [
+        { name: 'Spamhaus (SBL/XBL)', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'Barracuda', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'SpamCop', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'SORBS', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'Microsoft SNDS', status: 'GREEN', dot: '#0E9F6E', color: '#0E9F6E' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

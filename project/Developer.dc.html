@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="developer" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Developer Center</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">REST API, webhooks, events and plugin hooks</p>
+      </div>
+      <a href="Settings.dc.html#api" style="margin-left:auto;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55" style-hover="border-color:#D9DBEA;color:#14152A">Manage API keys</a>
+    </header>
+
+    <section style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px">
+      <div style="background:#0C0D1E;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:13.5px;font-weight:800;color:#fff">API Playground</span>
+          <div style="margin-left:auto;display:flex;gap:5px">
+            <sc-for list="{{ methods }}" as="m" hint-placeholder-count="3">
+              <button onClick="{{ m.onClick }}" style="border:1px solid {{ m.border }};background:{{ m.bg }};color:{{ m.color }};border-radius:7px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ m.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:12px">
+          <sc-for list="{{ endpoints }}" as="e" hint-placeholder-count="4">
+            <button onClick="{{ e.onClick }}" style="display:flex;align-items:center;gap:9px;border:1px solid {{ e.border }};background:{{ e.bg }};border-radius:9px;padding:8px 11px;cursor:pointer;font-family:'SF Mono',ui-monospace,monospace;text-align:left" style-hover="border-color:#4F46E5">
+              <span style="font-size:9.5px;font-weight:800;color:{{ e.mColor }};width:38px">{{ e.method }}</span>
+              <span style="font-size:11.5px;color:#C7D2FE">{{ e.path }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="background:#15162D;border:1px solid #24264A;border-radius:10px;padding:13px 15px;margin-top:12px">
+          <div style="font-size:10px;font-weight:800;color:#5B5E88;letter-spacing:.5px">RESPONSE · 200 OK · 48ms</div>
+          <pre style="margin:8px 0 0 0;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:#9EA0C8;white-space:pre-wrap;line-height:1.6">{{ response }}</pre>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">API usage · 24h</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+            <sc-for list="{{ usage }}" as="u" hint-placeholder-count="4">
+              <div style="border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px"><div style="font-size:10px;font-weight:800;color:#8A8DA3">{{ u.label }}</div><div style="font-size:18px;font-weight:800;color:#14152A;margin-top:3px">{{ u.value }}</div></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Webhook tester</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <sc-for list="{{ events }}" as="e" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px;border:1px solid #F3F3FA;border-radius:9px;padding:8px 11px">
+                <span style="font-size:10px;font-weight:800;color:#4F46E5;background:#EEF0FE;border-radius:6px;padding:3px 8px;font-family:monospace">{{ e.name }}</span>
+                <span style="flex:1;font-size:11px;font-weight:600;color:#8A8DA3">{{ e.detail }}</span>
+                <button style="border:1px solid #ECEDF4;background:#fff;border-radius:7px;padding:4px 10px;font-size:10.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Send test</button>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">Plugin &amp; filter hooks</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Extend Noonfy from your WordPress theme</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:14px">
+          <sc-for list="{{ hooks }}" as="h" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;border:1px solid #F3F3FA;border-radius:9px">
+              <span style="font-size:9.5px;font-weight:800;color:{{ h.color }};background:{{ h.bg }};border-radius:6px;padding:3px 8px;width:52px;text-align:center">{{ h.type }}</span>
+              <span style="flex:1;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:#14152A">{{ h.name }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">Documentation</div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+          <sc-for list="{{ docs }}" as="d" hint-placeholder-count="5">
+            <a href="#" style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px;color:#14152A" style-hover="border-color:#C7C3F5;background:#FBFAFF;color:#14152A">
+              <span style="width:30px;height:30px;border-radius:8px;background:{{ d.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ d.glyph }}</span>
+              <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800">{{ d.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ d.detail }}</span></span>
+              <span style="color:#C4C6D4;font-size:14px">→</span>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { method: 'GET', endpoint: 0 };
+  renderVals() {
+    const eps = [
+      { method: 'GET', path: '/v1/customers', mColor: '#34D399' },
+      { method: 'GET', path: '/v1/customers/{id}/events', mColor: '#34D399' },
+      { method: 'POST', path: '/v1/automations', mColor: '#60A5FA' },
+      { method: 'POST', path: '/v1/campaigns/{id}/send', mColor: '#60A5FA' },
+    ];
+    const responses = [
+      '{\n  "data": [\n    { "id": 48120, "email": "elena.moreau@…",\n      "ltv": 3840, "ai_score": 94, "segment": "vip" },\n    { "id": 48121, "email": "d.chen@…", "ltv": 2910 }\n  ],\n  "total": 48212, "page": 1\n}',
+      '{\n  "customer_id": 48120,\n  "events": [\n    { "type": "product_view", "sku": "LDS-204", "at": "…" },\n    { "type": "email_open", "campaign": "linen_drop" }\n  ]\n}',
+      '{\n  "id": "auto_9f2a",\n  "name": "Cart Recovery",\n  "status": "draft",\n  "steps": 10, "created": "2026-07-16T09:41Z"\n}',
+      '{\n  "campaign_id": "camp_4821",\n  "queued": 12406,\n  "status": "sending",\n  "eta_seconds": 58\n}',
+    ];
+    const endpoints = eps.map((e, i) => ({ ...e, onClick: () => this.setState({ endpoint: i, method: e.method }),
+      border: this.state.endpoint === i ? '#4F46E5' : '#24264A', bg: this.state.endpoint === i ? 'rgba(79,70,229,.18)' : '#15162D' }));
+    const methods = ['GET', 'POST', 'DELETE'].map(m => ({ label: m, onClick: () => this.setState({ method: m }),
+      border: this.state.method === m ? '#4F46E5' : '#24264A', bg: this.state.method === m ? 'rgba(79,70,229,.2)' : '#15162D', color: this.state.method === m ? '#C7D2FE' : '#8E90B8' }));
+    return {
+      methods, endpoints, response: responses[this.state.endpoint],
+      usage: [
+        { label: 'REQUESTS', value: '84,210' }, { label: 'AVG LATENCY', value: '48 ms' },
+        { label: 'ERROR RATE', value: '0.02%' }, { label: 'RATE LIMIT', value: '96% free' },
+      ],
+      events: [
+        { name: 'order.attributed', detail: 'Fires on attributed purchase' },
+        { name: 'subscriber.created', detail: 'New contact added' },
+        { name: 'automation.entered', detail: 'Customer enters a flow' },
+        { name: 'contact.unsubscribed', detail: 'Opt-out received' },
+      ],
+      hooks: [
+        { type: 'ACTION', color: '#4F46E5', bg: '#EEF0FE', name: 'noonfy_before_send' },
+        { type: 'ACTION', color: '#4F46E5', bg: '#EEF0FE', name: 'noonfy_order_synced' },
+        { type: 'FILTER', color: '#7C3AED', bg: '#F1EBFE', name: 'noonfy_email_content' },
+        { type: 'FILTER', color: '#7C3AED', bg: '#F1EBFE', name: 'noonfy_segment_query' },
+        { type: 'ACTION', color: '#4F46E5', bg: '#EEF0FE', name: 'noonfy_automation_step' },
+        { type: 'FILTER', color: '#7C3AED', bg: '#F1EBFE', name: 'noonfy_coupon_code' },
+      ],
+      docs: [
+        { glyph: '🚀', name: 'Quickstart', detail: 'Authenticate and send in 5 minutes', tint: '#EEF0FE' },
+        { glyph: '📘', name: 'REST API reference', detail: 'Every endpoint and parameter', tint: '#F1EBFE' },
+        { glyph: '🪝', name: 'Webhooks guide', detail: 'Events, retries and signatures', tint: '#EDF9F1' },
+        { glyph: '🧩', name: 'Plugin hooks', detail: 'Actions and filters for WordPress', tint: '#FFF3E8' },
+        { glyph: '📦', name: 'SDKs', detail: 'PHP, JS and Python libraries', tint: '#EEF0FE' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

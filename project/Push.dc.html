@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+canvas{max-width:100%;}
+::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes slideIn{from{opacity:0;transform:translateX(14px);}to{opacity:1;transform:none;}}
+@keyframes shimmer{0%{background-position:-400px 0;}100%{background-position:400px 0;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="{{ sidebarKey }}" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0;gap:12px">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;color:#0E9F6E"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:blink 1.6s ease infinite"></span>Web push live</div>
+      <a href="#builder" style="background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:800;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92;color:#fff">+ New notification</a>
+    </header>
+    <div style="display:flex;gap:3px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="10">
+        <a href="{{ tb.href }}" style="padding:9px 12px;font-size:12.5px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px;white-space:nowrap" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <section style="animation:fadeUp .35s ease">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="12">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:13px 15px">
+              <div style="font-size:10px;font-weight:800;color:#8A8DA3;letter-spacing:.2px">{{ k.label }}</div>
+              <div style="font-size:19px;font-weight:800;color:{{ k.color }};margin-top:5px;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+              <div style="font-size:10px;font-weight:800;color:{{ k.deltaColor }};margin-top:2px">{{ k.delta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><div><div style="font-size:14px;font-weight:800;color:#14152A">Subscriber growth</div><div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">New vs. unsubscribed, last 30 days</div></div>
+              <div style="margin-left:auto;display:flex;gap:14px;font-size:11.5px;font-weight:700;color:#5B5E75"><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#4F46E5"></span>New</span><span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#DDD6FE"></span>Churned</span></div>
+            </div>
+            <div style="height:230px;margin-top:12px"><canvas id="pushGrowthCanvas" ref="{{ growthRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Browser distribution</div>
+            <div style="height:150px;margin:12px auto 6px auto;position:relative;width:150px"><canvas id="pushBrowserCanvas" ref="{{ browserRef }}"></canvas><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><span style="font-size:17px;font-weight:800;color:#14152A">184k</span><span style="font-size:10px;color:#8A8DA3;font-weight:700">subscribers</span></div></div>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">
+              <sc-for list="{{ browsers }}" as="b" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:600;color:#3C3F55"><span style="width:8px;height:8px;border-radius:3px;background:{{ b.color }}"></span>{{ b.name }}<span style="margin-left:auto;font-weight:800;color:#14152A">{{ b.pct }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">Recent campaigns</span><a href="#campaigns" style="margin-left:auto;font-size:12px;font-weight:700">View all</a></div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:13px">
+              <sc-for list="{{ recentCampaigns }}" as="c" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="width:30px;height:30px;border-radius:8px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ c.glyph }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ c.sent }} sent · CTR {{ c.ctr }}</span></span>
+                  <span style="font-size:11.5px;font-weight:800;color:#14152A">{{ c.rev }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Device split</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+              <sc-for list="{{ devices }}" as="d" hint-placeholder-count="4">
+                <div><div style="display:flex;align-items:center;font-size:11.5px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px">{{ d.glyph }} {{ d.name }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ d.pct }}</span></div><div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ d.pct }}"></div></div></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">Live activity</span><span style="margin-left:auto;width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:blink 1.6s ease infinite"></span></div>
+            <div style="display:flex;flex-direction:column;margin-top:13px">
+              <sc-for list="{{ feed }}" as="ev" hint-placeholder-count="6">
+                <div style="display:flex;gap:10px;padding-bottom:12px;animation:slideIn .3s ease">
+                  <span style="width:24px;height:24px;border-radius:7px;background:{{ ev.tint }};display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">{{ ev.glyph }}</span>
+                  <div style="min-width:0"><div style="font-size:11.5px;font-weight:600;color:#3C3F55;line-height:1.4">{{ ev.text }}</div><div style="font-size:10px;color:#A5A8BD;font-weight:700;margin-top:1px">{{ ev.time }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isCampaigns }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:9px;padding:14px 20px;border-bottom:1px solid #F3F3FA">
+          <input onInput="{{ onCampSearch }}" placeholder="Search campaigns…" style="border:1px solid #ECEDF4;border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:230px;background:#F8F8FC"></input>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <sc-for list="{{ campFilters }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.onClick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ f.label }}</button></sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:2.2fr .9fr 1fr .8fr .8fr .8fr .9fr;gap:8px;padding:11px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA">
+          <span>Campaign</span><span>Status</span><span>Segment</span><span>Sent</span><span>Clicks</span><span>CTR</span><span style="text-align:right">Revenue</span>
+        </div>
+        <sc-for list="{{ campaigns }}" as="c" hint-placeholder-count="7">
+          <div style="display:grid;grid-template-columns:2.2fr .9fr 1fr .8fr .8fr .8fr .9fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB" style-hover="background:#FAFAFE">
+            <span style="display:flex;align-items:center;gap:11px;min-width:0"><span style="width:32px;height:32px;border-radius:9px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">{{ c.glyph }}</span><span style="display:block;min-width:0;overflow:hidden"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.title }}</span></span></span>
+            <span><span style="font-size:10px;font-weight:800;color:{{ c.stColor }};background:{{ c.stBg }};border-radius:99px;padding:3px 8px">{{ c.status }}</span></span>
+            <span style="font-size:11.5px;font-weight:700;color:#5B5E75">{{ c.segment }}</span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.sent }}</span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.clicks }}</span>
+            <span style="font-size:12px;font-weight:800;color:{{ c.ctrColor }}">{{ c.ctr }}</span>
+            <span style="display:flex;align-items:center;gap:7px;justify-content:flex-end"><span style="font-size:12.5px;font-weight:800;color:#14152A">{{ c.rev }}</span><button onClick="{{ c.onToggle }}" style="border:1px solid #ECEDF4;background:#fff;border-radius:7px;padding:4px 9px;font-size:10px;font-weight:800;color:{{ c.actionColor }};cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">{{ c.action }}</button></span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ campEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:56px 0;color:#8A8DA3"><div style="font-size:32px">🔔</div><div style="font-size:14px;font-weight:800;color:#14152A;margin-top:10px">No campaigns here</div><div style="font-size:12.5px;font-weight:600;margin-top:4px">Try another filter, or create your first push campaign.</div></div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAutomation }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #F3F3FA"><span style="font-size:13.5px;font-weight:800;color:#14152A">Triggered push flows</span><a href="Builder.dc.html" style="margin-left:auto;font-size:12px;font-weight:800">Open automation builder →</a></div>
+          <div style="display:grid;grid-template-columns:1.8fr 1.4fr .8fr .7fr .8fr .8fr;gap:8px;padding:11px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Flow</span><span>Trigger</span><span>Sent</span><span>CTR</span><span>Revenue</span><span>Status</span></div>
+          <sc-for list="{{ pushFlows }}" as="f" hint-placeholder-count="8">
+            <div style="display:grid;grid-template-columns:1.8fr 1.4fr .8fr .7fr .8fr .8fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB" style-hover="background:#FAFAFE">
+              <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:30px;height:30px;border-radius:8px;background:{{ f.tint }};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">{{ f.glyph }}</span><span style="display:block;min-width:0;font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.name }}</span></span>
+              <span style="display:block;font-size:11px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ f.trigger }}</span>
+              <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ f.sent }}</span>
+              <span style="font-size:12px;font-weight:800;color:#0E9F6E">{{ f.ctr }}</span>
+              <span style="font-size:12px;font-weight:800;color:#14152A">{{ f.rev }}</span>
+              <span><span style="font-size:10px;font-weight:800;color:{{ f.stColor }};background:{{ f.stBg }};border-radius:99px;padding:3px 8px">{{ f.status }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Supported triggers</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Any platform event can start a push flow</div>
+            <div style="display:flex;flex-direction:column;gap:13px;margin-top:14px">
+              <sc-for list="{{ pushTriggers }}" as="g" hint-placeholder-count="3">
+                <div>
+                  <div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD">{{ g.group }}</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px">
+                    <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="5"><span style="font-family:'SF Mono',ui-monospace,monospace;font-size:10.5px;font-weight:700;color:#7C3AED;background:#F1EBFE;border-radius:7px;padding:4px 9px">{{ i }}</span></sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Push actions</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Drop these into any workflow</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+              <sc-for list="{{ pushActions }}" as="a" hint-placeholder-count="9">
+                <div style="display:flex;align-items:center;gap:9px;border:1px solid #F3F3FA;border-radius:9px;padding:9px 11px" style-hover="border-color:#C7C3F5;background:#FBFAFF"><span style="font-size:13px">{{ a.glyph }}</span><span style="font-size:11.5px;font-weight:800;color:#14152A">{{ a.label }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isLifecycle }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+        <div style="flex:1 1 440px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">How a visitor becomes tracked revenue</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">The full web-push pipeline, end to end</div>
+          <div style="display:flex;flex-direction:column;align-items:center;margin-top:18px">
+            <sc-for list="{{ lcStages }}" as="s" hint-placeholder-count="12">
+              <div style="width:100%;display:flex;flex-direction:column;align-items:center">
+                <div style="width:100%;max-width:430px;border:1.5px solid {{ s.border }};background:{{ s.bg }};border-radius:13px;padding:12px 14px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(20,21,42,.05)">
+                  <span style="width:30px;height:30px;border-radius:99px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:{{ s.kindColor }};flex-shrink:0">{{ s.n }}</span>
+                  <span style="width:30px;height:30px;border-radius:9px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">{{ s.glyph }}</span>
+                  <span style="display:block;flex:1 1 0;min-width:0;overflow:hidden">
+                    <span style="display:block;font-size:9.5px;font-weight:800;letter-spacing:.5px;color:{{ s.kindColor }}">{{ s.kind }}</span>
+                    <span style="display:block;font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span>
+                    <span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.detail }}</span>
+                  </span>
+                  <span style="font-size:10px;font-weight:800;color:#8A8DA3;white-space:nowrap;flex-shrink:0">{{ s.stat }}</span>
+                </div>
+                <sc-if value="{{ s.arrow }}" hint-placeholder-val="{{ true }}"><div style="height:16px;width:2px;background:#DDD6FE"></div></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Stored at subscription</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Captured automatically on opt-in</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:13px">
+              <sc-for list="{{ lcCaptured }}" as="c" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:9px;border:1px solid #F3F3FA;border-radius:9px;padding:9px 11px">
+                  <span style="font-size:13px;flex-shrink:0">{{ c.glyph }}</span>
+                  <span style="display:block;flex:1 1 0;min-width:0;font-size:11.5px;font-weight:700;color:#5B5E75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.label }}</span>
+                  <span style="font-size:11px;font-weight:800;color:#14152A;white-space:nowrap;flex-shrink:0">{{ c.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Tracked after send</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:13px">
+              <sc-for list="{{ lcTracked }}" as="t" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex;align-items:center;font-size:11.5px;font-weight:700;color:#3C3F55"><span>{{ t.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ t.value }}</span><span style="width:62px;text-align:right;font-weight:800;color:{{ t.color }}">{{ t.pct }}</span></div>
+                  <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:{{ t.color }};width:{{ t.width }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff">
+            <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">🔌</span><span style="font-size:13px;font-weight:800">Provider routing</span></div>
+            <div style="font-size:12px;font-weight:600;color:#E6E4F5;line-height:1.55;margin-top:9px">Step 9 routes through your configured engine. Switch provider or add VAPID keys without touching campaigns.</div>
+            <a href="PushSettings.dc.html#provider" style="display:inline-block;margin-top:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:7px 13px;font-size:11.5px;font-weight:800" style-hover="background:rgba(255,255,255,.22);color:#fff">Configure provider →</a>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isReach }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Browser support</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Web Push Protocol coverage across your subscriber base</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+            <sc-for list="{{ browserSupport }}" as="b" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px">
+                <span style="width:32px;height:32px;border-radius:9px;background:{{ b.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ b.glyph }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ b.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ b.note }}</span></span>
+                <span style="text-align:right"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ b.subs }}</span><span style="display:block;font-size:10.5px;font-weight:700;color:#A5A8BD">{{ b.pct }}</span></span>
+                <span style="font-size:9.5px;font-weight:800;color:{{ b.stColor }};background:{{ b.stBg }};border-radius:99px;padding:3px 8px;white-space:nowrap;flex-shrink:0">{{ b.status }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Device support</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Live surfaces and what's on the roadmap</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+            <sc-for list="{{ deviceSupport }}" as="d" hint-placeholder-count="8">
+              <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px">
+                <span style="width:28px;height:28px;border-radius:8px;background:{{ d.tint }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ d.glyph }}</span>
+                <span style="flex:1;min-width:0;font-size:12px;font-weight:700;color:#14152A">{{ d.name }}</span>
+                <span style="font-size:11.5px;font-weight:800;color:#5B5E75">{{ d.pct }}</span>
+                <span style="font-size:9.5px;font-weight:800;color:{{ d.stColor }};background:{{ d.stBg }};border-radius:99px;padding:3px 8px;white-space:nowrap;flex-shrink:0">{{ d.status }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isSubscribers }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+          <sc-for list="{{ subKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:21px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.note }}</div></div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:9px;padding:14px 20px;border-bottom:1px solid #F3F3FA;flex-wrap:wrap">
+            <input onInput="{{ onSubSearch }}" placeholder="Search subscribers…" style="border:1px solid #ECEDF4;border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:210px;background:#F8F8FC"></input>
+            <div style="display:flex;gap:6px">
+              <sc-for list="{{ subFilters }}" as="f" hint-placeholder-count="4"><button onClick="{{ f.onClick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ f.label }}</button></sc-for>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:7px">
+              <button style="border:1px solid #ECEDF4;background:#fff;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Import</button>
+              <button style="border:1px solid #ECEDF4;background:#fff;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Export CSV</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr .9fr .9fr;gap:8px;padding:11px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Subscriber</span><span>Browser · OS</span><span>Location</span><span>Subscribed</span><span>Last active</span><span>Status</span></div>
+          <sc-for list="{{ subscribers }}" as="s" hint-placeholder-count="8">
+            <div onClick="{{ s.onClick }}" style="display:grid;grid-template-columns:1.7fr 1fr 1fr 1fr .9fr .9fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB;cursor:pointer" style-hover="background:#FAFAFE">
+              <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:30px;height:30px;border-radius:8px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ s.glyph }}</span><span style="min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.id }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ s.tags }}</span></span></span>
+              <span style="font-size:11.5px;font-weight:700;color:#5B5E75">{{ s.browser }}</span>
+              <span style="font-size:11.5px;font-weight:700;color:#5B5E75">{{ s.location }}</span>
+              <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ s.subscribed }}</span>
+              <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ s.lastActive }}</span>
+              <span><span style="font-size:10px;font-weight:800;color:{{ s.stColor }};background:{{ s.stBg }};border-radius:99px;padding:3px 8px">{{ s.status }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ subOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeSub }}" style="position:fixed;inset:0;background:rgba(20,21,42,.4);backdrop-filter:blur(3px);z-index:900;display:flex;align-items:center;justify-content:center;padding:40px">
+            <div onClick="{{ stopProp }}" style="width:520px;max-width:92vw;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(20,21,42,.35);overflow:hidden;animation:fadeUp .2s ease">
+              <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:1px solid #ECEDF4">
+                <span style="width:38px;height:38px;border-radius:10px;background:{{ selSub.tint }};display:flex;align-items:center;justify-content:center;font-size:16px">{{ selSub.glyph }}</span>
+                <div><div style="font-size:14px;font-weight:800;color:#14152A">{{ selSub.id }}</div><div style="font-size:11.5px;color:#8A8DA3;font-weight:600">{{ selSub.browser }} · {{ selSub.location }}</div></div>
+                <button onClick="{{ closeSub }}" style="margin-left:auto;width:28px;height:28px;border-radius:8px;border:1px solid #ECEDF4;background:#fff;color:#8A8DA3;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">✕</button>
+              </div>
+              <div style="padding:18px 20px">
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+                  <sc-for list="{{ selSubStats }}" as="st" hint-placeholder-count="6">
+                    <div style="border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px"><div style="font-size:9.5px;font-weight:800;color:#A5A8BD">{{ st.label }}</div><div style="font-size:12.5px;font-weight:800;color:#14152A;margin-top:3px">{{ st.value }}</div></div>
+                  </sc-for>
+                </div>
+                <div style="font-size:12px;font-weight:800;color:#5B5E75;margin-top:16px">Subscriber timeline</div>
+                <div style="margin-top:11px">
+                  <sc-for list="{{ selSubTimeline }}" as="t" hint-placeholder-count="4">
+                    <div style="display:flex;gap:11px;padding-bottom:12px">
+                      <div style="display:flex;flex-direction:column;align-items:center"><span style="width:8px;height:8px;border-radius:99px;background:{{ t.dot }};margin-top:4px"></span><span style="width:1.5px;flex:1;background:#EFEFF7;margin-top:4px"></span></div>
+                      <div><div style="font-size:12px;font-weight:600;color:#3C3F55;line-height:1.4">{{ t.text }}</div><div style="font-size:10.5px;color:#A5A8BD;font-weight:700;margin-top:1px">{{ t.time }}</div></div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isSegments }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+        <div style="flex:1 1 420px;min-width:0">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">
+            <sc-for list="{{ segments }}" as="s" hint-placeholder-count="6">
+              <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px" style-hover="box-shadow:0 8px 22px rgba(20,21,42,.07)">
+                <div style="display:flex;align-items:center;gap:9px"><span style="width:32px;height:32px;border-radius:9px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ s.glyph }}</span><span style="flex:1;font-size:12.5px;font-weight:800;color:#14152A">{{ s.name }}</span><sc-if value="{{ s.ai }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:2px 7px">AI</span></sc-if></div>
+                <div style="font-size:11px;color:#8A8DA3;font-weight:600;margin-top:8px;line-height:1.45">{{ s.rule }}</div>
+                <div style="display:flex;align-items:baseline;gap:7px;margin-top:11px"><span style="font-size:18px;font-weight:800;color:#14152A">{{ s.count }}</span><span style="font-size:10.5px;font-weight:800;color:#0E9F6E">{{ s.delta }}</span><span style="margin-left:auto;font-size:10.5px;font-weight:700;color:#A5A8BD">CTR {{ s.ctr }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="flex:1 1 340px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px;align-self:start">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Segment builder</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Match subscribers on any condition</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+            <sc-for list="{{ conditions }}" as="c" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:8px;border:1px solid #F3F3FA;border-radius:11px;padding:10px 12px">
+                <span style="font-size:10px;font-weight:800;color:#8A8DA3;width:26px">{{ c.join }}</span>
+                <span style="font-size:11.5px;font-weight:800;color:#4F46E5;background:#EEF0FE;border-radius:7px;padding:4px 9px">{{ c.field }}</span>
+                <span style="font-size:11px;font-weight:700;color:#8A8DA3">{{ c.op }}</span>
+                <span style="font-size:11.5px;font-weight:800;color:#14152A;background:#F8F8FC;border:1px solid #ECEDF4;border-radius:7px;padding:4px 9px">{{ c.value }}</span>
+                <button onClick="{{ c.onRemove }}" style="margin-left:auto;width:22px;height:22px;border-radius:6px;border:1px solid #FDE1E1;background:#fff;color:#E02424;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit">✕</button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:12px">
+            <sc-for list="{{ addFields }}" as="f" hint-placeholder-count="6"><button onClick="{{ f.onClick }}" style="border:1px dashed #C7C3F5;background:#FBFAFF;color:#7C3AED;border-radius:99px;padding:5px 11px;font-size:10.5px;font-weight:800;cursor:pointer;font-family:inherit" style-hover="background:#F1EBFE">+ {{ f.label }}</button></sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid #F3F3FA">
+            <div><div style="font-size:10.5px;font-weight:800;color:#A5A8BD">MATCHING SUBSCRIBERS</div><div style="font-size:20px;font-weight:800;color:#14152A;margin-top:2px">{{ matchCount }}</div></div>
+            <button style="margin-left:auto;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px 16px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Save segment</button>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isBuilder }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+        <div style="flex:1 1 380px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Notification builder</div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">Title <span style="color:{{ titleCountColor }};font-weight:800">{{ titleCount }}/65</span></div>
+          <input ref="{{ titleRef }}" onInput="{{ onTitle }}" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:700;font-family:inherit;color:#14152A;outline:none;background:#F8F8FC" value="Back in stock: Linen Duvet — Sage ☀️"></input>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">Message <span style="color:{{ msgCountColor }};font-weight:800">{{ msgCount }}/150</span></div>
+          <textarea ref="{{ msgRef }}" onInput="{{ onMsg }}" style="width:100%;height:64px;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;font-family:'Manrope',sans-serif;color:#14152A;outline:none;background:#F8F8FC;resize:none">Hi {{firstName}} — the sage duvet you wanted just landed. Free shipping this week.</textarea>
+          <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+            <sc-for list="{{ mergeTags }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.onClick }}" style="border:1px solid #ECEDF4;background:#F8F8FC;color:#5B5E75;border-radius:99px;padding:4px 10px;font-size:10.5px;font-weight:800;cursor:pointer;font-family:'SF Mono',ui-monospace,monospace" style-hover="border-color:#C7C3F5">{{ t.label }}</button></sc-for>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:7px">CTA buttons</div>
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ ctas }}" as="c" hint-placeholder-count="2"><span style="border:1px solid #ECEDF4;background:#F8F8FC;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:800;color:#14152A">{{ c }}</span></sc-for>
+            <button style="border:1px dashed #C7C3F5;background:#FBFAFF;color:#7C3AED;border-radius:8px;padding:7px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit" style-hover="background:#F1EBFE">+ Add</button>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">Landing page URL</div>
+          <input value="https://brumahome.com/shop/linen-duvet-sage" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+            <sc-for list="{{ builderToggles }}" as="t" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:9px"><span onClick="{{ t.onClick }}" style="width:38px;height:22px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span><span style="font-size:12px;font-weight:700;color:#3C3F55">{{ t.label }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="flex:1 1 340px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">Preview</span>
+              <div style="margin-left:auto;display:flex;gap:5px">
+                <sc-for list="{{ previewTabs }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.onClick }}" style="border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.color }};border-radius:8px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ p.label }}</button></sc-for>
+              </div>
+            </div>
+            <div style="background:linear-gradient(135deg,#EEF0FE,#F4EFFE);border-radius:12px;padding:22px;margin-top:14px;display:flex;justify-content:center">
+              <div style="width:{{ previewWidth }};background:#fff;border-radius:12px;box-shadow:0 10px 28px rgba(20,21,42,.16);overflow:hidden;transition:width .25s ease;animation:fadeUp .3s ease">
+                <sc-if value="{{ showHero }}" hint-placeholder-val="{{ true }}">
+                  <div style="height:96px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:28px">🛏️</div>
+                </sc-if>
+                <div style="padding:12px 14px;display:flex;gap:11px">
+                  <span style="width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0">B</span>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-size:12.5px;font-weight:800;color:#14152A;line-height:1.3">{{ previewTitle }}</div>
+                    <div style="font-size:11.5px;color:#5B5E75;font-weight:500;line-height:1.45;margin-top:3px">{{ previewMsg }}</div>
+                    <div style="font-size:10px;color:#A5A8BD;font-weight:700;margin-top:5px">brumahome.com · now</div>
+                    <div style="display:flex;gap:7px;margin-top:9px">
+                      <sc-for list="{{ ctas }}" as="c" hint-placeholder-count="2"><span style="font-size:10.5px;font-weight:800;color:#4F46E5">{{ c }}</span></sc-for>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Delivery</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
+              <sc-for list="{{ deliveryRows }}" as="d" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;font-size:12px;font-weight:700;color:#5B5E75"><span>{{ d.label }}</span><span style="margin-left:auto;font-weight:800;color:{{ d.color }}">{{ d.value }}</span></div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:16px">
+              <button style="flex:1;border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px;font-size:12px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Send test</button>
+              <button style="flex:1;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Schedule push</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isStudio }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:linear-gradient(120deg,#1E1B4B,#4C1D95);border-radius:16px;padding:22px 24px">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#C4B5FD">✨ DESCRIBE YOUR NOTIFICATION</div>
+          <textarea ref="{{ promptRef }}" style="width:100%;height:70px;border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:12px 14px;margin-top:11px;background:rgba(255,255,255,.07);color:#fff;font-size:13.5px;font-weight:600;font-family:'Manrope',sans-serif;resize:none;outline:none;line-height:1.5">Sage linen duvet is back in stock, free shipping this week</textarea>
+          <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+            <sc-for list="{{ tones }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.onClick }}" style="border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};border-radius:99px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ t.label }}</button></sc-for>
+          </div>
+          <button onClick="{{ generate }}" style="width:100%;margin-top:14px;border:none;background:#fff;color:#4C1D95;border-radius:10px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.25)" style-hover="opacity:.92">{{ genLabel }}</button>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Variations</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:#A5A8BD">Predicted CTR</span></div>
+          <sc-if value="{{ generating }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <div style="height:64px;border-radius:11px;background:linear-gradient(90deg,#F3F3FA 25%,#ECECF6 37%,#F3F3FA 63%);background-size:800px 100%;animation:shimmer 1.3s linear infinite"></div>
+              <div style="height:64px;border-radius:11px;background:linear-gradient(90deg,#F3F3FA 25%,#ECECF6 37%,#F3F3FA 63%);background-size:800px 100%;animation:shimmer 1.3s linear .15s infinite"></div>
+              <div style="height:64px;border-radius:11px;background:linear-gradient(90deg,#F3F3FA 25%,#ECECF6 37%,#F3F3FA 63%);background-size:800px 100%;animation:shimmer 1.3s linear .3s infinite"></div>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+            <sc-for list="{{ variations }}" as="v" hint-placeholder-count="4">
+              <div style="border:1px solid #ECEDF4;border-radius:11px;padding:12px 14px" style-hover="border-color:#C7C3F5;background:#FBFAFF">
+                <div style="display:flex;align-items:center;gap:9px"><span style="flex:1;font-size:12.5px;font-weight:800;color:#14152A">{{ v.title }}</span><span style="font-size:11px;font-weight:800;color:{{ v.color }};background:{{ v.bg }};border-radius:99px;padding:3px 9px">{{ v.ctr }}</span></div>
+                <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:4px;line-height:1.45">{{ v.msg }}</div>
+                <div style="display:flex;align-items:center;gap:9px;margin-top:8px"><span style="font-size:10px;font-weight:800;color:#5B5E75">Spam {{ v.spam }}</span><span style="font-size:10px;font-weight:800;color:#5B5E75">Read {{ v.read }}</span><a href="#builder" style="margin-left:auto;font-size:10.5px;font-weight:800">Use →</a></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:16px;padding-top:14px;border-top:1px solid #F3F3FA">
+            <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">AI best send time</span><span style="font-size:11.5px;font-weight:800;color:#7C3AED">Thu 10:00 · +21% CTR</span>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isTemplates }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+          <sc-for list="{{ tplCats }}" as="c" hint-placeholder-count="8"><button onClick="{{ c.onClick }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.label }}</button></sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+          <sc-for list="{{ templates }}" as="t" hint-placeholder-count="9">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px;display:flex;flex-direction:column" style-hover="box-shadow:0 10px 28px rgba(20,21,42,.08);transform:translateY(-2px)">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:34px;height:34px;border-radius:9px;background:{{ t.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ t.glyph }}</span><span style="flex:1;font-size:12.5px;font-weight:800;color:#14152A">{{ t.name }}</span><sc-if value="{{ t.ai }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:2px 7px">AI</span></sc-if></div>
+              <div style="background:#F8F8FC;border:1px solid #ECEDF4;border-radius:10px;padding:10px 12px;margin-top:11px;flex:1">
+                <div style="font-size:11.5px;font-weight:800;color:#14152A;line-height:1.3">{{ t.title }}</div>
+                <div style="font-size:10.5px;color:#8A8DA3;font-weight:600;margin-top:3px;line-height:1.4">{{ t.msg }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:11px"><span style="font-size:10.5px;font-weight:800;color:#0E9F6E">CTR {{ t.ctr }}</span><a href="#builder" style="margin-left:auto;font-size:11px;font-weight:800">Use template →</a></div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isDelivery }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:14px;padding:16px 18px;color:#fff">
+            <div style="font-size:10.5px;font-weight:800;opacity:.8;letter-spacing:.5px">PUSHES / MINUTE</div>
+            <div style="font-size:28px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums">{{ ppm }}</div>
+            <div style="font-size:11px;font-weight:700;opacity:.8;margin-top:2px">{{ subsOnline }} subscribers online</div>
+          </div>
+          <sc-for list="{{ deliveryKpis }}" as="k" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:24px;font-weight:800;color:{{ k.color }};margin-top:5px;font-variant-numeric:tabular-nums">{{ k.value }}</div><div style="font-size:10.5px;font-weight:700;color:#A5A8BD;margin-top:2px">{{ k.note }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;align-items:flex-start">
+          <div style="flex:1 1 320px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">Queue status</span><button onClick="{{ togglePause }}" style="margin-left:auto;border:1px solid {{ pauseBorder }};background:{{ pauseBg }};color:{{ pauseColor }};border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ pauseLabel }}</button></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+              <sc-for list="{{ queueStates }}" as="q" hint-placeholder-count="6">
+                <div style="border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px"><div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:3px;background:{{ q.color }}"></span><span style="font-size:10px;font-weight:800;color:#8A8DA3">{{ q.label }}</span></div><div style="font-size:17px;font-weight:800;color:#14152A;margin-top:5px;font-variant-numeric:tabular-nums">{{ q.value }}</div></div>
+              </sc-for>
+            </div>
+            <div style="margin-top:14px"><div style="display:flex;font-size:11px;font-weight:700;color:#8A8DA3"><span>Batch progress</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ progressPct }}</span></div><div style="height:7px;border-radius:99px;background:#F3F3FA;margin-top:6px"><div style="height:7px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ progressPct }};transition:width .4s ease"></div></div></div>
+          </div>
+          <div style="flex:1 1 380px;min-width:0;background:#0C0D1E;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#fff">Live delivery log</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#34D399;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:#34D399;animation:blink 1.4s ease infinite"></span>STREAMING</span></div>
+            <div style="margin-top:12px;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px">
+              <sc-for list="{{ logs }}" as="l" hint-placeholder-count="9">
+                <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #1E1F3D;animation:slideIn .3s ease">
+                  <span style="color:#5B5E88;flex-shrink:0">{{ l.time }}</span>
+                  <span style="font-weight:800;color:{{ l.color }};width:66px;flex-shrink:0">{{ l.status }}</span>
+                  <span style="color:#9EA0C8;flex-shrink:0;width:74px">{{ l.browser }}</span>
+                  <span style="display:block;color:#E6E7F5;flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.detail }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAnalytics }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+          <sc-for list="{{ anKpis }}" as="k" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.delta }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Delivery &amp; click performance</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Daily, last 30 days</div>
+            <div style="height:240px;margin-top:12px"><canvas ref="{{ perfRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Conversion funnel</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+              <sc-for list="{{ funnel }}" as="f" hint-placeholder-count="5">
+                <div><div style="display:flex;font-size:11.5px;font-weight:700;color:#5B5E75"><span>{{ f.label }}</span><span style="margin-left:auto;color:#14152A;font-weight:800">{{ f.value }}</span></div><div style="height:20px;border-radius:6px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ f.width }};margin-top:4px;opacity:{{ f.opacity }};min-width:44px;display:flex;align-items:center;justify-content:flex-end;padding-right:7px;color:#fff;font-size:10px;font-weight:800">{{ f.pct }}</div></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+          <div style="display:flex;align-items:baseline"><div style="font-size:14px;font-weight:800;color:#14152A">Click-rate heatmap</div><div style="margin-left:auto;font-size:11px;color:#8A8DA3;font-weight:700">Best: Thu 10am · 9.2%</div></div>
+          <div style="display:grid;grid-template-columns:38px repeat(12,1fr);gap:3px;margin-top:14px">
+            <sc-for list="{{ heatCells }}" as="c" hint-placeholder-count="30">
+              <div style="height:22px;border-radius:4px;background:{{ c.bg }};display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:{{ c.color }}" title="{{ c.tip }}">{{ c.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-top:14px">
+          <sc-for list="{{ anLists }}" as="l" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+              <div style="font-size:13px;font-weight:800;color:#14152A">{{ l.title }}</div>
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:13px">
+                <sc-for list="{{ l.rows }}" as="r" hint-placeholder-count="4">
+                  <div><div style="display:flex;align-items:center;font-size:11.5px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px;min-width:0"><span>{{ r.glyph }}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.label }}</span></span><span style="margin-left:auto;font-weight:800;color:#14152A;padding-left:8px">{{ r.value }}</span></div><div style="height:5px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:5px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ r.width }}"></div></div></div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Application settings</div>
+            <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">Site name shown in notifications</div>
+            <input value="Bruma Home" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:700;font-family:inherit;color:#14152A;outline:none;background:#F8F8FC"></input>
+            <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">Default landing page</div>
+            <input value="https://brumahome.com/shop" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input>
+            <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:7px">Default icon &amp; badge</div>
+            <div style="display:flex;gap:9px">
+              <span style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800">B</span>
+              <span style="width:44px;height:44px;border-radius:11px;background:#F8F8FC;border:1px dashed #C7C3F5;display:flex;align-items:center;justify-content:center;font-size:16px">🔔</span>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Frequency &amp; quiet hours</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+              <div><div style="display:flex;font-size:11.5px;font-weight:700;color:#5B5E75"><span>Max pushes per subscriber / day</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ freqCap }}</span></div><input type="range" min="1" max="10" value="{{ freqCap }}" onInput="{{ onFreq }}" style="width:100%;margin-top:8px;accent-color:#4F46E5"></input></div>
+              <div style="display:flex;align-items:center;gap:9px"><span onClick="{{ toggleQuiet }}" style="width:38px;height:22px;border-radius:99px;background:{{ quietBg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ quietLeft }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span><span style="font-size:12px;font-weight:700;color:#3C3F55">Quiet hours 21:00 — 08:00 (subscriber local time)</span></div>
+              <div style="display:flex;align-items:center;gap:9px"><span onClick="{{ toggleTz }}" style="width:38px;height:22px;border-radius:99px;background:{{ tzBg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ tzLeft }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span><span style="font-size:12px;font-weight:700;color:#3C3F55">Deliver in subscriber timezone</span></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Permission prompt</div>
+            <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
+              <sc-for list="{{ promptStyles }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.onClick }}" style="border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.color }};border-radius:99px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ p.label }}</button></sc-for>
+            </div>
+            <div style="background:#F8F8FC;border:1px solid #ECEDF4;border-radius:11px;padding:14px;margin-top:14px">
+              <div style="background:#fff;border:1px solid #ECEDF4;border-radius:10px;padding:12px 14px;box-shadow:0 4px 14px rgba(20,21,42,.08)">
+                <div style="display:flex;gap:10px"><span style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800">B</span><div><div style="font-size:12px;font-weight:800;color:#14152A">{{ promptTitle }}</div><div style="font-size:10.5px;color:#8A8DA3;font-weight:600;margin-top:2px">{{ promptCopy }}</div></div></div>
+                <div style="display:flex;gap:7px;margin-top:11px"><span style="flex:1;text-align:center;font-size:10.5px;font-weight:800;color:#8A8DA3;border:1px solid #ECEDF4;border-radius:7px;padding:6px">Not now</span><span style="flex:1;text-align:center;font-size:10.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#4F46E5,#8B5CF6);border-radius:7px;padding:6px">Allow</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Compliance &amp; API</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
+              <sc-for list="{{ complianceToggles }}" as="t" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:9px"><span onClick="{{ t.onClick }}" style="width:38px;height:22px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span><span style="font-size:12px;font-weight:700;color:#3C3F55">{{ t.label }}</span></div>
+              </sc-for>
+            </div>
+            <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">Push API key</div>
+            <div style="display:flex;gap:8px"><input value="pk_live_••••••••••••4c19" style="flex:1;border:1px solid #ECEDF4;border-radius:9px;padding:8px 11px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input><button style="border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:8px 13px;font-size:11.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Copy</button></div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:11px;font-weight:700;color:#0E9F6E"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E"></span>Domain verified · brumahome.com</div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#dashboard').slice(1), t: 0, feedTick: 0,
+    campFilter: 'all', campQ: '', subFilter: 'all', subQ: '', selSub: null,
+    conds: ['country', 'device', 'clicked'], preview: 'desktop',
+    title: 'Back in stock: Linen Duvet — Sage ☀️', msg: 'Hi {{firstName}} — the sage duvet you wanted just landed. Free shipping this week.',
+    bToggles: { hero: true, emoji: true, ttl: false }, tone: 'Urgent', genPhase: 'done',
+    tplCat: 'All', sent: 42800, paused: false, ppm: 1840, logs: [],
+    freqCap: 3, quiet: true, tz: true, promptStyle: 'Slide-in', compliance: { gdpr: true, cookie: true, welcome: true } };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#dashboard').slice(1) }); setTimeout(() => this.build(), 60); };
+    window.addEventListener('hashchange', this.hh);
+    const start = performance.now();
+    const tick = (now) => { const p = Math.min(1, (now - start) / 1100); this.setState({ t: 1 - Math.pow(1 - p, 3) }); if (p < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+    this.fi = setInterval(() => this.setState(s => ({ feedTick: s.feedTick + 1 })), 4200);
+    this.seedLogs();
+    this.di = setInterval(() => {
+      if ((location.hash || '#dashboard').slice(1) !== 'delivery' || this.state.paused) return;
+      this.setState(s => ({ sent: Math.min(64000, s.sent + 900 + Math.round(Math.random() * 500)), ppm: 1700 + Math.round(Math.random() * 380), logs: this.nextLogs(s.logs) }));
+    }, 1500);
+    this.build();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearInterval(this.fi); clearInterval(this.di); clearTimeout(this.bt); this.destroy(); }
+  destroy() { [this.growth, this.browser, this.perf].forEach(c => c && c.destroy()); this.growth = null; this.browser = null; this.perf = null; this.growthEl = null; this.browserEl = null; this.perfEl = null; }
+  mkLog() {
+    const brs = ['Chrome', 'Edge', 'Firefox', 'Safari', 'Samsung', 'Brave', 'Opera'];
+    const r = Math.random();
+    const st = r < 0.7 ? ['DELIVERED', '#34D399'] : r < 0.86 ? ['CLICKED', '#60A5FA'] : r < 0.94 ? ['WAITING', '#FBBF24'] : r < 0.98 ? ['FAILED', '#F87171'] : ['EXPIRED', '#94A3B8'];
+    const details = ['Back in stock: Linen Duvet — Sage', 'Flash sale ends tonight', 'Your order has shipped', 'Price drop on Alpaca Throw', 'New course: Glazing Masterclass'];
+    return { time: new Date().toLocaleTimeString([], { hour12: false }), status: st[0], color: st[1], browser: brs[Math.floor(Math.random() * brs.length)], detail: details[Math.floor(Math.random() * details.length)] };
+  }
+  seedLogs() { const l = []; for (let i = 0; i < 10; i++) l.push(this.mkLog()); this.setState({ logs: l }); }
+  nextLogs(prev) { return [this.mkLog(), this.mkLog()].concat(prev).slice(0, 11); }
+  build() {
+    clearTimeout(this.bt);
+    if (!window.Chart) { this.bt = setTimeout(() => this.build(), 140); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    const page = (location.hash || '#dashboard').slice(1);
+    const days = Array.from({ length: 30 }, (_, i) => 'D' + (i + 1));
+    if (page === 'dashboard' || page === '') {
+      this.growthEl = document.getElementById('pushGrowthCanvas');
+      this.browserEl = document.getElementById('pushBrowserCanvas');
+      this.growth = this.growthEl ? (Chart.getChart(this.growthEl) || null) : null;
+      this.browser = this.browserEl ? (Chart.getChart(this.browserEl) || null) : null;
+      if (this.growthEl && this.growthEl.isConnected && !this.growth) {
+        try {
+        this.growth = new Chart(this.growthEl, { type: 'line', data: { labels: days, datasets: [
+          { data: days.map((_, i) => 820 + Math.sin(i / 3.4) * 180 + i * 14), borderColor: '#4F46E5', backgroundColor: 'rgba(79,70,229,.14)', fill: true, tension: .4, borderWidth: 2.5, pointRadius: 0 },
+          { data: days.map((_, i) => 120 + Math.cos(i / 4) * 40), borderColor: '#DDD6FE', tension: .4, borderWidth: 2.4, pointRadius: 0 } ] },
+          options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10, weight: 600 } } }, y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 } } } } } });
+        this.growth.resize();
+        } catch (e) { this.growth = null; }
+      }
+      if (this.browserEl && this.browserEl.isConnected && !this.browser) {
+        try {
+        this.browser = new Chart(this.browserEl, { type: 'doughnut', data: { labels: ['Chrome', 'Edge', 'Firefox', 'Samsung', 'Other'], datasets: [{ data: [58, 18, 11, 8, 5], backgroundColor: ['#4F46E5', '#8B5CF6', '#C4B5FD', '#E0D7FE', '#EFEFF7'], borderWidth: 0, cutout: '72%' }] }, options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } } });
+        this.browser.resize();
+        } catch (e) { this.browser = null; }
+      }
+      const gOk = this.growthEl && this.growthEl.isConnected && Chart.getChart(this.growthEl);
+      const bOk = this.browserEl && this.browserEl.isConnected && Chart.getChart(this.browserEl);
+      if (!gOk || !bOk) { this.bt = setTimeout(() => this.build(), 200); return; }
+    }
+    if (page === 'analytics' && this.perfEl && this.perfEl.isConnected && !this.perf) {
+      this.perf = new Chart(this.perfEl, { type: 'line', data: { labels: days, datasets: [
+        { label: 'Delivered', data: days.map((_, i) => 12000 + Math.sin(i / 3) * 2200 + i * 90), borderColor: '#4F46E5', backgroundColor: 'rgba(79,70,229,.12)', fill: true, tension: .4, borderWidth: 2.5, pointRadius: 0, yAxisID: 'y' },
+        { label: 'CTR %', data: days.map((_, i) => 6.2 + Math.sin(i / 4) * 1.4), borderColor: '#0E9F6E', tension: .4, borderWidth: 2.4, pointRadius: 0, yAxisID: 'y1' } ] },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: true, labels: { boxWidth: 9, boxHeight: 9, font: { size: 11, weight: 700 } } } },
+          scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10, weight: 600 } } },
+            y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: v => (v / 1000).toFixed(0) + 'k' } },
+            y1: { position: 'right', border: { display: false }, grid: { display: false }, ticks: { maxTicksLimit: 4, font: { size: 10, weight: 600 }, callback: v => v.toFixed(0) + '%' } } } } });
+    }
+  }
+  renderVals() {
+    const valid = ['dashboard', 'campaigns', 'automation', 'subscribers', 'lifecycle', 'segments', 'builder', 'studio', 'templates', 'delivery', 'analytics', 'reach'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'dashboard';
+    const titles = {
+      dashboard: ['Push Notifications', 'Web push across Chrome, Edge, Firefox, Samsung and PWA'],
+      campaigns: ['Push Campaigns', '18 campaigns · $24.8k attributed revenue'],
+      subscribers: ['Push Subscribers', '184,210 opted in · 92% active'],
+      segments: ['Push Segments', 'Dynamic audiences that update in real time'],
+      builder: ['Notification Builder', 'Compose, personalize and preview before you send'],
+      studio: ['AI Notification Studio', 'Generate high-CTR notifications in seconds'],
+      templates: ['Notification Templates', '24 proven templates, ready to send'],
+      delivery: ['Delivery Monitor', 'Live queue, throughput and delivery events'],
+      analytics: ['Push Analytics', 'Delivery, clicks, conversion and revenue'],
+      automation: ['Push Automation', 'Triggered pushes wired into the automation builder'],
+      reach: ['Browsers \u0026 Devices', 'Where your subscribers can be reached'],
+      lifecycle: ['Subscription Lifecycle', 'From opt-in prompt to tracked revenue'],
+    };
+    const keyMap = { dashboard: 'pushdash', campaigns: 'pushcampaigns', automation: 'pushautomation', subscribers: 'pushsubs', lifecycle: 'pushlifecycle', segments: 'pushsegments', builder: 'pushbuilder', studio: 'pushstudio', templates: 'pushtemplates', delivery: 'pushdelivery', analytics: 'pushanalytics', reach: 'pushreach' };
+    const tabs = [['Dashboard', '#dashboard'], ['Campaigns', '#campaigns'], ['Automation', '#automation'], ['Subscribers', '#subscribers'], ['Lifecycle', '#lifecycle'], ['Segments', '#segments'], ['Builder', '#builder'], ['AI Studio', '#studio'], ['Templates', '#templates'], ['Delivery', '#delivery'], ['Analytics', '#analytics'], ['Browsers', '#reach'], ['Settings', 'PushSettings.dc.html#general']].map(t => {
+      const k = t[1].slice(1);
+      const on = t[1].charAt(0) === '#' && page === k;
+      return { label: t[0], href: t[1], weight: on ? 800 : 600, color: on ? '#4F46E5' : '#8A8DA3', border: on ? '#4F46E5' : 'transparent' };
+    });
+    const t = this.state.t;
+    const n = (v) => Math.round(v * t).toLocaleString();
+    const f1 = (v) => (v * t).toFixed(1);
+    const kpis = [
+      { label: 'TOTAL SUBSCRIBERS', value: n(184210), delta: '▲ 6.2%', up: 1 },
+      { label: 'ACTIVE', value: n(169480), delta: '92% of total', up: 1 },
+      { label: 'NEW TODAY', value: n(1204), delta: '▲ 18%', up: 1 },
+      { label: 'SENT · 30D', value: n(412800), delta: '▲ 9.4%', up: 1 },
+      { label: 'DELIVERED', value: f1(96.8) + '%', delta: '▲ 0.6pt', up: 1 },
+      { label: 'CLICKED', value: n(26410), delta: '▲ 12%', up: 1 },
+      { label: 'CTR', value: f1(6.4) + '%', delta: '▲ 0.8pt', up: 1 },
+      { label: 'CONVERSION', value: f1(2.1) + '%', delta: '▲ 0.3pt', up: 1 },
+      { label: 'REVENUE', value: '$' + n(24800), delta: '▲ 21%', up: 1 },
+      { label: 'RUNNING', value: String(Math.round(4 * t)), delta: 'campaigns', up: 1 },
+      { label: 'SCHEDULED', value: String(Math.round(7 * t)), delta: 'queued', up: 1 },
+      { label: 'FAILED', value: n(842), delta: '0.2% of sends', up: 0 },
+    ].map(k => ({ ...k, color: k.up ? '#14152A' : '#E02424', deltaColor: k.up ? '#0E9F6E' : '#C2620A' }));
+    const stt = { LIVE: ['#0E9F6E', '#EDF9F1'], SENT: ['#0E9F6E', '#EDF9F1'], SCHEDULED: ['#4F46E5', '#EEF0FE'], PAUSED: ['#C2620A', '#FFF3E8'], DRAFT: ['#8A8DA3', '#F3F3FA'] };
+    const C = (name, title, glyph, tint, status, segment, sent, clicks, ctr, rev) => ({ name, title, glyph, tint, status, stColor: stt[status][0], stBg: stt[status][1], segment, sent, clicks, ctr, ctrColor: parseFloat(ctr) >= 7 ? '#0E9F6E' : parseFloat(ctr) >= 4 ? '#C2620A' : '#8A8DA3', rev,
+      action: status === 'PAUSED' ? 'Resume' : status === 'LIVE' || status === 'SCHEDULED' ? 'Pause' : 'Duplicate',
+      actionColor: status === 'PAUSED' ? '#0E9F6E' : status === 'LIVE' || status === 'SCHEDULED' ? '#C2620A' : '#4F46E5',
+      onToggle: () => this.setState(s => ({ campFilter: s.campFilter })) });
+    let campaigns = [
+      C('Sage Duvet Restock', 'Back in stock: Linen Duvet — Sage ☀️', '📦', '#EDF9F1', 'LIVE', 'Waitlist', '18,420', '1,684', '9.1%', '$8,240'),
+      C('July Flash Sale', '48 hours: 25% off everything ⚡', '⚡', '#FDEDED', 'SENT', 'All active', '164,800', '11,208', '6.8%', '$9,860'),
+      C('Alpaca Throw Price Drop', 'Price drop: Alpaca Throw now $96', '📉', '#EEF0FE', 'SENT', 'Viewed product', '24,120', '1,978', '8.2%', '$4,120'),
+      C('Cart Reminder — Push', 'You left something behind 🛒', '🛒', '#F1EBFE', 'LIVE', 'Abandoned cart', '9,840', '892', '9.1%', '$2,580'),
+      C('New Course Launch', 'New: Glazing Masterclass is open 🎓', '🎓', '#EDF9F1', 'SCHEDULED', 'Course viewers', '—', '—', '—', '—'),
+      C('Holiday Gift Guide', 'Our gift picks are here 🎁', '🎁', '#FFF3E8', 'PAUSED', 'Engaged 30d', '42,180', '1,940', '4.6%', '$1,840'),
+      C('Weekly Digest', 'This week at Bruma Home', '📰', '#EEF0FE', 'DRAFT', '—', '—', '—', '—', '—'),
+    ];
+    const cq = this.state.campQ.toLowerCase();
+    if (this.state.campFilter !== 'all') campaigns = campaigns.filter(c => c.status === this.state.campFilter);
+    if (cq) campaigns = campaigns.filter(c => (c.name + ' ' + c.title).toLowerCase().includes(cq));
+    const campFilters = [['All', 'all'], ['Live', 'LIVE'], ['Scheduled', 'SCHEDULED'], ['Paused', 'PAUSED'], ['Draft', 'DRAFT']].map(f => ({
+      label: f[0], onClick: () => this.setState({ campFilter: f[1] }), border: this.state.campFilter === f[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.campFilter === f[1] ? '#EEF0FE' : '#fff', color: this.state.campFilter === f[1] ? '#4F46E5' : '#8A8DA3' }));
+    const sst = { ACTIVE: ['#0E9F6E', '#EDF9F1'], IDLE: ['#C2620A', '#FFF3E8'], UNSUB: ['#8A8DA3', '#F3F3FA'] };
+    const S = (id, glyph, tint, browser, location, subscribed, lastActive, status, tags) => ({ id, glyph, tint, browser, location, subscribed, lastActive, status, stColor: sst[status][0], stBg: sst[status][1], tags });
+    let subs = [
+      S('sub_8f21a4', '🌐', '#EEF0FE', 'Chrome · macOS', 'Lyon, FR', 'Jan 12, 2024', '2h ago', 'ACTIVE', 'vip · bedding'),
+      S('sub_4c09be', '🌐', '#EDF9F1', 'Edge · Windows', 'Austin, US', 'Mar 4, 2025', '5h ago', 'ACTIVE', 'newsletter'),
+      S('sub_7ba3d1', '📱', '#F1EBFE', 'Samsung · Android', 'Osaka, JP', 'Jun 18, 2026', '1d ago', 'ACTIVE', 'course'),
+      S('sub_d510f8', '🌐', '#FFF3E8', 'Firefox · Linux', 'Berlin, DE', 'Nov 2, 2025', '3d ago', 'IDLE', 'discount'),
+      S('sub_2e8890', '📱', '#EEF0FE', 'Chrome · Android', 'Toronto, CA', 'Feb 20, 2026', '4h ago', 'ACTIVE', 'waitlist'),
+      S('sub_a1b2c3', '🌐', '#EDF9F1', 'Brave · Windows', 'London, UK', 'Apr 9, 2026', '2w ago', 'IDLE', 'gift-buyer'),
+      S('sub_f4e5d6', '💻', '#F1EBFE', 'Chrome · ChromeOS', 'Sydney, AU', 'May 30, 2026', '6h ago', 'ACTIVE', 'vip'),
+      S('sub_9c8b7a', '🌐', '#FDEDED', 'Opera · Windows', 'Milan, IT', 'Dec 14, 2025', '1mo ago', 'UNSUB', 'lapsed'),
+    ];
+    const sq = this.state.subQ.toLowerCase();
+    if (this.state.subFilter !== 'all') subs = subs.filter(s => s.status === this.state.subFilter);
+    if (sq) subs = subs.filter(s => (s.id + ' ' + s.browser + ' ' + s.location + ' ' + s.tags).toLowerCase().includes(sq));
+    subs = subs.map((s, i) => ({ ...s, onClick: () => this.setState({ selSub: s.id }) }));
+    const subFilters = [['All', 'all'], ['Active', 'ACTIVE'], ['Idle', 'IDLE'], ['Unsubscribed', 'UNSUB']].map(f => ({
+      label: f[0], onClick: () => this.setState({ subFilter: f[1] }), border: this.state.subFilter === f[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.subFilter === f[1] ? '#EEF0FE' : '#fff', color: this.state.subFilter === f[1] ? '#4F46E5' : '#8A8DA3' }));
+    const selSub = subs.find(s => s.id === this.state.selSub) || subs[0] || { id: '', glyph: '', tint: '#F3F3FA', browser: '', location: '' };
+    const condDefs = { country: ['Country', 'is', 'France, Germany'], device: ['Device', 'is', 'Mobile'], clicked: ['Notification clicked', 'in last', '30 days'], browser: ['Browser', 'is', 'Chrome'], purchase: ['Purchase history', 'over', '$500'], course: ['Course completed', 'is', 'Ceramics 101'], tags: ['Tags', 'include', 'vip'], inactive: ['Inactive', 'more than', '14 days'] };
+    const conditions = this.state.conds.map((c, i) => ({ join: i === 0 ? 'IF' : 'AND', field: condDefs[c][0], op: condDefs[c][1], value: condDefs[c][2], onRemove: () => this.setState(s => ({ conds: s.conds.filter(x => x !== c) })) }));
+    const addFields = Object.keys(condDefs).filter(k => !this.state.conds.includes(k)).map(k => ({ label: condDefs[k][0], onClick: () => this.setState(s => ({ conds: [...s.conds, k] })) }));
+    const matchCount = (184210 / Math.pow(2.2, this.state.conds.length)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const bt = this.state.bToggles;
+    const bToggle = (key, label) => ({ label, onClick: () => this.setState(s => ({ bToggles: { ...s.bToggles, [key]: !s.bToggles[key] } })), bg: bt[key] ? '#4F46E5' : '#D9DBEA', left: bt[key] ? '19px' : '3px' });
+    const previewTabs = [['🖥️ Desktop', 'desktop'], ['📱 Mobile', 'mobile'], ['📟 Tablet', 'tablet']].map(p => ({ label: p[0], onClick: () => this.setState({ preview: p[1] }), border: this.state.preview === p[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.preview === p[1] ? '#EEF0FE' : '#fff', color: this.state.preview === p[1] ? '#4F46E5' : '#8A8DA3' }));
+    const pw = { desktop: '360px', mobile: '268px', tablet: '320px' }[this.state.preview];
+    const varSets = {
+      Urgent: [['Sage is back — and going fast ⚡', 'Only 86 left of the duvet 4,000 people waitlisted. Free shipping ends Sunday.', '9.4%', 'Low', '6.1'], ['Back in stock: 48 hours only', 'The sage linen duvet returned. Free shipping this week only.', '8.6%', 'Low', '5.8'], ['Last restock this season', 'Sage sold out twice. It\u2019s back — don\u2019t wait.', '7.9%', 'Low', '5.2'], ['Your waitlist item is here ☀️', 'The duvet you wanted just landed. Ships free.', '7.2%', 'Low', '5.5']],
+      Playful: [['Guess what came back? 👀', 'Sage. The duvet. Your bed already knows.', '8.8%', 'Low', '4.9'], ['Sage said “I\u2019m back” ☀️', 'Six colors of never-getting-up-again, ships free.', '8.1%', 'Low', '5.1'], ['Plot twist: it\u2019s in stock', 'The sage linen duvet returns. Free shipping this week.', '7.4%', 'Low', '5.4'], ['Your bed called 🛏️', 'It wants the sage duvet. It\u2019s back and ships free.', '6.9%', 'Low', '4.7']],
+      Direct: [['Linen Duvet — Sage back in stock', 'Free shipping this week. 86 available.', '7.8%', 'Low', '6.8'], ['Back in stock: sage linen duvet', 'Your waitlisted item is available now.', '7.1%', 'Low', '6.4'], ['Sage duvet available now', 'Ships free through Sunday.', '6.4%', 'Low', '6.9'], ['Restocked: Linen Duvet Set', 'Sage is available again — free shipping.', '5.9%', 'Low', '7.1']],
+      Curious: [['The color 4,000 people waited for', 'It\u2019s back. Free shipping this week only.', '9.1%', 'Low', '5.6'], ['We\u2019ve never restocked this fast', 'Sage linen returns — here\u2019s why it sells out.', '8.4%', 'Low', '5.3'], ['Guess which color sold out first', 'Hint: it\u2019s back in stock right now.', '7.6%', 'Low', '4.8'], ['Something you wanted came back', 'Check your waitlist — it shipped free.', '6.8%', 'Low', '5.9']],
+    };
+    const variations = this.state.genPhase === 'done' ? varSets[this.state.tone].map(v => ({ title: v[0], msg: v[1], ctr: v[2], spam: v[3], read: v[4],
+      color: parseFloat(v[2]) >= 8.5 ? '#0E9F6E' : parseFloat(v[2]) >= 7 ? '#C2620A' : '#8A8DA3', bg: parseFloat(v[2]) >= 8.5 ? '#EDF9F1' : parseFloat(v[2]) >= 7 ? '#FFF3E8' : '#F3F3FA' })) : [];
+    const T = (name, cat, glyph, tint, title, msg, ctr, ai) => ({ name, cat, glyph, tint, title, msg, ctr, ai });
+    const allTpl = [
+      T('Flash Sale', 'Promotional', '⚡', '#FDEDED', '48 hours: 25% off everything', 'Our biggest sale of the season ends Sunday night.', '7.8%', 0),
+      T('Back In Stock', 'Ecommerce', '📦', '#EDF9F1', 'Back in stock: {{product}}', 'The item you waitlisted just landed. Ships free.', '9.1%', 0),
+      T('Abandoned Cart', 'Ecommerce', '🛒', '#F1EBFE', 'You left something behind 🛒', 'Your cart is waiting — complete it in one tap.', '8.4%', 1),
+      T('Price Drop', 'Ecommerce', '📉', '#EEF0FE', 'Price drop: {{product}} now {{price}}', 'The item you viewed just got cheaper.', '8.2%', 0),
+      T('Welcome', 'Lifecycle', '👋', '#FFF3E8', 'Welcome to Bruma Home ☀️', 'Here\u2019s 15% off your first order — enjoy.', '6.9%', 0),
+      T('Order Update', 'Transactional', '🚚', '#EEF0FE', 'Your order has shipped', 'Track {{orderId}} — arriving in 2–3 days.', '11.2%', 0),
+      T('Review Request', 'Post-purchase', '⭐', '#FFF3E8', 'How\u2019s your {{product}}?', 'Leave a quick review and help other shoppers.', '5.4%', 0),
+      T('Course Enrolled', 'Course', '🎓', '#EDF9F1', 'You\u2019re enrolled in {{course}} 🎓', 'Start your first lesson whenever you\u2019re ready.', '7.6%', 0),
+      T('Membership Expiring', 'Membership', '🎫', '#FFF3E8', 'Your membership expires in 3 days', 'Renew now to keep your perks and access.', '9.8%', 1),
+      T('Appointment Reminder', 'Booking', '📅', '#EEF0FE', 'Your session is tomorrow at {{time}}', 'Tap to reschedule or add to your calendar.', '12.4%', 0),
+      T('Product Launch', 'Promotional', '🚀', '#F1EBFE', 'New: the stoneware collection', 'Just landed — see it before it sells out.', '7.2%', 0),
+      T('Coupon Expiring', 'Promotional', '🎟️', '#FDEDED', 'Your {{code}} expires tonight', 'Use it before midnight — 20% off everything.', '8.6%', 1),
+      T('Birthday', 'Lifecycle', '🎂', '#F1EBFE', 'Happy birthday, {{firstName}}! 🎂', 'A treat from us — 20% off, on us today.', '10.4%', 0),
+      T('Festival', 'Seasonal', '🎄', '#FDEDED', 'Our holiday gift picks are here 🎁', 'Curated presents for everyone on your list.', '6.4%', 0),
+      T('Newsletter', 'Content', '📰', '#EEF0FE', 'This week at Bruma Home', 'New arrivals, styling tips and reader picks.', '4.8%', 0),
+    ];
+    const tplCatNames = ['All', 'Promotional', 'Ecommerce', 'Lifecycle', 'Transactional', 'Post-purchase', 'Course', 'Membership', 'Booking', 'Seasonal', 'Content'];
+    const tplCats = tplCatNames.map(c => ({ label: c, onClick: () => this.setState({ tplCat: c }), border: this.state.tplCat === c ? '#4F46E5' : '#ECEDF4', bg: this.state.tplCat === c ? '#EEF0FE' : '#fff', color: this.state.tplCat === c ? '#4F46E5' : '#8A8DA3' }));
+    const templates = allTpl.filter(x => this.state.tplCat === 'All' || x.cat === this.state.tplCat);
+    const total = 64000, sent = this.state.sent;
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const heat = [[3,4,5,6,5,4,4,5,4,4,3,3],[3,4,6,7,6,5,4,5,5,4,3,3],[4,5,6,7,6,5,5,6,5,4,4,3],[4,6,8,9,8,6,5,6,6,5,4,4],[4,5,7,8,7,5,5,6,5,5,4,3],[3,4,5,6,6,5,5,6,6,5,4,4],[3,4,5,5,5,5,6,7,6,5,4,4]];
+    const heatCells = [{ label: '', bg: 'transparent', color: 'transparent', tip: '' }];
+    for (let h = 0; h < 12; h++) heatCells.push({ label: h % 2 === 0 ? (7 + h) + '' : '', bg: 'transparent', color: '#A5A8BD', tip: '' });
+    heat.forEach((row, d) => {
+      heatCells.push({ label: dayNames[d], bg: 'transparent', color: '#A5A8BD', tip: '' });
+      row.forEach((v, h) => heatCells.push({ label: '', bg: `rgba(99,82,229,${(0.06 + v / 9 * 0.85).toFixed(2)})`, color: 'transparent', tip: `${dayNames[d]} ${7 + h}:00 — ${v}% CTR` }));
+    });
+    const cmp = this.state.compliance;
+    const cToggle = (key, label) => ({ label, onClick: () => this.setState(s => ({ compliance: { ...s.compliance, [key]: !s.compliance[key] } })), bg: cmp[key] ? '#4F46E5' : '#D9DBEA', left: cmp[key] ? '19px' : '3px' });
+    const promptCopy = { 'Slide-in': ['Stay in the loop?', 'Get restock alerts and early access to sales.'], 'Bell widget': ['Subscribe to updates', 'Tap the bell to allow notifications.'], 'Native': ['brumahome.com wants to', 'Show notifications'] }[this.state.promptStyle];
+    const feedAll = [
+      { glyph: '🔔', tint: '#EEF0FE', text: 'Sage Duvet Restock delivered to 1,204 subscribers', time: 'just now' },
+      { glyph: '👆', tint: '#EDF9F1', text: 'Maya clicked “Back in stock” → visited product page', time: '1 min ago' },
+      { glyph: '💰', tint: '#F1EBFE', text: 'Push-attributed order — $186.00', time: '3 min ago' },
+      { glyph: '➕', tint: '#EEF0FE', text: '84 new subscribers from the slide-in prompt', time: '8 min ago' },
+      { glyph: '⚡', tint: '#FDEDED', text: 'Flash Sale campaign finished — 6.8% CTR', time: '22 min ago' },
+      { glyph: '✨', tint: '#F1EBFE', text: 'AI moved 2,140 subscribers into “Ready to buy”', time: '1 hour ago' },
+      { glyph: '🎓', tint: '#EDF9F1', text: 'Course launch push scheduled for Thu 10:00', time: '2 hours ago' },
+    ];
+    const off = this.state.feedTick % feedAll.length;
+    return {
+      sidebarKey: keyMap[page], pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isDashboard: page === 'dashboard', isCampaigns: page === 'campaigns', isSubscribers: page === 'subscribers', isSegments: page === 'segments',
+      isBuilder: page === 'builder', isStudio: page === 'studio', isTemplates: page === 'templates', isDelivery: page === 'delivery', isAnalytics: page === 'analytics',
+      isAutomation: page === 'automation', isReach: page === 'reach', isLifecycle: page === 'lifecycle',
+      lcStages: [
+        { n: '1', name: 'Visitor enters website', detail: 'Service worker registers on first page view', glyph: '🌐', tint: '#EEF0FE', kind: 'VISITOR', kindColor: '#4F46E5', stat: '842k sessions · 30d', tone: 'start' },
+        { n: '2', name: 'Browser asks “Allow notifications?”', detail: 'Soft prompt first, then the native permission dialog', glyph: '🔔', tint: '#F1EBFE', kind: 'PROMPT', kindColor: '#7C3AED', stat: '318k prompts shown', tone: '' },
+        { n: '3', name: 'User clicks Allow', detail: 'Denies and dismissals are suppressed for 30 days', glyph: '✅', tint: '#EDF9F1', kind: 'CONSENT', kindColor: '#0E9F6E', stat: '18.4% opt-in rate', tone: '' },
+        { n: '4', name: 'Browser generates Push Subscription ID', detail: 'Endpoint + p256dh + auth keys returned by the browser', glyph: '🔑', tint: '#FFF3E8', kind: 'TOKEN', kindColor: '#C2620A', stat: 'unique per browser', tone: '' },
+        { n: '5', name: 'Plugin stores the subscriber record', detail: 'Subscription ID plus device, locale and identity context', glyph: '🗄️', tint: '#EEF0FE', kind: 'STORE', kindColor: '#4F46E5', stat: '184,290 records', tone: '' },
+        { n: '6', name: 'Visitor becomes a Push Subscriber', detail: 'Auto-tagged, segmented and eligible for campaigns', glyph: '👤', tint: '#F1EBFE', kind: 'SUBSCRIBER', kindColor: '#7C3AED', stat: '169,480 active', tone: '' },
+        { n: '7', name: 'Admin creates a push campaign', detail: 'Manual campaign or an automation trigger fires', glyph: '📣', tint: '#EEF0FE', kind: 'CAMPAIGN', kindColor: '#4F46E5', stat: '48 campaigns · 30d', tone: '' },
+        { n: '8', name: 'Plugin sends the delivery request', detail: 'Batched, rate-limited, quiet-hours aware', glyph: '📤', tint: '#EDF9F1', kind: 'QUEUE', kindColor: '#0E9F6E', stat: '4,120 pushes/min', tone: '' },
+        { n: '9', name: 'Push provider relays the payload', detail: 'FCM · OneSignal · WonderPush · Webpushr · self-hosted VAPID', glyph: '🔌', tint: '#FFF3E8', kind: 'PROVIDER', kindColor: '#C2620A', stat: '99.9% uptime', tone: '' },
+        { n: '10', name: 'Notification delivered to the browser', detail: 'Receipt confirmed by the service worker', glyph: '🔔', tint: '#EDF9F1', kind: 'DELIVERED', kindColor: '#0E9F6E', stat: '96.8% delivery rate', tone: '' },
+        { n: '11', name: 'User clicks and lands on your site', detail: 'Deep link opens with UTM attribution attached', glyph: '👆', tint: '#EEF0FE', kind: 'CLICK', kindColor: '#4F46E5', stat: '6.4% CTR', tone: '' },
+        { n: '12', name: 'Conversion and revenue attributed', detail: 'Order matched back to the notification, 5-day window', glyph: '💰', tint: '#EDF9F1', kind: 'REVENUE', kindColor: '#0E9F6E', stat: '$38,420 · 30d', tone: 'goal' },
+      ].map((s, i, a) => ({ ...s, arrow: i < a.length - 1,
+        border: s.tone === 'start' ? '#DDD6FE' : s.tone === 'goal' ? '#BEE9D2' : '#ECEDF4',
+        bg: s.tone === 'start' ? '#FBFAFF' : s.tone === 'goal' ? '#F7FCF9' : '#fff' })),
+      lcCaptured: [
+        { label: 'Subscription ID', value: 'sub_8f21ac04be7b', glyph: '🔑', mono: true },
+        { label: 'Browser', value: 'Chrome 128', glyph: '🌐', mono: false },
+        { label: 'Device', value: 'Desktop', glyph: '🖥️', mono: false },
+        { label: 'Operating system', value: 'macOS 15', glyph: '💽', mono: false },
+        { label: 'Country', value: 'France', glyph: '🇫🇷', mono: false },
+        { label: 'Language', value: 'fr-FR', glyph: '🗣️', mono: true },
+        { label: 'Timezone', value: 'Europe/Paris', glyph: '🕑', mono: true },
+        { label: 'User ID (if logged in)', value: 'wp_user_4821', glyph: '👤', mono: true },
+      ],
+      lcTracked: [
+        { label: 'Delivered', value: '399,610', pct: '96.8%', width: '97%', color: '#0E9F6E' },
+        { label: 'Clicked', value: '26,410', pct: '6.4%', width: '46%', color: '#4F46E5' },
+        { label: 'Converted', value: '3,120', pct: '0.8%', width: '18%', color: '#7C3AED' },
+        { label: 'Revenue', value: '$38,420', pct: '$0.09/push', width: '62%', color: '#C2620A' },
+      ],
+      pushFlows: [
+        { name: 'Abandoned cart recovery', glyph: '🛒', tint: '#F1EBFE', trigger: 'Cart abandoned · 1 hour', sent: '9,840', ctr: '9.1%', rev: '$2,580', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Back in stock alert', glyph: '📦', tint: '#EDF9F1', trigger: 'Product restocked', sent: '18,420', ctr: '9.1%', rev: '$8,240', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Price drop watcher', glyph: '📉', tint: '#EEF0FE', trigger: 'Price drops on viewed product', sent: '24,120', ctr: '8.2%', rev: '$4,120', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Welcome push', glyph: '👋', tint: '#FFF3E8', trigger: 'Subscriber opts in', sent: '8,420', ctr: '6.9%', rev: '$1,240', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Order shipped', glyph: '🚚', tint: '#EEF0FE', trigger: 'Order status → shipped', sent: '2,840', ctr: '11.2%', rev: '—', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Course enrolled', glyph: '🎓', tint: '#EDF9F1', trigger: 'Tutor LMS · course enrolled', sent: '640', ctr: '7.6%', rev: '$820', status: 'PAUSED', stColor: '#C2620A', stBg: '#FFF3E8' },
+        { name: 'Membership expiring', glyph: '🎫', tint: '#FFF3E8', trigger: 'MemberPress · 3 days before expiry', sent: '410', ctr: '9.8%', rev: '$1,960', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Appointment reminder', glyph: '📅', tint: '#EEF0FE', trigger: 'Amelia · 24h before session', sent: '1,204', ctr: '12.4%', rev: '—', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+      ],
+      pushTriggers: [
+        { group: 'Customer', items: ['customer.registered', 'customer.login', 'customer.inactive', 'birthday', 'anniversary'] },
+        { group: 'Commerce', items: ['purchase.completed', 'order.shipped', 'order.delivered', 'cart.abandoned', 'product.back_in_stock', 'price.drop', 'coupon.expiring'] },
+        { group: 'Content & plugins', items: ['course.enrolled', 'course.completed', 'membership.purchased', 'membership.expiring', 'appointment.booked', 'appointment.reminder', 'form.submitted', 'post.published'] },
+      ],
+      pushActions: [
+        { label: 'Send push notification', glyph: '🔔' }, { label: 'Schedule push', glyph: '🕑' }, { label: 'Delay push', glyph: '⏱️' },
+        { label: 'Cancel push', glyph: '🚫' }, { label: 'Repeat push', glyph: '🔁' }, { label: 'Add tag', glyph: '🏷️' },
+        { label: 'Remove tag', glyph: '🧹' }, { label: 'Move to segment', glyph: '🧬' }, { label: 'Generate AI notification', glyph: '✨' },
+      ],
+      browserSupport: [
+        { name: 'Google Chrome', glyph: '🌐', tint: '#EEF0FE', subs: '106,840', pct: '58%', status: 'SUPPORTED', stColor: '#0E9F6E', stBg: '#EDF9F1', note: 'Desktop + Android' },
+        { name: 'Microsoft Edge', glyph: '🌊', tint: '#EDF9F1', subs: '33,160', pct: '18%', status: 'SUPPORTED', stColor: '#0E9F6E', stBg: '#EDF9F1', note: 'Chromium engine' },
+        { name: 'Mozilla Firefox', glyph: '🦊', tint: '#FFF3E8', subs: '20,260', pct: '11%', status: 'SUPPORTED', stColor: '#0E9F6E', stBg: '#EDF9F1', note: 'Desktop + Android' },
+        { name: 'Samsung Internet', glyph: '📱', tint: '#F1EBFE', subs: '14,740', pct: '8%', status: 'SUPPORTED', stColor: '#0E9F6E', stBg: '#EDF9F1', note: 'Android only' },
+        { name: 'Opera', glyph: '🎭', tint: '#FDEDED', subs: '5,530', pct: '3%', status: 'SUPPORTED', stColor: '#0E9F6E', stBg: '#EDF9F1', note: 'Chromium engine' },
+        { name: 'Brave', glyph: '🦁', tint: '#FFF3E8', subs: '3,680', pct: '2%', status: 'SUPPORTED', stColor: '#0E9F6E', stBg: '#EDF9F1', note: 'Opt-in required' },
+      ],
+      deviceSupport: [
+        { name: 'Desktop', glyph: '🖥️', tint: '#EEF0FE', pct: '46%', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Laptop', glyph: '💻', tint: '#EDF9F1', pct: '14%', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Android browser', glyph: '📱', tint: '#F1EBFE', pct: '28%', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Android PWA', glyph: '📲', tint: '#EDF9F1', pct: '6%', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Tablet', glyph: '📟', tint: '#FFF3E8', pct: '6%', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'iOS app', glyph: '🍎', tint: '#F3F3FA', pct: '—', status: 'ROADMAP', stColor: '#8A8DA3', stBg: '#F3F3FA' },
+        { name: 'Android app', glyph: '🤖', tint: '#F3F3FA', pct: '—', status: 'ROADMAP', stColor: '#8A8DA3', stBg: '#F3F3FA' },
+        { name: 'Flutter / React Native', glyph: '⚛️', tint: '#F3F3FA', pct: '—', status: 'ROADMAP', stColor: '#8A8DA3', stBg: '#F3F3FA' },
+      ],
+      kpis,
+      growthRef: (el) => { if (el) { this.growthEl = el; this.build(); } },
+      browserRef: (el) => { if (el) { this.browserEl = el; this.build(); } },
+      perfRef: (el) => { if (el && el !== this.perfEl) { this.perfEl = el; this.build(); } },
+      browsers: [{ name: 'Chrome', pct: '58%', color: '#4F46E5' }, { name: 'Edge', pct: '18%', color: '#8B5CF6' }, { name: 'Firefox', pct: '11%', color: '#C4B5FD' }, { name: 'Samsung Internet', pct: '8%', color: '#E0D7FE' }, { name: 'Other', pct: '5%', color: '#EFEFF7' }],
+      devices: [{ glyph: '🖥️', name: 'Desktop', pct: '46%' }, { glyph: '📱', name: 'Android', pct: '34%' }, { glyph: '💻', name: 'Laptop', pct: '14%' }, { glyph: '📟', name: 'Tablet', pct: '6%' }],
+      recentCampaigns: [
+        { name: 'Sage Duvet Restock', glyph: '📦', tint: '#EDF9F1', sent: '18,420', ctr: '9.1%', rev: '$8,240' },
+        { name: 'July Flash Sale', glyph: '⚡', tint: '#FDEDED', sent: '164,800', ctr: '6.8%', rev: '$9,860' },
+        { name: 'Alpaca Price Drop', glyph: '📉', tint: '#EEF0FE', sent: '24,120', ctr: '8.2%', rev: '$4,120' },
+        { name: 'Cart Reminder', glyph: '🛒', tint: '#F1EBFE', sent: '9,840', ctr: '9.1%', rev: '$2,580' },
+        { name: 'Holiday Gift Guide', glyph: '🎁', tint: '#FFF3E8', sent: '42,180', ctr: '4.6%', rev: '$1,840' },
+      ],
+      feed: feedAll.slice(off).concat(feedAll.slice(0, off)).slice(0, 6),
+      campaigns, campEmpty: campaigns.length === 0, campFilters, onCampSearch: (e) => this.setState({ campQ: e.target.value }),
+      subKpis: [
+        { label: 'TOTAL', value: '184,210', color: '#14152A', note: '▲ 6.2%' },
+        { label: 'ACTIVE', value: '169,480', color: '#0E9F6E', note: '92%' },
+        { label: 'NEW · 7D', value: '8,420', color: '#14152A', note: '▲ 18%' },
+        { label: 'CHURN RATE', value: '1.4%', color: '#0E9F6E', note: '▼ 0.3pt' },
+      ],
+      subscribers: subs, subFilters, onSubSearch: (e) => this.setState({ subQ: e.target.value }),
+      subOpen: !!this.state.selSub, closeSub: () => this.setState({ selSub: null }), stopProp: (e) => e.stopPropagation(),
+      selSub,
+      selSubStats: [
+        { label: 'NOTIFICATIONS', value: '84' }, { label: 'CLICKS', value: '12' }, { label: 'CTR', value: '14.3%' },
+        { label: 'TIMEZONE', value: 'GMT+1' }, { label: 'LANGUAGE', value: 'fr-FR' }, { label: 'REVENUE', value: '$486' },
+      ],
+      selSubTimeline: [
+        { text: 'Clicked “Back in stock: Linen Duvet — Sage”', time: '2 hours ago', dot: '#0E9F6E' },
+        { text: 'Received Sage Duvet Restock push', time: '2 hours ago', dot: '#4F46E5' },
+        { text: 'Added to segment “Waitlist — bedding”', time: 'Yesterday', dot: '#7C3AED' },
+        { text: 'Subscribed via slide-in prompt', time: 'Jan 12, 2024', dot: '#8A8DA3' },
+      ],
+      segments: [
+        { name: 'All active', glyph: '🌐', tint: '#EEF0FE', rule: 'Subscribed and active in the last 30 days', count: '169,480', delta: '+8.4k', ctr: '6.4%', ai: false },
+        { name: 'Waitlist — bedding', glyph: '📦', tint: '#EDF9F1', rule: 'Requested back-in-stock alert for Bedding', count: '18,420', delta: '+1.2k', ctr: '9.1%', ai: false },
+        { name: 'Ready to buy', glyph: '🎯', tint: '#F1EBFE', rule: 'AI purchase intent above 80% this week', count: '12,140', delta: '+2.1k', ctr: '11.2%', ai: true },
+        { name: 'Cart abandoners', glyph: '🛒', tint: '#F1EBFE', rule: 'Cart abandoned in the last 48 hours', count: '9,840', delta: '+640', ctr: '9.1%', ai: false },
+        { name: 'Course learners', glyph: '🎓', tint: '#EDF9F1', rule: 'Enrolled in any Tutor LMS course', count: '6,480', delta: '+310', ctr: '7.6%', ai: false },
+        { name: 'Sleeping subscribers', glyph: '😴', tint: '#FFF3E8', rule: 'No click in 60 days — win-back candidates', count: '14,210', delta: '+1.8k', ctr: '2.1%', ai: true },
+      ],
+      conditions, addFields, matchCount,
+      titleRef: () => {}, msgRef: () => {},
+      onTitle: (e) => this.setState({ title: e.target.value }), onMsg: (e) => this.setState({ msg: e.target.value }),
+      titleCount: this.state.title.length, titleCountColor: this.state.title.length > 65 ? '#E02424' : '#A5A8BD',
+      msgCount: this.state.msg.length, msgCountColor: this.state.msg.length > 150 ? '#E02424' : '#A5A8BD',
+      previewTitle: this.state.title, previewMsg: this.state.msg.replace('{{firstName}}', 'Elena'),
+      mergeTags: ['{{firstName}}', '{{product}}', '{{price}}', '{{code}}'].map(m => ({ label: m, onClick: () => this.setState(s => ({ msg: s.msg + ' ' + m })) })),
+      ctas: ['Shop now', 'Remind me later'],
+      builderToggles: [bToggle('hero', 'Include hero image'), bToggle('emoji', 'Allow emoji in title'), bToggle('ttl', 'Set expiration (TTL 24h)')],
+      previewTabs, previewWidth: pw, showHero: bt.hero,
+      deliveryRows: [
+        { label: 'Audience', value: 'Waitlist — bedding (18,420)', color: '#14152A' },
+        { label: 'Send time', value: 'Thu, Jul 30 · 10:00 (AI pick)', color: '#7C3AED' },
+        { label: 'Timezone delivery', value: 'Subscriber local', color: '#14152A' },
+        { label: 'Frequency cap', value: 'Respects 3/day limit', color: '#0E9F6E' },
+      ],
+      promptRef: () => {},
+      tones: ['Urgent', 'Playful', 'Direct', 'Curious'].map(tn => ({ label: tn, onClick: () => this.setState({ tone: tn, genPhase: 'done' }), border: this.state.tone === tn ? '#fff' : 'rgba(255,255,255,.2)', bg: this.state.tone === tn ? 'rgba(255,255,255,.2)' : 'rgba(255,255,255,.06)', color: this.state.tone === tn ? '#fff' : '#E9E5FB' })),
+      generate: () => { this.setState({ genPhase: 'gen' }); clearTimeout(this.gt); this.gt = setTimeout(() => this.setState({ genPhase: 'done' }), 1000); },
+      genLabel: this.state.genPhase === 'gen' ? 'Generating…' : '✨ Generate variations',
+      generating: this.state.genPhase === 'gen', variations,
+      tplCats, templates,
+      ppm: this.state.paused ? '0' : String(this.state.ppm),
+      subsOnline: '12,480',
+      deliveryKpis: [
+        { label: 'DELIVERED', value: Math.round(sent * 0.968).toLocaleString(), color: '#0E9F6E', note: '96.8% rate' },
+        { label: 'CLICKED', value: Math.round(sent * 0.064).toLocaleString(), color: '#4F46E5', note: '6.4% CTR' },
+        { label: 'IN QUEUE', value: (total - sent).toLocaleString(), color: '#C2620A', note: 'remaining' },
+      ],
+      queueStates: [
+        { label: 'SENDING', value: this.state.paused ? '0' : String(this.state.ppm), color: '#8B5CF6' },
+        { label: 'WAITING', value: (total - sent).toLocaleString(), color: '#6366F1' },
+        { label: 'DELIVERED', value: Math.round(sent * 0.968).toLocaleString(), color: '#34D399' },
+        { label: 'CLICKED', value: Math.round(sent * 0.064).toLocaleString(), color: '#60A5FA' },
+        { label: 'FAILED', value: '842', color: '#F87171' },
+        { label: 'EXPIRED', value: '124', color: '#94A3B8' },
+      ],
+      progressPct: ((sent / total) * 100).toFixed(1) + '%',
+      togglePause: () => this.setState(s => ({ paused: !s.paused })),
+      pauseLabel: this.state.paused ? '▶ Resume queue' : '⏸ Pause queue',
+      pauseBg: this.state.paused ? '#EDF9F1' : '#FDEDED', pauseBorder: this.state.paused ? '#C4E9D3' : '#FDE1E1', pauseColor: this.state.paused ? '#0E9F6E' : '#E02424',
+      logs: this.state.logs,
+      anKpis: [
+        { label: 'DELIVERED', value: '399,610', color: '#14152A', delta: '96.8%' },
+        { label: 'CLICKS', value: '26,410', color: '#14152A', delta: '▲ 12%' },
+        { label: 'CTR', value: '6.4%', color: '#0E9F6E', delta: '▲ 0.8pt' },
+        { label: 'CONVERSIONS', value: '3,120', color: '#14152A', delta: '▲ 18%' },
+        { label: 'REVENUE', value: '$24,800', color: '#14152A', delta: '▲ 21%' },
+      ],
+      funnel: [
+        { label: 'Sent', value: '412,800', width: '100%', pct: '100%', opacity: 1 },
+        { label: 'Delivered', value: '399,610', width: '78%', pct: '96.8%', opacity: .88 },
+        { label: 'Clicked', value: '26,410', width: '46%', pct: '6.4%', opacity: .74 },
+        { label: 'Landed', value: '24,180', width: '32%', pct: '5.9%', opacity: .6 },
+        { label: 'Converted', value: '3,120', width: '18%', pct: '0.8%', opacity: .48 },
+      ],
+      heatCells,
+      anLists: [
+        { title: 'Top campaigns', rows: [{ glyph: '📦', label: 'Sage Duvet Restock', value: '9.1%', width: '100%' }, { glyph: '🛒', label: 'Cart Reminder', value: '9.1%', width: '98%' }, { glyph: '📉', label: 'Alpaca Price Drop', value: '8.2%', width: '88%' }, { glyph: '⚡', label: 'July Flash Sale', value: '6.8%', width: '72%' }] },
+        { title: 'Top landing pages', rows: [{ glyph: '🛏️', label: '/shop/linen-duvet-sage', value: '8,420', width: '100%' }, { glyph: '⚡', label: '/collections/sale', value: '6,180', width: '73%' }, { glyph: '🧶', label: '/shop/alpaca-throw', value: '4,120', width: '49%' }, { glyph: '🎓', label: '/courses/glazing', value: '2,410', width: '29%' }] },
+        { title: 'By country', rows: [{ glyph: '🇺🇸', label: 'United States', value: '48%', width: '100%' }, { glyph: '🇬🇧', label: 'United Kingdom', value: '16%', width: '33%' }, { glyph: '🇨🇦', label: 'Canada', value: '12%', width: '25%' }, { glyph: '🇩🇪', label: 'Germany', value: '9%', width: '19%' }] },
+      ],
+      freqCap: this.state.freqCap, onFreq: (e) => this.setState({ freqCap: +e.target.value }),
+      toggleQuiet: () => this.setState(s => ({ quiet: !s.quiet })), quietBg: this.state.quiet ? '#4F46E5' : '#D9DBEA', quietLeft: this.state.quiet ? '19px' : '3px',
+      toggleTz: () => this.setState(s => ({ tz: !s.tz })), tzBg: this.state.tz ? '#4F46E5' : '#D9DBEA', tzLeft: this.state.tz ? '19px' : '3px',
+      promptStyles: ['Slide-in', 'Bell widget', 'Native'].map(p => ({ label: p, onClick: () => this.setState({ promptStyle: p }), border: this.state.promptStyle === p ? '#4F46E5' : '#ECEDF4', bg: this.state.promptStyle === p ? '#EEF0FE' : '#fff', color: this.state.promptStyle === p ? '#4F46E5' : '#8A8DA3' })),
+      promptTitle: promptCopy[0], promptCopy: promptCopy[1],
+      complianceToggles: [cToggle('gdpr', 'GDPR consent required before prompt'), cToggle('cookie', 'Integrate with cookie consent banner'), cToggle('welcome', 'Send welcome notification on subscribe')],
+    };
+  }
+}
+</script>
+</body>
+</html>

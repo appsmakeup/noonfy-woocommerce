@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="network" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Multi-Site Network</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Agency workspace · every WordPress site, store and LMS in one place</p>
+      </div>
+      <button style="margin-left:auto;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">+ Connect site</button>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:21px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.note }}</div></div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #F3F3FA"><span style="font-size:13.5px;font-weight:800;color:#14152A">Connected sites</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:#8A8DA3">5 sites · all healthy</span></div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr .7fr;gap:8px;padding:11px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Site</span><span>Type</span><span>Revenue</span><span>Customers</span><span></span></div>
+        <sc-for list="{{ sites }}" as="s" hint-placeholder-count="5">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr .7fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB" style-hover="background:#FAFAFE">
+            <span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:9px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ s.glyph }}</span><span><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ s.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ s.domain }}</span></span></span>
+            <span style="font-size:11px;font-weight:800;color:{{ s.typeColor }};background:{{ s.typeBg }};border-radius:99px;padding:3px 8px;justify-self:start">{{ s.type }}</span>
+            <span style="font-size:12.5px;font-weight:800;color:#14152A">{{ s.revenue }}</span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ s.customers }}</span>
+            <button onClick="{{ s.onSwitch }}" style="border:1px solid #ECEDF4;background:#fff;border-radius:7px;padding:5px 10px;font-size:10.5px;font-weight:800;color:#4F46E5;cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">{{ s.switchLabel }}</button>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Shared across network</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+            <sc-for list="{{ shared }}" as="r" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;background:{{ r.tint }};display:flex;align-items:center;justify-content:center;font-size:12px">{{ r.glyph }}</span><span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ r.label }}</span><span style="font-size:12px;font-weight:800;color:#14152A">{{ r.value }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff;flex:1">
+          <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">✨</span><span style="font-size:13px;font-weight:800">Cross-site AI insight</span></div>
+          <div style="font-size:12.5px;font-weight:600;color:#E6E4F5;line-height:1.55;margin-top:10px">Larkspur Apparel's cart-recovery flow converts 2.3× better than the network average. Roll it out to Nordic Volt and Cafe Mero to add an estimated <strong style="color:#6EE7B7">$7.8k/mo</strong> across the portfolio.</div>
+          <a href="CrossAutomation.dc.html" style="display:inline-block;margin-top:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:7px 13px;font-size:11.5px;font-weight:800" style-hover="background:rgba(255,255,255,.22);color:#fff">Deploy to all sites</a>
+        </div>
+      </div>
+    </section>
+
+    <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+      <div style="font-size:14px;font-weight:800;color:#14152A">Clients &amp; permissions</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px">
+        <sc-for list="{{ clients }}" as="c" hint-placeholder-count="3">
+          <div style="border:1px solid #F3F3FA;border-radius:12px;padding:14px 16px">
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:30px;height:30px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span><span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ c.sites }} sites</span></span></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:11px"><span style="font-size:10px;font-weight:800;color:{{ c.roleColor }};background:{{ c.roleBg }};border-radius:99px;padding:3px 9px">{{ c.role }}</span><span style="margin-left:auto;font-size:10.5px;font-weight:700;color:#8A8DA3">{{ c.plan }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { active: 'bruma' };
+  renderVals() {
+    const ty = { Store: ['#7C3AED', '#F1EBFE'], LMS: ['#0E9F6E', '#EDF9F1'], Membership: ['#C2620A', '#FFF3E8'], Mixed: ['#4F46E5', '#EEF0FE'] };
+    const S = (id, name, domain, glyph, tint, type, revenue, customers) => ({ id, name, domain, glyph, tint, type, typeColor: ty[type][0], typeBg: ty[type][1], revenue, customers,
+      switchLabel: this.state.active === id ? 'Active' : 'Switch', onSwitch: () => this.setState({ active: id }) });
+    return {
+      kpis: [
+        { label: 'CONNECTED SITES', value: '5', color: '#14152A', note: 'unlimited plan' },
+        { label: 'NETWORK REVENUE', value: '$284.6k', color: '#14152A', note: '▲ 16%' },
+        { label: 'TOTAL CUSTOMERS', value: '112,840', color: '#14152A', note: 'deduplicated' },
+        { label: 'CROSS-SITE FLOWS', value: '14', color: '#7C3AED', note: 'active' },
+      ],
+      sites: [
+        S('bruma', 'Bruma Home', 'brumahome.com', '🏡', '#EEF0FE', 'Store', '$128,460', '48,212'),
+        S('larkspur', 'Larkspur Apparel', 'larkspur.co', '👗', '#F1EBFE', 'Store', '$86,240', '31,640'),
+        S('academy', 'Bruma Academy', 'academy.brumahome.com', '🎓', '#EDF9F1', 'LMS', '$41,900', '18,420'),
+        S('guild', 'Makers Guild', 'makersguild.org', '🎫', '#FFF3E8', 'Membership', '$18,610', '9,840'),
+        S('fernfable', 'Fern & Fable', 'fernfable.com', '🌿', '#EDF9F1', 'Mixed', '$9,400', '4,720'),
+      ],
+      shared: [
+        { glyph: '🤖', tint: '#F1EBFE', label: 'Shared AI agents', value: '6' },
+        { glyph: '✉️', tint: '#EEF0FE', label: 'Email templates', value: '42' },
+        { glyph: '⚡', tint: '#EDF9F1', label: 'Automations', value: '14' },
+        { glyph: '🧬', tint: '#FFF3E8', label: 'Segments', value: '28' },
+      ],
+      clients: [
+        { name: 'Bruma Group', initials: 'BG', tint: '#F1EBFE', fg: '#7C3AED', sites: 3, role: 'OWNER', roleColor: '#7C3AED', roleBg: '#F1EBFE', plan: 'Agency' },
+        { name: 'Larkspur Co', initials: 'LC', tint: '#EEF0FE', fg: '#4F46E5', sites: 1, role: 'ADMIN', roleColor: '#4F46E5', roleBg: '#EEF0FE', plan: 'Pro' },
+        { name: 'Guild Collective', initials: 'GC', tint: '#EDF9F1', fg: '#0E9F6E', sites: 1, role: 'EDITOR', roleColor: '#0E9F6E', roleBg: '#EDF9F1', plan: 'Pro' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

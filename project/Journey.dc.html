@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="journey" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Customer Journey Analytics</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">How shoppers move from first visit to repeat purchase</p>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:4px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:3px">
+        <sc-for list="{{ segTabs }}" as="s" hint-placeholder-count="3">
+          <button onClick="{{ s.onClick }}" style="border:none;background:{{ s.bg }};color:{{ s.color }};border-radius:7px;padding:6px 13px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">{{ s.label }}</button>
+        </sc-for>
+      </div>
+    </header>
+
+    <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:22px 20px;overflow-x:auto">
+      <div style="display:flex;align-items:stretch;gap:0;min-width:940px">
+        <sc-for list="{{ stages }}" as="st" hint-placeholder-count="8">
+          <div style="display:flex;align-items:center">
+            <div style="width:112px;text-align:center">
+              <div style="width:64px;height:64px;border-radius:16px;background:{{ st.tint }};display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto;box-shadow:0 4px 12px rgba(20,21,42,.06)">{{ st.glyph }}</div>
+              <div style="font-size:12px;font-weight:800;color:#14152A;margin-top:9px">{{ st.name }}</div>
+              <div style="font-size:15px;font-weight:800;color:#4F46E5;margin-top:3px">{{ st.count }}</div>
+              <div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ st.pct }}</div>
+              <sc-if value="{{ st.drop }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:10px;font-weight:800;color:#E02424;background:#FDEDED;border-radius:99px;padding:2px 8px;margin-top:6px;display:inline-block">▼ {{ st.drop }}</div>
+              </sc-if>
+            </div>
+            <sc-if value="{{ st.arrow }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;align-items:center;width:44px">
+                <svg width="34" height="16" viewBox="0 0 34 16" fill="none"><path d="M0 8h30m0 0l-6-6m6 6l-6 6" stroke="#D9D5F5" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Biggest drop-off points</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Where the journey leaks, and the fix</div>
+        <div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
+          <sc-for list="{{ dropoffs }}" as="d" hint-placeholder-count="4">
+            <div style="border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px">
+              <div style="display:flex;align-items:center"><span style="font-size:12.5px;font-weight:800;color:#14152A">{{ d.stage }}</span><span style="margin-left:auto;font-size:12.5px;font-weight:800;color:#E02424">{{ d.pct }} lost</span></div>
+              <div style="height:7px;border-radius:99px;background:#F3F3FA;margin-top:8px"><div style="height:7px;border-radius:99px;background:linear-gradient(90deg,#F59E0B,#EF4444);width:{{ d.width }}"></div></div>
+              <div style="display:flex;align-items:center;gap:7px;margin-top:9px"><span style="font-size:11px">💡</span><span style="font-size:11px;font-weight:600;color:#8A8DA3;line-height:1.4">{{ d.fix }}</span><a href="AIBuilder.dc.html" style="margin-left:auto;font-size:10.5px;font-weight:800;white-space:nowrap">Fix →</a></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Journey heatmap</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Time spent at each stage, by day since first visit</div>
+        <div style="display:grid;grid-template-columns:80px repeat(7,1fr);gap:3px;margin-top:16px">
+          <sc-for list="{{ heat }}" as="h" hint-placeholder-count="40">
+            <div style="height:24px;border-radius:4px;background:{{ h.bg }};display:flex;align-items:center;justify-content:{{ h.justify }};padding:0 6px;font-size:9.5px;font-weight:800;color:{{ h.color }}" title="{{ h.tip }}">{{ h.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:11px;font-weight:700;color:#8A8DA3">Less<span style="display:flex;gap:3px"><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.1)"></span><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.35)"></span><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.6)"></span><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.9)"></span></span>More</div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">
+      <sc-for list="{{ metrics }}" as="m" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:15px 18px">
+          <div style="font-size:11px;font-weight:800;color:#8A8DA3">{{ m.label }}</div>
+          <div style="font-size:21px;font-weight:800;color:#14152A;margin-top:6px">{{ m.value }}</div>
+          <div style="font-size:11px;font-weight:800;color:{{ m.deltaColor }};margin-top:2px">{{ m.delta }}</div>
+        </div>
+      </sc-for>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { seg: 'All' };
+  renderVals() {
+    const base = {
+      All: [100, 48, 22, 14, 11, 6, 31, 12],
+      New: [100, 52, 20, 12, 9, 3, 0, 0],
+      VIP: [100, 71, 44, 34, 30, 22, 68, 41],
+    };
+    const vals = base[this.state.seg];
+    const names = ['Website visit', 'Product view', 'Add to cart', 'Checkout', 'Purchase', 'Review', 'Repeat purchase', 'Referral'];
+    const glyphs = ['🌐', '👀', '🛒', '💳', '✅', '⭐', '🔁', '🤝'];
+    const tints = ['#EEF0FE', '#EDF9F1', '#FFF3E8', '#F1EBFE', '#EDF9F1', '#FFF3E8', '#EEF0FE', '#F1EBFE'];
+    const totalEntered = 48200;
+    const stages = names.map((n, i) => {
+      const drop = i > 0 && vals[i - 1] > 0 && vals[i] < vals[i - 1] && i < 6 ? Math.round((1 - vals[i] / vals[i - 1]) * 100) + '%' : '';
+      return { name: n, glyph: glyphs[i], tint: tints[i], count: vals[i] === 0 ? '—' : Math.round(totalEntered * vals[i] / 100).toLocaleString(),
+        pct: vals[i] + '%', drop, arrow: i < names.length - 1 };
+    });
+    const segTabs = ['All', 'New', 'VIP'].map(s => ({ label: s + (s === 'All' ? ' customers' : ''), onClick: () => this.setState({ seg: s }),
+      bg: this.state.seg === s ? '#4F46E5' : 'transparent', color: this.state.seg === s ? '#fff' : '#8A8DA3' }));
+    const rowLabels = ['Visit', 'Browse', 'Cart', 'Checkout', 'Purchase'];
+    const heatData = [[9,7,5,4,3,2,2],[6,8,7,5,4,3,3],[3,5,7,6,5,4,3],[2,3,4,6,5,4,4],[1,2,3,4,6,7,8]];
+    const heat = [];
+    heat.push({ label: '', bg: 'transparent', color: 'transparent', justify: 'center', tip: '' });
+    for (let d = 0; d < 7; d++) heat.push({ label: 'D' + (d + 1), bg: 'transparent', color: '#A5A8BD', justify: 'center', tip: '' });
+    heatData.forEach((row, r) => {
+      heat.push({ label: rowLabels[r], bg: 'transparent', color: '#8A8DA3', justify: 'flex-start', tip: '' });
+      row.forEach((v, d) => heat.push({ label: '', bg: `rgba(99,82,229,${(0.08 + v / 9 * 0.85).toFixed(2)})`, color: 'transparent', justify: 'center', tip: `${rowLabels[r]} · day ${d + 1}` }));
+    });
+    return {
+      segTabs, stages, heat,
+      dropoffs: [
+        { stage: 'Product view → Add to cart', pct: '54%', width: '82%', fix: 'Browse Abandonment flow re-engages window shoppers within 2h.' },
+        { stage: 'Add to cart → Checkout', pct: '36%', width: '62%', fix: 'Cart Recovery with a timed 10% coupon recovers most of these.' },
+        { stage: 'Checkout → Purchase', pct: '21%', width: '40%', fix: 'Checkout Recovery + free-shipping nudge closes the gap.' },
+        { stage: 'Purchase → Repeat', pct: '69%', width: '90%', fix: 'Post-purchase cross-sell + replenishment drives the second order.' },
+      ],
+      metrics: [
+        { label: 'AVG TIME TO PURCHASE', value: '4.2 days', delta: '▼ 0.6 days', deltaColor: '#0E9F6E' },
+        { label: 'VISIT → PURCHASE', value: '11%', delta: '▲ 1.4pt', deltaColor: '#0E9F6E' },
+        { label: 'REPEAT WITHIN 60D', value: '31%', delta: '▲ 3.8pt', deltaColor: '#0E9F6E' },
+        { label: 'AVG TOUCHPOINTS', value: '6.8', delta: 'before first order', deltaColor: '#8A8DA3' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

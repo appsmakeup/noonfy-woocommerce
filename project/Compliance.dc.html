@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="compliance" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Compliance Center</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">GDPR, CCPA and consent — audit-ready</p>
+      </div>
+      <span style="margin-left:auto;font-size:11px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px">✅ Compliant · last audit Jul 1</span>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <sc-for list="{{ frameworks }}" as="f" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px">
+          <div style="display:flex;align-items:center"><span style="font-size:13px;font-weight:800;color:#14152A">{{ f.name }}</span><span style="margin-left:auto;font-size:10px;font-weight:800;color:{{ f.stColor }};background:{{ f.stBg }};border-radius:99px;padding:3px 9px">{{ f.status }}</span></div>
+          <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:8px;line-height:1.45">{{ f.desc }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Consent management</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+          <sc-for list="{{ consent }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:32px;height:32px;border-radius:9px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ c.glyph }}</span>
+              <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ c.detail }}</span></span>
+              <span style="width:40px;height:23px;border-radius:99px;background:{{ c.on ? '#4F46E5' : '#D9DBEA' }};position:relative"><span style="position:absolute;top:3px;left:{{ c.on ? '20px' : '3px' }};width:17px;height:17px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Data subject requests</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+          <sc-for list="{{ dsrStats }}" as="d" hint-placeholder-count="4">
+            <div style="border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ d.label }}</div><div style="font-size:19px;font-weight:800;color:#14152A;margin-top:3px">{{ d.value }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button style="flex:1;border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px;font-size:12px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Export user data</button>
+          <button style="flex:1;border:1px solid #FDE1E1;background:#fff;border-radius:9px;padding:9px;font-size:12px;font-weight:800;color:#E02424;cursor:pointer;font-family:inherit" style-hover="background:#FDEDED">Forget a user</button>
+        </div>
+      </div>
+    </section>
+
+    <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+      <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Audit log</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:#8A8DA3">Immutable · retained 7 years</span></div>
+      <div style="margin-top:12px;font-family:'SF Mono',ui-monospace,monospace;font-size:12px">
+        <sc-for list="{{ audit }}" as="l" hint-placeholder-count="6">
+          <div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #F3F3FA">
+            <span style="color:#A5A8BD;flex-shrink:0;width:120px">{{ l.time }}</span>
+            <span style="font-weight:800;color:{{ l.color }};width:130px;flex-shrink:0">{{ l.action }}</span>
+            <span style="color:#5B5E75;flex:1;min-width:0">{{ l.detail }}</span>
+            <span style="color:#A5A8BD;flex-shrink:0">{{ l.actor }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const ok = { status: 'ACTIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' };
+    return {
+      frameworks: [
+        { name: 'GDPR', ...ok, desc: 'EU data protection · lawful basis and consent tracked per contact.' },
+        { name: 'CCPA', ...ok, desc: 'California privacy · opt-out and “do not sell” honored.' },
+        { name: 'CAN-SPAM', ...ok, desc: 'Physical address and one-click unsubscribe on every send.' },
+        { name: 'Cookie Consent', ...ok, desc: 'Consent banner + preference center synced to tracking.' },
+      ],
+      consent: [
+        { glyph: '✅', name: 'Double opt-in', detail: 'Confirmation email required for new EU subscribers', tint: '#EDF9F1', on: true },
+        { glyph: '🍪', name: 'Cookie consent gate', detail: 'Tracking waits for explicit consent', tint: '#FFF3E8', on: true },
+        { glyph: '📍', name: 'Geo-aware rules', detail: 'GDPR for EU, CCPA for CA visitors', tint: '#EEF0FE', on: true },
+        { glyph: '📴', name: 'Suppress non-consented', detail: 'Never email contacts without a lawful basis', tint: '#F1EBFE', on: true },
+      ],
+      dsrStats: [
+        { label: 'OPEN REQUESTS', value: '2' }, { label: 'AVG RESOLUTION', value: '1.4 days' },
+        { label: 'DATA EXPORTS · 30D', value: '14' }, { label: 'ERASURES · 30D', value: '6' },
+      ],
+      audit: [
+        { time: 'Jul 16 09:41', action: 'DATA_EXPORT', color: '#4F46E5', detail: 'Exported profile for contact #48120', actor: 'lena@brumahome.com' },
+        { time: 'Jul 15 17:22', action: 'USER_ERASED', color: '#E02424', detail: 'Right-to-be-forgotten for old.addr@gmx.de', actor: 'system' },
+        { time: 'Jul 15 11:08', action: 'CONSENT_UPDATED', color: '#0E9F6E', detail: 'Double opt-in enabled for EU segment', actor: 'sam@brumahome.com' },
+        { time: 'Jul 14 14:50', action: 'DPA_SIGNED', color: '#7C3AED', detail: 'Data processing agreement countersigned', actor: 'sam@brumahome.com' },
+        { time: 'Jul 12 08:30', action: 'SUPPRESSION', color: '#C2620A', detail: '412 unconsented contacts suppressed', actor: 'system' },
+        { time: 'Jul 10 16:14', action: 'POLICY_UPDATE', color: '#4F46E5', detail: 'Cookie policy v2.3 published', actor: 'lena@brumahome.com' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

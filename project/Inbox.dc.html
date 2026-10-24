@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="inbox" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <header style="display:flex;align-items:center;gap:12px;padding:16px 24px;background:#fff;border-bottom:1px solid #ECEDF4">
+      <div>
+        <h1 style="margin:0;font-size:18px;font-weight:800;color:#14152A;letter-spacing:-.3px">Omnichannel Inbox</h1>
+        <p style="margin:2px 0 0 0;font-size:12px;color:#8A8DA3;font-weight:500">One shared inbox for every channel · 12 open · 3 unassigned</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+        <span style="display:flex;align-items:center;gap:7px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;color:#0E9F6E"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:blink 1.6s ease infinite"></span>4 agents online</span>
+        <button style="background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap">+ New conversation</button>
+      </div>
+    </header>
+    <div style="flex:1;display:flex;min-height:0;overflow-x:auto">
+      <div style="width:320px;border-right:1px solid #ECEDF4;background:#fff;display:flex;flex-direction:column">
+        <div style="display:flex;gap:5px;padding:12px 14px;flex-wrap:wrap;border-bottom:1px solid #F3F3FA">
+          <sc-for list="{{ channels }}" as="c" hint-placeholder-count="8">
+            <button onClick="{{ c.onClick }}" style="display:flex;align-items:center;gap:6px;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:99px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.glyph }} {{ c.label }}<sc-if value="{{ c.count }}" hint-placeholder-val="{{ false }}"><span style="background:{{ c.badgeBg }};color:{{ c.badgeColor }};border-radius:99px;padding:0 6px;font-size:10px">{{ c.count }}</span></sc-if></button>
+          </sc-for>
+        </div>
+        <div style="flex:1;overflow-y:auto">
+          <sc-for list="{{ convos }}" as="c" hint-placeholder-count="8">
+            <div onClick="{{ c.onClick }}" style="display:flex;gap:11px;padding:13px 15px;border-bottom:1px solid #F7F7FB;cursor:pointer;background:{{ c.activeBg }};border-left:3px solid {{ c.activeBar }}" style-hover="background:#FAFAFE">
+              <div style="position:relative;flex-shrink:0">
+                <span style="width:38px;height:38px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+                <span style="position:absolute;-bottom:0;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:99px;background:{{ c.chColor }};border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:8px">{{ c.chGlyph }}</span>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:6px"><span style="font-size:12.5px;font-weight:800;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span><span style="margin-left:auto;font-size:10px;font-weight:700;color:#A5A8BD;flex-shrink:0">{{ c.time }}</span></div>
+                <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">{{ c.preview }}</div>
+                <div style="display:flex;align-items:center;gap:5px;margin-top:5px">
+                  <span style="font-size:9px;font-weight:800;color:{{ c.tagColor }};background:{{ c.tagBg }};border-radius:99px;padding:2px 7px">{{ c.tag }}</span>
+                  <sc-if value="{{ c.unread }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;width:8px;height:8px;border-radius:99px;background:#4F46E5"></span></sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="flex:1;min-width:380px;display:flex;flex-direction:column;background:#F8F8FC">
+        <div style="display:flex;align-items:center;gap:11px;padding:13px 20px;background:#fff;border-bottom:1px solid #ECEDF4">
+          <span style="width:34px;height:34px;border-radius:99px;background:{{ activeTint }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:{{ activeFg }}">{{ activeInitials }}</span>
+          <div><div style="font-size:13.5px;font-weight:800;color:#14152A">{{ activeName }}</div><div style="font-size:11px;color:#8A8DA3;font-weight:600">{{ activeSub }}</div></div>
+          <div style="margin-left:auto;display:flex;gap:7px">
+            <button style="border:1px solid #ECEDF4;background:#fff;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Assign</button>
+            <button style="border:1px solid #ECEDF4;background:#fff;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">✨ Summary</button>
+            <a href="Customer360.dc.html" style="border:1px solid #ECEDF4;background:#fff;border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:800;color:#3C3F55" style-hover="border-color:#D9DBEA;color:#3C3F55">Profile</a>
+          </div>
+        </div>
+        <div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ messages }}" as="m" hint-placeholder-count="6">
+            <div style="display:flex;justify-content:{{ m.justify }};animation:msgIn .3s ease">
+              <div style="max-width:70%">
+                <div style="background:{{ m.bg }};border:1px solid {{ m.border }};border-radius:14px;padding:10px 14px;font-size:13px;font-weight:500;color:{{ m.color }};line-height:1.5">{{ m.text }}</div>
+                <div style="font-size:10px;font-weight:700;color:#A5A8BD;margin-top:3px;text-align:{{ m.align }}">{{ m.meta }}</div>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ aiSuggesting }}" hint-placeholder-val="{{ true }}">
+            <div style="background:#FBFAFF;border:1px solid #E7E0FB;border-radius:12px;padding:12px 14px">
+              <div style="font-size:10.5px;font-weight:800;color:#7C3AED;display:flex;align-items:center;gap:6px">✨ AI SUGGESTED REPLY</div>
+              <div style="font-size:12.5px;font-weight:600;color:#3C3F55;line-height:1.5;margin-top:6px">{{ aiSuggestion }}</div>
+              <div style="display:flex;gap:7px;margin-top:9px"><button onClick="{{ useAiReply }}" style="border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">Use reply</button><button style="border:1px solid #ECEDF4;background:#fff;border-radius:7px;padding:6px 13px;font-size:11px;font-weight:800;color:#8A8DA3;cursor:pointer;font-family:inherit">Regenerate</button></div>
+            </div>
+          </sc-if>
+        </div>
+        <div style="padding:14px 20px;background:#fff;border-top:1px solid #ECEDF4">
+          <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap">
+            <sc-for list="{{ savedReplies }}" as="s" hint-placeholder-count="3">
+              <button onClick="{{ s.onClick }}" style="border:1px solid #ECEDF4;background:#F8F8FC;color:#5B5E75;border-radius:99px;padding:5px 11px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">{{ s.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;background:#F8F8FC;border:1px solid #ECEDF4;border-radius:12px;padding:6px 6px 6px 15px">
+            <input ref="{{ inputRef }}" onKeyDown="{{ onKey }}" placeholder="Type a reply…" style="flex:1;border:none;outline:none;background:transparent;color:#14152A;font-size:13.5px;font-weight:600;font-family:'Manrope',sans-serif"></input>
+            <button onClick="{{ send }}" style="border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit">Send</button>
+          </div>
+        </div>
+      </div>
+      <div style="width:250px;border-left:1px solid #ECEDF4;background:#fff;padding:16px;overflow-y:auto">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#A5A8BD">Customer</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+          <sc-for list="{{ custInfo }}" as="i" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#5B5E75"><span style="font-size:13px">{{ i.glyph }}</span><span>{{ i.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ i.value }}</span></div>
+          </sc-for>
+        </div>
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#A5A8BD;margin-top:18px">Tags</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+          <sc-for list="{{ custTags }}" as="t" hint-placeholder-count="4"><span style="font-size:10px;font-weight:800;color:#5B5E75;background:#F3F3FA;border-radius:99px;padding:3px 9px">{{ t }}</span></sc-for>
+        </div>
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#A5A8BD;margin-top:18px">Recent orders</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+          <sc-for list="{{ custOrders }}" as="o" hint-placeholder-count="2">
+            <div style="border:1px solid #F3F3FA;border-radius:9px;padding:9px 11px"><div style="display:flex;font-size:11.5px;font-weight:800;color:#14152A"><span>{{ o.id }}</span><span style="margin-left:auto;color:#4F46E5">{{ o.total }}</span></div><div style="font-size:10.5px;color:#8A8DA3;font-weight:600;margin-top:2px">{{ o.items }}</div></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.state = { channel: 'all', active: 0, draft: [], aiSuggesting: true };
+  }
+  componentWillUnmount() {}
+  convoData() {
+    const ch = {
+      chat: ['💬', '#4F46E5'], email: ['✉️', '#8B5CF6'], whatsapp: ['🟢', '#0E9F6E'], messenger: ['💙', '#3B82F6'], instagram: ['📸', '#EC4899'], sms: ['📱', '#C2620A'], telegram: ['✈️', '#0EA5E9'],
+    };
+    const C = (name, channel, preview, time, tag, tagColor, tagBg, unread, tint, fg, msgs, sub) => ({ name, channel, chGlyph: ch[channel][0], chColor: ch[channel][1], preview, time, tag, tagColor, tagBg, unread, initials: name.split(' ').map(w => w[0]).join(''), tint, fg, msgs, sub });
+    const you = (text, meta) => ({ from: 'agent', text, meta });
+    const them = (text, meta) => ({ from: 'them', text, meta });
+    const ai = (text, meta) => ({ from: 'ai', text, meta });
+    return [
+      C('Maya Okafor', 'whatsapp', 'Is the Linen Duvet back in sage?', '2m', 'SALES', '#7C3AED', '#F1EBFE', true, '#F1EBFE', '#7C3AED', [
+        them('Hi! Is the Linen Duvet Set back in stock in sage?', 'WhatsApp · 10:02'),
+        ai('Yes — sage restocked this morning. Want me to send a checkout link?', 'AI agent · 10:02'),
+        them('Yes please, and do you have a discount?', 'WhatsApp · 10:03'),
+      ], 'WhatsApp · +1 ••• ••84 · VIP'),
+      C('Jonas Lindqvist', 'chat', 'Where is my order #28470?', '8m', 'SUPPORT', '#0E9F6E', '#EDF9F1', true, '#EEF0FE', '#4F46E5', [
+        them('Where is my order #28470? Ordered 3 days ago.', 'Live chat · 09:55'),
+        ai('Order #28470 shipped yesterday via DHL — arriving Thu Jul 18. Tracking: DH••4821.', 'AI agent · 09:55'),
+        them('Great, thanks!', 'Live chat · 09:56'),
+      ], 'Website live chat · Lyon, FR'),
+      C('Priya Raman', 'instagram', 'Loved the story! How much is the lamp?', '15m', 'SALES', '#7C3AED', '#F1EBFE', false, '#FFF3E8', '#C2620A', [
+        them('Loved the story! How much is the ceramic lamp? 😍', 'Instagram DM · 09:48'),
+        ai('The Ceramic Table Lamp is $110. Here\u2019s the link — free shipping this week!', 'AI agent · 09:48'),
+      ], 'Instagram DM · @priya.r'),
+      C('Tom Becker', 'email', 'Return request for towel set', '32m', 'RETURNS', '#C2620A', '#FFF3E8', false, '#EDF9F1', '#0E9F6E', [
+        them('I\u2019d like to return the waffle towel set — wrong color.', 'Email · 09:30'),
+        ai('No problem, Tom. I\u2019ve created return RMA-2841 with a prepaid label attached.', 'AI agent · 09:31'),
+      ], 'Email · tbecker@gmx.de'),
+      C('Alice Fontaine', 'messenger', 'Do you ship to France?', '1h', 'SALES', '#7C3AED', '#F1EBFE', false, '#FDEDED', '#E02424', [
+        them('Do you ship to France? 🇫🇷', 'Messenger · 09:02'),
+        ai('Yes! We ship to France in 4–6 days. Standard shipping is €9, free over €120.', 'AI agent · 09:02'),
+      ], 'Facebook Messenger'),
+      C('Sofia Ricci', 'sms', 'YES to the 15% offer', '2h', 'CONVERTED', '#0E9F6E', '#EDF9F1', false, '#EDF9F1', '#0E9F6E', [
+        them('YES to the 15% offer', 'SMS · 08:10'),
+        you('Perfect — code VIP15 applied. Your cart total is now $204. Checkout: link', 'You · 08:11'),
+        them('Just ordered, thank you!', 'SMS · 08:14'),
+      ], 'SMS · +39 ••• ••02'),
+      C('David Chen', 'telegram', 'Any new kitchen arrivals?', '3h', 'SALES', '#7C3AED', '#F1EBFE', false, '#EEF0FE', '#4F46E5', [
+        them('Any new kitchen arrivals this month?', 'Telegram · 07:20'),
+        ai('Yes — the Stoneware Collection just landed. Want a quick carousel of the top 3?', 'AI agent · 07:20'),
+      ], 'Telegram · @dchen'),
+    ];
+  }
+  renderVals() {
+    const chFilters = [
+      ['all', 'All', '📥', '12'], ['chat', 'Chat', '💬', '3'], ['email', 'Email', '✉️', '2'], ['whatsapp', 'WhatsApp', '🟢', '4'],
+      ['messenger', 'Messenger', '💙', '1'], ['instagram', 'Instagram', '📸', '1'], ['sms', 'SMS', '📱', '1'], ['telegram', 'Telegram', '✈️', ''],
+    ];
+    const channels = chFilters.map(c => ({ id: c[0], label: c[1], glyph: c[2], count: c[3], onClick: () => this.setState({ channel: c[0], active: 0 }),
+      border: this.state.channel === c[0] ? '#4F46E5' : '#ECEDF4', bg: this.state.channel === c[0] ? '#EEF0FE' : '#fff', color: this.state.channel === c[0] ? '#4F46E5' : '#8A8DA3',
+      badgeBg: this.state.channel === c[0] ? '#4F46E5' : '#EFEFF7', badgeColor: this.state.channel === c[0] ? '#fff' : '#8A8DA3' }));
+    let list = this.convoData();
+    if (this.state.channel !== 'all') list = list.filter(c => c.channel === this.state.channel);
+    const activeIdx = Math.min(this.state.active, Math.max(0, list.length - 1));
+    const convos = list.map((c, i) => ({ ...c, onClick: () => this.setState({ active: i, aiSuggesting: true, draft: [] }),
+      activeBg: i === activeIdx ? '#F5F4FE' : '#fff', activeBar: i === activeIdx ? '#4F46E5' : 'transparent' }));
+    const active = list[activeIdx] || this.convoData()[0];
+    const baseMsgs = active.msgs.map(m => ({
+      justify: m.from === 'them' ? 'flex-start' : 'flex-end', align: m.from === 'them' ? 'left' : 'right',
+      bg: m.from === 'them' ? '#fff' : m.from === 'ai' ? '#F1EBFE' : 'linear-gradient(135deg,#4F46E5,#8B5CF6)',
+      border: m.from === 'them' ? '#ECEDF4' : m.from === 'ai' ? '#E0D7FE' : 'transparent',
+      color: m.from === 'agent' ? '#fff' : '#14152A', text: (m.from === 'ai' ? '✨ ' : '') + m.text, meta: m.meta }));
+    const draftMsgs = this.state.draft.map(t => ({ justify: 'flex-end', align: 'right', bg: 'linear-gradient(135deg,#4F46E5,#8B5CF6)', border: 'transparent', color: '#fff', text: t, meta: 'You · just now' }));
+    const suggestions = {
+      whatsapp: 'Yes, sage is back! With code LINEN10 you get 10% off. Here\u2019s your checkout link — ships free this week 🌿',
+      chat: 'You\u2019re all set — your order arrives Thursday. Anything else I can help with?',
+      instagram: 'It\u2019s $110 and shipping is free this week! Want me to send a direct checkout link?',
+      email: 'Your return is confirmed — just drop it off with the attached label. Refund lands in 3–5 days.',
+      messenger: 'Yes, we ship across France in 4–6 days. Would you like product recommendations?',
+      sms: 'Awesome! Let me know if you need anything else 💜',
+      telegram: 'Here are the top 3 new stoneware pieces — tap any to view and buy.',
+    };
+    const useReply = suggestions[active.channel] || suggestions.chat;
+    return {
+      channels, convos,
+      activeName: active.name, activeSub: active.sub, activeInitials: active.initials, activeTint: active.tint, activeFg: active.fg,
+      messages: [...baseMsgs, ...draftMsgs],
+      aiSuggesting: this.state.aiSuggesting && this.state.draft.length === 0, aiSuggestion: useReply,
+      useAiReply: () => this.setState(s => ({ draft: [...s.draft, useReply], aiSuggesting: false })),
+      savedReplies: [
+        { label: '👋 Greeting', onClick: () => this.pushDraft('Hi! Thanks for reaching out — how can I help today?') },
+        { label: '🚚 Shipping info', onClick: () => this.pushDraft('We ship in 3–5 business days, free over $120.') },
+        { label: '🎟️ Send coupon', onClick: () => this.pushDraft('Here\u2019s 10% off with code LINEN10 — valid for 3 days.') },
+      ],
+      scrollRef: (el) => { this.scrollEl = el; if (el) setTimeout(() => el.scrollTop = el.scrollHeight, 40); },
+      inputRef: (el) => { this.inputEl = el; },
+      onKey: (e) => { if (e.key === 'Enter' && e.target.value.trim()) { this.pushDraft(e.target.value.trim()); e.target.value = ''; } },
+      send: () => { if (this.inputEl && this.inputEl.value.trim()) { this.pushDraft(this.inputEl.value.trim()); this.inputEl.value = ''; } },
+      custInfo: [
+        { glyph: '📍', label: 'Location', value: active.channel === 'whatsapp' ? 'Portland, US' : 'Lyon, FR' },
+        { glyph: '💰', label: 'Lifetime value', value: '$3,840' }, { glyph: '🛒', label: 'Orders', value: '24' },
+        { glyph: '🤖', label: 'AI intent', value: '87%' }, { glyph: '⭐', label: 'CSAT', value: '4.9' }, { glyph: '🕑', label: 'First seen', value: 'Jan 2024' },
+      ],
+      custTags: ['vip', 'bedding', 'sms-optin', 'high-intent'],
+      custOrders: [
+        { id: '#28102', total: '$342', items: 'Linen Duvet + 2 items' }, { id: '#27418', total: '$96', items: 'Waffle Towel Set ×2' },
+      ],
+    };
+  }
+  pushDraft(t) { this.setState(s => ({ draft: [...s.draft, t], aiSuggesting: false })); setTimeout(() => { if (this.scrollEl) this.scrollEl.scrollTop = this.scrollEl.scrollHeight; }, 50); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="cdp" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:18px 0 16px 0;gap:10px">
+      <span style="font-size:12.5px;font-weight:700;color:#8A8DA3">Universal CDP</span><span style="color:#C4C6D4">/</span><span style="font-size:12.5px;font-weight:800;color:#14152A">Unified profile</span>
+      <span style="margin-left:auto;font-size:11px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:4px 11px">1 identity · merged from 6 plugins</span>
+    </header>
+
+    <section style="background:linear-gradient(120deg,#4F46E5,#7C3AED);border-radius:16px;padding:22px 26px;color:#fff;display:flex;align-items:center;gap:18px">
+      <span style="width:60px;height:60px;border-radius:99px;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">EM</span>
+      <div>
+        <div style="display:flex;align-items:center;gap:9px"><span style="font-size:20px;font-weight:800">Elena Moreau</span><span style="font-size:10px;font-weight:800;background:rgba(255,255,255,.2);border-radius:99px;padding:3px 10px">VIP · MULTI-PRODUCT</span></div>
+        <div style="font-size:12px;font-weight:600;opacity:.85;margin-top:3px">elena.moreau@gmail.com · Lyon, France · unified across WooCommerce, Tutor LMS, MemberPress, Amelia, Fluent Support, GiveWP</div>
+        <div style="display:flex;gap:6px;margin-top:9px">
+          <sc-for list="{{ pluginBadges }}" as="b" hint-placeholder-count="6"><span style="font-size:10px;font-weight:800;background:rgba(255,255,255,.16);border-radius:99px;padding:3px 9px">{{ b }}</span></sc-for>
+        </div>
+      </div>
+      <div style="margin-left:auto;text-align:center"><div style="font-size:10px;font-weight:800;opacity:.75">UNIFIED LTV</div><div style="font-size:28px;font-weight:800;margin-top:2px">$5,240</div></div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:14px">
+      <sc-for list="{{ scores }}" as="s" hint-placeholder-count="6">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:13px 14px">
+          <div style="font-size:9.5px;font-weight:800;color:#8A8DA3;letter-spacing:.2px">{{ s.label }}</div>
+          <div style="font-size:19px;font-weight:800;color:{{ s.color }};margin-top:6px">{{ s.value }}</div>
+          <div style="height:5px;border-radius:99px;background:#F3F3FA;margin-top:7px"><div style="height:5px;border-radius:99px;background:{{ s.color }};width:{{ s.width }}"></div></div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Cross-plugin relationship timeline</span>
+          <div style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap">
+            <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.onClick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:99px;padding:4px 10px;font-size:10.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ f.label }}</button></sc-for>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <sc-for list="{{ timeline }}" as="e" hint-placeholder-count="10">
+            <div style="display:flex;gap:12px;padding-bottom:15px">
+              <div style="display:flex;flex-direction:column;align-items:center"><span style="width:30px;height:30px;border-radius:9px;background:{{ e.tint }};display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">{{ e.glyph }}</span><span style="width:1.5px;flex:1;background:#EFEFF7;margin-top:5px"></span></div>
+              <div style="flex:1;min-width:0;padding-top:2px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="font-size:12.5px;font-weight:700;color:#14152A">{{ e.title }}</span><span style="font-size:9px;font-weight:800;color:{{ e.plColor }};background:{{ e.plBg }};border-radius:99px;padding:2px 7px">{{ e.plugin }}</span></div>
+                <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:2px;line-height:1.4">{{ e.detail }}</div>
+                <div style="font-size:10.5px;color:#A5A8BD;font-weight:700;margin-top:2px">{{ e.time }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff">
+          <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">🔮</span><span style="font-size:13px;font-weight:800">AI cross-plugin insight</span></div>
+          <div style="font-size:12.5px;font-weight:600;color:#E6E4F5;line-height:1.55;margin-top:10px">Elena completed the Ceramics 101 course and books studio time monthly, but hasn't purchased the matching tool kit. Predicted 89% to buy if offered a course-graduate bundle. Best next step: cross-sell WooCommerce → coaching appointment.</div>
+          <a href="CrossAutomation.dc.html" style="display:inline-block;margin-top:12px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:7px 13px;font-size:11.5px;font-weight:800" style-hover="background:rgba(255,255,255,.22);color:#fff">Build cross-plugin flow</a>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Records across plugins</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+            <sc-for list="{{ records }}" as="r" hint-placeholder-count="7">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;background:{{ r.tint }};display:flex;align-items:center;justify-content:center;font-size:12px">{{ r.glyph }}</span><span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ r.label }}</span><span style="font-size:12px;font-weight:800;color:#14152A">{{ r.value }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { filter: 'All' };
+  renderVals() {
+    const pl = { Woo: ['#7C3AED', '#F1EBFE'], LMS: ['#0E9F6E', '#EDF9F1'], Member: ['#C2620A', '#FFF3E8'], Booking: ['#4F46E5', '#EEF0FE'], Support: ['#E02424', '#FDEDED'], Give: ['#7C3AED', '#F1EBFE'], Email: ['#4F46E5', '#EEF0FE'] };
+    const T = (title, detail, time, plugin, plKey, glyph, tint, cat) => ({ title, detail, time, plugin, plColor: pl[plKey][0], plBg: pl[plKey][1], glyph, tint, cat });
+    const all = [
+      T('Purchased Linen Duvet Set', 'Order #28102 · $342.00', '2 days ago', 'WooCommerce', 'Woo', '🛒', '#F1EBFE', 'purchase'),
+      T('Completed Ceramics 101', 'Certificate earned · 98% quiz avg', '4 days ago', 'Tutor LMS', 'LMS', '🎓', '#EDF9F1', 'course'),
+      T('Booked studio session', 'Amelia · Jul 22, 3:00 PM', '5 days ago', 'Amelia', 'Booking', '📅', '#EEF0FE', 'booking'),
+      T('Renewed Gold membership', 'MemberPress · $120/yr', '1 week ago', 'MemberPress', 'Member', '🎫', '#FFF3E8', 'member'),
+      T('Opened “VIP early access”', '2 clicks · Apple Mail', '1 week ago', 'Email', 'Email', '📬', '#EEF0FE', 'email'),
+      T('Support ticket resolved', 'Shipping question · CSAT 5/5', '2 weeks ago', 'Fluent Support', 'Support', '🎧', '#FDEDED', 'support'),
+      T('Donated to studio fund', 'GiveWP · $50 one-time', '3 weeks ago', 'GiveWP', 'Give', '❤️', '#F1EBFE', 'other'),
+      T('Enrolled in Glazing Masterclass', 'Tutor LMS · in progress 40%', '3 weeks ago', 'Tutor LMS', 'LMS', '🎓', '#EDF9F1', 'course'),
+      T('Submitted workshop inquiry', 'Fluent Forms · group booking', '1 month ago', 'Fluent Forms', 'Support', '📝', '#FDEDED', 'other'),
+      T('First order — Pour-Over Kettle', 'Order #25811 · $75.00', '2 months ago', 'WooCommerce', 'Woo', '🛒', '#F1EBFE', 'purchase'),
+    ];
+    const map = { All: () => true, Purchases: e => e.cat === 'purchase', Courses: e => e.cat === 'course', Bookings: e => e.cat === 'booking', Support: e => e.cat === 'support' };
+    const timeline = all.filter(map[this.state.filter] || map.All);
+    const filters = ['All', 'Purchases', 'Courses', 'Bookings', 'Support'].map(f => ({ label: f, onClick: () => this.setState({ filter: f }), border: this.state.filter === f ? '#4F46E5' : '#ECEDF4', bg: this.state.filter === f ? '#EEF0FE' : '#fff', color: this.state.filter === f ? '#4F46E5' : '#8A8DA3' }));
+    return {
+      pluginBadges: ['WooCommerce', 'Tutor LMS', 'MemberPress', 'Amelia', 'Fluent Support', 'GiveWP'],
+      scores: [
+        { label: 'AI SCORE', value: '94', color: '#7C3AED', width: '94%' },
+        { label: 'PURCHASE INTENT', value: '89%', color: '#0E9F6E', width: '89%' },
+        { label: 'LEAD SCORE', value: '82', color: '#4F46E5', width: '82%' },
+        { label: 'ENGAGEMENT', value: '91', color: '#4F46E5', width: '91%' },
+        { label: 'CHURN RISK', value: '7%', color: '#0E9F6E', width: '7%' },
+        { label: 'LTV', value: '$5.2k', color: '#14152A', width: '80%' },
+      ],
+      filters, timeline,
+      records: [
+        { glyph: '🛒', tint: '#F1EBFE', label: 'WooCommerce orders', value: '24' },
+        { glyph: '🎓', tint: '#EDF9F1', label: 'Course enrollments', value: '3' },
+        { glyph: '🎫', tint: '#FFF3E8', label: 'Memberships', value: 'Gold' },
+        { glyph: '📅', tint: '#EEF0FE', label: 'Appointments', value: '8' },
+        { glyph: '🎧', tint: '#FDEDED', label: 'Support tickets', value: '2' },
+        { glyph: '❤️', tint: '#F1EBFE', label: 'Donations', value: '$180' },
+        { glyph: '📝', tint: '#EEF0FE', label: 'Form submissions', value: '5' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

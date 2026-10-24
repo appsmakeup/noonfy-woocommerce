@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="calendar" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0;gap:12px">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Campaign Calendar</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">July 2026 · drag campaigns to reschedule</p>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:4px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:3px">
+        <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+          <button onClick="{{ v.onClick }}" style="border:none;background:{{ v.bg }};color:{{ v.color }};border-radius:7px;padding:6px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">{{ v.label }}</button>
+        </sc-for>
+      </div>
+      <a href="Campaigns.dc.html#builder" style="background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:800;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92;color:#fff">+ Schedule</a>
+    </header>
+
+    <section style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+        <span style="display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:#5B5E75"><span style="width:10px;height:10px;border-radius:3px;background:{{ l.color }}"></span>{{ l.label }}</span>
+      </sc-for>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:7px;background:#FFF6E8;border:1px solid #F8DFC5;border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;color:#C2620A">⚠️ 1 conflict · 2 holiday tips</span>
+    </section>
+
+    <sc-if value="{{ isMonth }}" hint-placeholder-val="{{ true }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid #F3F3FA">
+          <sc-for list="{{ dow }}" as="d" hint-placeholder-count="7">
+            <div style="padding:10px;text-align:center;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:#A5A8BD">{{ d }}</div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr)">
+          <sc-for list="{{ cells }}" as="c" hint-placeholder-count="35">
+            <div onDragOver="{{ c.onDragOver }}" onDrop="{{ c.onDrop }}" style="min-height:104px;border-right:1px solid #F3F3FA;border-bottom:1px solid #F3F3FA;padding:6px 7px;background:{{ c.bg }};position:relative">
+              <div style="display:flex;align-items:center;gap:5px"><span style="font-size:11.5px;font-weight:800;color:{{ c.numColor }}">{{ c.day }}</span><sc-if value="{{ c.holiday }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;font-weight:800;color:#C2620A;background:#FFF3E8;border-radius:5px;padding:1px 5px">{{ c.holiday }}</span></sc-if></div>
+              <div style="display:flex;flex-direction:column;gap:4px;margin-top:5px">
+                <sc-for list="{{ c.events }}" as="e" hint-placeholder-count="1">
+                  <div draggable="true" onDragStart="{{ e.onDragStart }}" style="background:{{ e.bg }};border-left:3px solid {{ e.accent }};border-radius:6px;padding:4px 7px;cursor:grab" title="{{ e.title }}">
+                    <div style="font-size:10.5px;font-weight:800;color:{{ e.accent }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.title }}</div>
+                    <div style="font-size:9px;font-weight:700;color:#8A8DA3">{{ e.time }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isWeek }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13px;font-weight:800;color:#14152A;margin-bottom:14px">Week of July 13 — 19</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ weekRows }}" as="w" hint-placeholder-count="7">
+            <div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid #F7F7FB;padding-bottom:9px">
+              <span style="width:70px;font-size:12px;font-weight:800;color:{{ w.dayColor }}">{{ w.day }}</span>
+              <div style="flex:1;display:flex;gap:7px;flex-wrap:wrap">
+                <sc-for list="{{ w.events }}" as="e" hint-placeholder-count="1">
+                  <span style="background:{{ e.bg }};border-left:3px solid {{ e.accent }};border-radius:7px;padding:5px 11px;font-size:11.5px;font-weight:800;color:{{ e.accent }}">{{ e.title }} · {{ e.time }}</span>
+                </sc-for>
+                <sc-if value="{{ w.empty }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;font-weight:600;color:#C4C6D4">No sends scheduled</span></sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isDay }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13px;font-weight:800;color:#14152A;margin-bottom:14px">Thursday, July 16</div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ dayHours }}" as="h" hint-placeholder-count="6">
+              <div style="display:flex;gap:12px;border-top:1px solid #F3F3FA;padding:9px 0">
+                <span style="width:52px;font-size:11px;font-weight:800;color:#A5A8BD">{{ h.time }}</span>
+                <div style="flex:1">
+                  <sc-if value="{{ h.event }}" hint-placeholder-val="{{ false }}"><div style="background:{{ h.bg }};border-left:3px solid {{ h.accent }};border-radius:7px;padding:8px 11px"><div style="font-size:12px;font-weight:800;color:#14152A">{{ h.title }}</div><div style="font-size:10.5px;font-weight:700;color:#8A8DA3">{{ h.audience }}</div></div></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13px;font-weight:800;color:#14152A">Automation schedule today</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+            <sc-for list="{{ autoSchedule }}" as="a" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ a.glyph }}</span><span style="flex:1"><span style="display:block;font-size:12px;font-weight:700;color:#14152A">{{ a.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ a.detail }}</span></span><span style="font-size:11px;font-weight:800;color:#8A8DA3">{{ a.count }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const t = { c: ['#4F46E5', '#EEF0FE'], f: ['#EF4444', '#FDEDED'], s: ['#0E9F6E', '#EDF9F1'], p: ['#7C3AED', '#F1EBFE'] };
+    this.t = t;
+    this.state = { view: 'month',
+      events: {
+        3: [['Summer Kickoff', '10:00', 's']],
+        7: [['Weekend Restock', '09:00', 'c']],
+        11: [['Mid-Month Digest', '10:00', 'c']],
+        14: [['July Flash Sale', '12:00', 'f']],
+        16: [['Summer Linen Drop', '10:00', 's'], ['VIP Early Access', '08:00', 'p']],
+        19: [['Lookbook Reveal', '11:00', 'c']],
+        23: [['Clearance Preview', '10:00', 'f']],
+        26: [['New Arrivals', '09:00', 'c']],
+        30: [['Month-End Loyalty', '10:00', 'p']],
+      },
+    };
+  }
+  titleOf(e) { return e[0]; }
+  renderVals() {
+    const t = this.t;
+    const views = [['Month', 'month'], ['Week', 'week'], ['Day', 'day']].map(v => ({
+      label: v[0], onClick: () => this.setState({ view: v[1] }),
+      bg: this.state.view === v[1] ? '#4F46E5' : 'transparent', color: this.state.view === v[1] ? '#fff' : '#8A8DA3' }));
+    const holidays = { 4: 'July 4th', 20: 'Moon Day' };
+    const cells = [];
+    for (let i = 0; i < 2; i++) cells.push({ day: 29 + i, numColor: '#C4C6D4', bg: '#FBFBFE', events: [], holiday: '', onDragOver: e => e.preventDefault(), onDrop: () => {} });
+    cells.push({ day: 1, numColor: '#C4C6D4', bg: '#FBFBFE', events: [], holiday: '', onDragOver: e => e.preventDefault(), onDrop: () => {} });
+    for (let d = 1; d <= 31; d++) {
+      const evs = (this.state.events[d] || []).map((e, idx) => ({ title: e[0], time: e[1], accent: t[e[2]][0], bg: t[e[2]][1],
+        onDragStart: (ev) => { this.dragFrom = d; this.dragIdx = idx; } }));
+      cells.push({ day: d, numColor: d === 16 ? '#4F46E5' : '#14152A', bg: d === 16 ? '#F7F6FE' : '#fff', holiday: holidays[d] || '', events: evs,
+        onDragOver: (ev) => ev.preventDefault(),
+        onDrop: () => {
+          if (this.dragFrom == null) return;
+          this.setState(s => {
+            const events = { ...s.events };
+            const moving = events[this.dragFrom][this.dragIdx];
+            events[this.dragFrom] = events[this.dragFrom].filter((_, i) => i !== this.dragIdx);
+            if (!events[this.dragFrom].length) delete events[this.dragFrom];
+            events[d] = (events[d] || []).concat([moving]);
+            return { events };
+          });
+          this.dragFrom = null;
+        } });
+    }
+    const weekDays = [['Mon 13', 13], ['Tue 14', 14], ['Wed 15', 15], ['Thu 16', 16], ['Fri 17', 17], ['Sat 18', 18], ['Sun 19', 19]];
+    const weekRows = weekDays.map(wd => {
+      const evs = (this.state.events[wd[1]] || []).map(e => ({ title: e[0], time: e[1], accent: t[e[2]][0], bg: t[e[2]][1] }));
+      return { day: wd[0], dayColor: wd[1] === 16 ? '#4F46E5' : '#14152A', events: evs, empty: evs.length === 0 };
+    });
+    const dayHours = [
+      { time: '08:00', event: 1, title: 'VIP Early Access', audience: 'VIP segment · 214', bg: '#F1EBFE', accent: '#7C3AED' },
+      { time: '09:00', event: 0 }, 
+      { time: '10:00', event: 1, title: 'Summer Linen Drop', audience: 'Engaged 30d · 18,204', bg: '#EDF9F1', accent: '#0E9F6E' },
+      { time: '11:00', event: 0 },
+      { time: '12:00', event: 0 },
+      { time: '14:00', event: 0 },
+    ];
+    return {
+      views, isMonth: this.state.view === 'month', isWeek: this.state.view === 'week', isDay: this.state.view === 'day',
+      legend: [{ label: 'Campaign', color: '#4F46E5' }, { label: 'Flash sale', color: '#EF4444' }, { label: 'Seasonal', color: '#0E9F6E' }, { label: 'VIP / loyalty', color: '#7C3AED' }],
+      dow: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
+      cells, weekRows, dayHours,
+      autoSchedule: [
+        { glyph: '🛒', tint: '#EEF0FE', name: 'Cart Recovery', detail: 'Runs continuously', count: '~148/day' },
+        { glyph: '👋', tint: '#F1EBFE', name: 'Welcome Series', detail: 'On new subscriber', count: '~92/day' },
+        { glyph: '👀', tint: '#EDF9F1', name: 'Browse Abandonment', detail: 'On product view', count: '~210/day' },
+        { glyph: '📦', tint: '#FFF3E8', name: 'Back In Stock', detail: 'On restock event', count: '~40/day' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

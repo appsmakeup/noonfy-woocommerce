@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="{{ sidebarKey }}" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px;display:flex;align-items:center;gap:9px">{{ pageTitle }}<span style="font-size:10px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 9px;letter-spacing:.5px">BETA</span></h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="7">
+        <a href="{{ tb.href }}" style="padding:9px 13px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="background:linear-gradient(120deg,#4F46E5 0%,#7C3AED 55%,#A855F7 100%);border-radius:16px;padding:24px 28px;color:#fff;display:flex;align-items:center;gap:24px">
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:800;letter-spacing:1px;opacity:.8">✨ THIS WEEK'S AI IMPACT</div>
+            <div style="font-size:22px;font-weight:800;margin-top:8px;letter-spacing:-.3px">AI decisions generated $14,280 in extra revenue</div>
+            <div style="font-size:13px;font-weight:600;opacity:.85;margin-top:6px;line-height:1.55">Send-time optimization, product picks and smart segments across 41,200 sends.</div>
+          </div>
+          <div style="display:flex;gap:18px">
+            <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:13px;padding:14px 18px;text-align:center"><div style="font-size:20px;font-weight:800">+21%</div><div style="font-size:10px;font-weight:700;opacity:.8;margin-top:2px">OPEN LIFT</div></div>
+            <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:13px;padding:14px 18px;text-align:center"><div style="font-size:20px;font-weight:800">+34%</div><div style="font-size:10px;font-weight:700;opacity:.8;margin-top:2px">CLICK LIFT</div></div>
+            <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:13px;padding:14px 18px;text-align:center"><div style="font-size:20px;font-weight:800">2,861</div><div style="font-size:10px;font-weight:700;opacity:.8;margin-top:2px">READY TO BUY</div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
+          <sc-for list="{{ aiCards }}" as="c" hint-placeholder-count="6">
+            <a href="{{ c.href }}" style="background:#fff;border:1px solid #ECEDF4;border-radius:15px;padding:18px 20px;color:#14152A;display:block;transition:box-shadow .15s ease,transform .15s ease" style-hover="box-shadow:0 10px 28px rgba(20,21,42,.08);transform:translateY(-2px);color:#14152A">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:36px;height:36px;border-radius:10px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:16px">{{ c.glyph }}</span><span style="font-size:13.5px;font-weight:800">{{ c.name }}</span></div>
+              <p style="margin:10px 0 0 0;font-size:12px;color:#8A8DA3;font-weight:600;line-height:1.55">{{ c.desc }}</p>
+              <div style="font-size:11.5px;font-weight:800;color:#7C3AED;margin-top:12px">{{ c.stat }}</div>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isSubject }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Generate subject lines</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:2px">Describe the email — the model writes options tuned to your audience.</div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">What's the email about?</div>
+          <textarea ref="{{ subjectInput }}" style="width:100%;height:80px;border:1px solid #ECEDF4;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:600;font-family:'Manrope',sans-serif;color:#14152A;outline:none;background:#F8F8FC;resize:none">Summer linen collection launch, 6 new colors, free shipping this week</textarea>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <sc-for list="{{ tones }}" as="t" hint-placeholder-count="4">
+              <button onClick="{{ t.onClick }}" style="border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};border-radius:99px;padding:5px 13px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ t.label }}</button>
+            </sc-for>
+          </div>
+          <button onClick="{{ generate }}" style="margin-top:16px;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:10px;padding:11px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">✨ Generate 5 options</button>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Results</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:#A5A8BD">Predicted open rate</span></div>
+          <sc-if value="{{ generating }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <div style="height:52px;border-radius:11px;background:#F3F3FA;animation:pulse 1.2s ease infinite"></div>
+              <div style="height:52px;border-radius:11px;background:#F3F3FA;animation:pulse 1.2s ease .15s infinite"></div>
+              <div style="height:52px;border-radius:11px;background:#F3F3FA;animation:pulse 1.2s ease .3s infinite"></div>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+            <sc-for list="{{ subjects }}" as="s" hint-placeholder-count="5">
+              <div style="border:1px solid #ECEDF4;border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:11px" style-hover="border-color:#C7C3F5;background:#FBFAFF">
+                <span style="flex:1;font-size:13px;font-weight:700;color:#14152A">{{ s.text }}</span>
+                <span style="font-size:11.5px;font-weight:800;color:{{ s.color }};background:{{ s.bg }};border-radius:99px;padding:3px 9px">{{ s.score }}</span>
+                <a href="Campaigns.dc.html#builder" style="font-size:11.5px;font-weight:800">Use</a>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isWriter }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:.9fr 1.1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">AI Content Writer</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:2px">Draft full email copy in your brand voice.</div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">Brief</div>
+          <textarea style="width:100%;height:100px;border:1px solid #ECEDF4;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:600;font-family:'Manrope',sans-serif;color:#14152A;outline:none;background:#F8F8FC;resize:none">Win-back email for customers inactive 90+ days. Warm, no hard sell. Mention what's new and a 20% code COMEBACK20.</textarea>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:12px;margin-bottom:5px">Voice</div>
+          <div style="border:1px solid #ECEDF4;border-radius:9px;padding:9px 11px;font-size:12px;font-weight:700;color:#14152A;background:#F8F8FC">Bruma Home — calm, warm, confident</div>
+          <button onClick="{{ write }}" style="margin-top:16px;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:10px;padding:11px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">✨ Write draft</button>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Draft</span><a href="Campaigns.dc.html#builder" style="margin-left:auto;font-size:12px;font-weight:800">Open in builder →</a></div>
+          <sc-if value="{{ writing }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px"><div style="height:14px;width:60%;border-radius:6px;background:#F3F3FA;animation:pulse 1.2s ease infinite"></div><div style="height:11px;border-radius:6px;background:#F3F3FA;animation:pulse 1.2s ease .1s infinite"></div><div style="height:11px;border-radius:6px;background:#F3F3FA;animation:pulse 1.2s ease .2s infinite"></div><div style="height:11px;width:80%;border-radius:6px;background:#F3F3FA;animation:pulse 1.2s ease .3s infinite"></div></div>
+          </sc-if>
+          <sc-if value="{{ draftReady }}" hint-placeholder-val="{{ true }}">
+            <div style="border:1px solid #F3F3FA;border-radius:12px;padding:18px 20px;margin-top:14px">
+              <div style="font-size:15px;font-weight:800;color:#14152A">It's been a while — and we kept your favorites</div>
+              <p style="font-size:13px;color:#3C3F55;font-weight:500;line-height:1.7;margin:12px 0 0 0">Hi Elena,</p>
+              <p style="font-size:13px;color:#3C3F55;font-weight:500;line-height:1.7;margin:10px 0 0 0">Since your last visit we've added six new linen colors, a stoneware collection everyone's talking about, and restocked the alpaca throws that sold out in March.</p>
+              <p style="font-size:13px;color:#3C3F55;font-weight:500;line-height:1.7;margin:10px 0 0 0">No pressure — but if something catches your eye, <strong>COMEBACK20</strong> takes 20% off through Sunday.</p>
+              <p style="font-size:13px;color:#3C3F55;font-weight:500;line-height:1.7;margin:10px 0 0 0">Warmly,<br>The Bruma Home team</p>
+            </div>
+            <div style="display:flex;gap:14px;margin-top:12px;font-size:11px;font-weight:700;color:#8A8DA3"><span>Reading time: 22s</span><span>Grade level: 6.2</span><span>Spam score: <span style="color:#0E9F6E;font-weight:800">Low</span></span></div>
+          </sc-if>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isRecommend }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Recommendation engine</span><span style="margin-left:auto;font-size:11px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 10px">MODEL HEALTHY · trained 4h ago</span></div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:2px">Per-customer picks used by 3 live flows and the Products email block.</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px">
+            <sc-for list="{{ recCustomers }}" as="rc" hint-placeholder-count="3">
+              <div style="border:1px solid #F3F3FA;border-radius:13px;padding:16px 18px">
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:30px;height:30px;border-radius:99px;background:{{ rc.tint }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:{{ rc.fg }}">{{ rc.initials }}</span><span><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ rc.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ rc.basis }}</span></span></div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                  <sc-for list="{{ rc.picks }}" as="p" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:9px;border:1px solid #ECEDF4;border-radius:9px;padding:7px 10px"><span style="font-size:13px">{{ p.glyph }}</span><span style="flex:1;font-size:11.5px;font-weight:700;color:#14152A">{{ p.name }}</span><span style="font-size:10.5px;font-weight:800;color:#7C3AED">{{ p.match }}</span></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isPredictive }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Churn risk</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:2px">Customers likely to lapse in the next 30 days</div>
+          <sc-for list="{{ churn }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #F7F7FB">
+              <span style="width:30px;height:30px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+              <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ c.reason }}</span></span>
+              <span style="font-size:12px;font-weight:800;color:#E02424">{{ c.risk }}</span>
+            </div>
+          </sc-for>
+          <a href="Builder.dc.html" style="display:block;text-align:center;margin-top:14px;border:1px solid #FDE1E1;background:#FFF8F8;border-radius:9px;padding:9px;font-size:12px;font-weight:800;color:#E02424" style-hover="background:#FDEDED;color:#E02424">Enroll all in Win Back flow</a>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Predicted to purchase</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:2px">High intent in the next 14 days · predicted revenue $38,400</div>
+          <sc-for list="{{ intent }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #F7F7FB">
+              <span style="width:30px;height:30px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+              <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ c.basket }}</span></span>
+              <span style="font-size:12px;font-weight:800;color:#0E9F6E">{{ c.prob }}</span>
+            </div>
+          </sc-for>
+          <a href="Contacts.dc.html#segments" style="display:block;text-align:center;margin-top:14px;border:1px solid #C4E9D3;background:#F7FCF9;border-radius:9px;padding:9px;font-size:12px;font-weight:800;color:#0E9F6E" style-hover="background:#EDF9F1;color:#0E9F6E">View “Ready to buy” segment</a>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isSendtime }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Best send time</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:2px">Per-subscriber optimal windows, aggregated</div>
+          <div style="display:grid;grid-template-columns:44px repeat(7,1fr);gap:4px;margin-top:16px">
+            <sc-for list="{{ stCells }}" as="c" hint-placeholder-count="30">
+              <div style="height:26px;border-radius:6px;background:{{ c.bg }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ c.color }}" title="{{ c.tip }}">{{ c.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:11px;font-weight:700;color:#8A8DA3">Less<span style="display:flex;gap:3px"><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.08)"></span><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.3)"></span><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.55)"></span><span style="width:14px;height:10px;border-radius:3px;background:rgba(99,82,229,.85)"></span></span>More engaged</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="background:linear-gradient(135deg,#4F46E5,#8B5CF6);border-radius:14px;padding:20px 22px;color:#fff">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.8px;opacity:.8">⏰ RECOMMENDATION</div>
+            <div style="font-size:19px;font-weight:800;margin-top:8px">Thursday, 10:00 AM</div>
+            <div style="font-size:12.5px;font-weight:600;opacity:.85;margin-top:5px;line-height:1.55">Your list is 2.4× more likely to open vs. your current Sunday-evening sends.</div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+            <div style="font-size:13px;font-weight:800;color:#14152A">Impact so far</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <div style="display:flex;font-size:12.5px;font-weight:700;color:#3C3F55"><span>Campaigns using AI timing</span><span style="margin-left:auto;font-weight:800;color:#14152A">8 of 12</span></div>
+              <div style="display:flex;font-size:12.5px;font-weight:700;color:#3C3F55"><span>Open-rate lift</span><span style="margin-left:auto;font-weight:800;color:#0E9F6E">+21%</span></div>
+              <div style="display:flex;font-size:12.5px;font-weight:700;color:#3C3F55"><span>Revenue lift</span><span style="margin-left:auto;font-weight:800;color:#0E9F6E">+$6,120</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isSmartseg }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+        <sc-for list="{{ smartSegs }}" as="s" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="width:36px;height:36px;border-radius:10px;background:#F1EBFE;display:flex;align-items:center;justify-content:center;font-size:16px">{{ s.glyph }}</span><span style="flex:1;font-size:13.5px;font-weight:800;color:#14152A">{{ s.name }}</span><span style="font-size:9.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 8px">AI-DISCOVERED</span></div>
+            <p style="margin:11px 0 0 0;font-size:12.5px;color:#5B5E75;font-weight:600;line-height:1.6">{{ s.insight }}</p>
+            <div style="display:flex;align-items:center;gap:16px;margin-top:14px">
+              <span style="font-size:19px;font-weight:800;color:#14152A">{{ s.size }}</span>
+              <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">customers · {{ s.value }}</span>
+              <a href="Contacts.dc.html#segments" style="margin-left:auto;font-size:12px;font-weight:800">Create segment →</a>
+            </div>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#home').slice(1), tone: 'Playful', generating: false, generated: false, writing: false, written: true };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#home').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearTimeout(this.tm); }
+  renderVals() {
+    const valid = ['home', 'subject', 'writer', 'recommend', 'predictive', 'sendtime', 'smartseg'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'home';
+    const titles = {
+      home: ['AI Center', 'Every model working on your store, in one place'],
+      subject: ['AI Subject Generator', 'Subject lines scored against your list history'],
+      writer: ['AI Content Writer', 'Full email drafts in your brand voice'],
+      recommend: ['AI Product Recommendations', 'Per-customer picks from the recommendation engine'],
+      predictive: ['Predictive Customers', 'Churn risk and purchase intent, refreshed daily'],
+      sendtime: ['Best Send Time', 'Per-subscriber timing optimization'],
+      smartseg: ['Smart Segments', 'Audiences the model found on its own'],
+    };
+    const tabs = [['Overview', '#home'], ['Subject Generator', '#subject'], ['Content Writer', '#writer'], ['Recommendations', '#recommend'], ['Predictive', '#predictive'], ['Send Time', '#sendtime'], ['Smart Segments', '#smartseg']].map(t => {
+      const key = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === key ? 800 : 600, color: page === key ? '#4F46E5' : '#8A8DA3', border: page === key ? '#4F46E5' : 'transparent' };
+    });
+    const subjectSets = {
+      Playful: [
+        ['Six new linens walked into your inbox ☀️', 44], ['Your bed called. It wants the new colors.', 42],
+        ['Linen season is officially open', 39], ['New: 6 colors of \u201cnever getting up again\u201d', 38], ['Free shipping + new linen. That\u2019s it, that\u2019s the email.', 36],
+      ],
+      Direct: [
+        ['New linen collection: 6 colors, free shipping', 41], ['The Summer Linen Drop is live', 40],
+        ['6 new linen colors — ships free this week', 39], ['Now available: summer linen in 6 shades', 35], ['Linen restock + free shipping ends Sunday', 34],
+      ],
+      Urgent: [
+        ['Free shipping on new linen ends Sunday', 43], ['48 hours: the linen drop ships free', 41],
+        ['Sage is already selling out', 40], ['Last call for free shipping on new linen', 37], ['The linen drop won\u2019t wait', 33],
+      ],
+      Curious: [
+        ['We\u2019ve never made a color like this', 45], ['The linen shade 4,000 people waitlisted', 43],
+        ['Guess which color sold out first', 41], ['Something new for the best room in your house', 36], ['You haven\u2019t seen linen like this', 34],
+      ],
+    };
+    const subjects = (this.state.generated ? subjectSets[this.state.tone] : subjectSets.Playful).map(s => ({
+      text: s[0], score: s[1] + '%', color: s[1] >= 42 ? '#0E9F6E' : s[1] >= 37 ? '#C2620A' : '#8A8DA3',
+      bg: s[1] >= 42 ? '#EDF9F1' : s[1] >= 37 ? '#FFF3E8' : '#F3F3FA' }));
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const hours = ['6a', '8a', '10a', '12p', '2p', '4p', '6p', '8p'];
+    const stVals = [[2,3,4,3,2,1,1],[3,4,5,4,3,2,2],[4,5,8,5,4,2,3],[3,4,6,4,3,3,3],[2,3,5,4,3,3,4],[2,3,4,3,2,4,5],[3,4,5,4,3,5,6],[4,5,6,5,4,4,5]];
+    const stCells = [{ label: '', bg: 'transparent', color: 'transparent', tip: '' }];
+    dayNames.forEach(d => stCells.push({ label: d, bg: 'transparent', color: '#A5A8BD', tip: '' }));
+    hours.forEach((h, hi) => {
+      stCells.push({ label: h, bg: 'transparent', color: '#A5A8BD', tip: '' });
+      stVals[hi].forEach((v, di) => {
+        const best = hi === 2 && di === 3;
+        stCells.push({ label: best ? '★' : '', bg: `rgba(99,82,229,${(v / 9).toFixed(2)})`, color: '#fff', tip: `${dayNames[di]} ${h} — engagement ${v}/9` });
+      });
+    });
+    return {
+      sidebarKey: page === 'home' ? 'ai' : page,
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isHome: page === 'home', isSubject: page === 'subject', isWriter: page === 'writer', isRecommend: page === 'recommend',
+      isPredictive: page === 'predictive', isSendtime: page === 'sendtime', isSmartseg: page === 'smartseg',
+      aiCards: [
+        { name: 'Product Recommendations', href: '#recommend', glyph: '🛍️', tint: '#F1EBFE', desc: 'Per-customer picks powering 3 live flows and the Products block.', stat: '$5,640 attributed this month' },
+        { name: 'Subject Generator', href: '#subject', glyph: '💡', tint: '#EEF0FE', desc: 'Options scored against 2 years of your open data.', stat: '312 subjects generated' },
+        { name: 'Content Writer', href: '#writer', glyph: '🖋️', tint: '#FFF3E8', desc: 'Full drafts in the Bruma Home voice, spam-checked.', stat: '48 drafts this month' },
+        { name: 'Predictive Customers', href: '#predictive', glyph: '🔮', tint: '#F1EBFE', desc: 'Churn risk and next-purchase predictions, daily.', stat: '2,861 ready to buy now' },
+        { name: 'Best Send Time', href: '#sendtime', glyph: '⏰', tint: '#EDF9F1', desc: 'Every subscriber gets their own optimal window.', stat: '+21% open lift' },
+        { name: 'Smart Segments', href: '#smartseg', glyph: '🧠', tint: '#EEF0FE', desc: 'Audiences the model discovers without rules.', stat: '4 new segments found' },
+      ],
+      tones: ['Playful', 'Direct', 'Urgent', 'Curious'].map(tn => ({ label: tn, onClick: () => this.setState({ tone: tn, generated: false }),
+        border: this.state.tone === tn ? '#4F46E5' : '#ECEDF4', bg: this.state.tone === tn ? '#EEF0FE' : '#fff', color: this.state.tone === tn ? '#4F46E5' : '#8A8DA3' })),
+      generate: () => { this.setState({ generating: true }); clearTimeout(this.tm); this.tm = setTimeout(() => this.setState({ generating: false, generated: true }), 900); },
+      generating: this.state.generating,
+      subjects: this.state.generating ? [] : subjects,
+      subjectInput: () => {},
+      write: () => { this.setState({ writing: true, written: false }); clearTimeout(this.tm); this.tm = setTimeout(() => this.setState({ writing: false, written: true }), 1100); },
+      writing: this.state.writing, draftReady: this.state.written,
+      recCustomers: [
+        { name: 'Elena Moreau', basis: 'Based on 24 orders + browsing', initials: 'EM', tint: '#F1EBFE', fg: '#7C3AED', picks: [
+          { name: 'Linen Duvet — Terracotta', glyph: '🛏️', match: '96%' }, { name: 'Alpaca Throw — Slate', glyph: '🧶', match: '91%' }, { name: 'Waffle Robe', glyph: '🧖', match: '84%' }] },
+        { name: 'David Chen', basis: 'Based on kitchen affinity', initials: 'DC', tint: '#EEF0FE', fg: '#4F46E5', picks: [
+          { name: 'Stoneware Pour-Over Kettle', glyph: '☕', match: '94%' }, { name: 'Oak Serving Board', glyph: '🪵', match: '88%' }, { name: 'Ceramic Mug Set', glyph: '🍵', match: '82%' }] },
+        { name: 'Priya Raman', basis: 'Based on first order + views', initials: 'PR', tint: '#FFF3E8', fg: '#C2620A', picks: [
+          { name: 'Linen Pillowcase Pair', glyph: '🛏️', match: '89%' }, { name: 'Ceramic Table Lamp', glyph: '💡', match: '81%' }, { name: 'Stoneware Vase', glyph: '🏺', match: '76%' }] },
+      ],
+      churn: [
+        { name: 'Jonas Lindqvist', reason: 'No opens in 6 weeks · last order 2 months', risk: '84%', initials: 'JL', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: 'Alice Fontaine', reason: 'Unsubscribed from SMS · 4 months inactive', risk: '81%', initials: 'AF', tint: '#FDEDED', fg: '#E02424' },
+        { name: 'Marcus Webb', reason: 'Refunded last order · engagement falling', risk: '72%', initials: 'MW', tint: '#FFF3E8', fg: '#C2620A' },
+        { name: 'Tom Becker', reason: 'Opens but never clicks · 1 month inactive', risk: '64%', initials: 'TB', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { name: 'Hana Suzuki', reason: 'Cart abandoned twice, no recovery', risk: '58%', initials: 'HS', tint: '#FDEDED', fg: '#E02424' },
+      ],
+      intent: [
+        { name: 'Elena Moreau', basket: 'Bedding refresh · ~$210 · within 9 days', prob: '87%', initials: 'EM', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: 'Sofia Ricci', basket: 'Kitchen add-ons · ~$95 · within 6 days', prob: '82%', initials: 'SR', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { name: 'David Chen', basket: 'Stoneware set · ~$140 · within 12 days', prob: '78%', initials: 'DC', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: 'Maya Okafor', basket: 'Second order · ~$120 · within 14 days', prob: '71%', initials: 'MO', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: 'Priya Raman', basket: 'Lighting · ~$110 · within 10 days', prob: '66%', initials: 'PR', tint: '#FFF3E8', fg: '#C2620A' },
+      ],
+      stCells,
+      smartSegs: [
+        { name: 'Weekend gift buyers', glyph: '🎁', insight: 'Purchases cluster Sat–Sun, ship to different addresses, and spike before holidays. They respond 3× better to gift-guide content than discounts.', size: '1,840', value: 'avg order $86' },
+        { name: 'Quiet loyalists', glyph: '🤫', insight: 'Rarely open marketing email but reorder every 60–70 days directly. Best reached with a single well-timed replenishment reminder.', size: '920', value: 'avg LTV $1,240' },
+        { name: 'Texture-first shoppers', glyph: '🧶', insight: 'Browse fabric close-ups and care pages before buying. Emails leading with material detail convert 2.1× better for this group.', size: '2,410', value: 'avg order $132' },
+        { name: 'Coupon-independent VIPs', glyph: '💎', insight: 'High spenders who convert identically with or without discounts. Excluding them from coupon sends saves ~$1,900/month in margin.', size: '164', value: 'avg LTV $2,980' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="connectorstudio" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="padding:20px 0 16px 0">
+      <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px;display:flex;align-items:center;gap:9px">AI Connector Studio<span style="font-size:10px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 9px;letter-spacing:.5px">NO-CODE</span></h1>
+      <p style="margin:3px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Build a custom integration for any plugin or external API — no code required</p>
+    </header>
+
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+        <button onClick="{{ s.onClick }}" style="display:flex;align-items:center;gap:8px;padding:9px 14px;font-size:13px;font-weight:{{ s.weight }};color:{{ s.color }};border:none;border-bottom:2px solid {{ s.border }};margin-bottom:-1px;background:none;cursor:pointer;font-family:inherit"><span style="width:20px;height:20px;border-radius:99px;background:{{ s.numBg }};color:{{ s.numColor }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800">{{ s.n }}</span>{{ s.label }}</button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isSource }}" hint-placeholder-val="{{ true }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Connection type</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+            <sc-for list="{{ sourceTypes }}" as="s" hint-placeholder-count="4">
+              <div onClick="{{ s.onClick }}" style="display:flex;align-items:center;gap:11px;border:1.5px solid {{ s.border }};background:{{ s.bg }};border-radius:12px;padding:13px 15px;cursor:pointer">
+                <span style="width:34px;height:34px;border-radius:9px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ s.glyph }}</span>
+                <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ s.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ s.detail }}</span></span>
+                <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}"><span style="font-size:14px;color:#4F46E5">✓</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Authentication</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+            <sc-for list="{{ authTypes }}" as="a" hint-placeholder-count="4"><button onClick="{{ a.onClick }}" style="border:1px solid {{ a.border }};background:{{ a.bg }};color:{{ a.color }};border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ a.label }}</button></sc-for>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">Base URL</div>
+          <input value="https://api.myplugin.com/v1" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12px;font-family:'SF Mono',ui-monospace,monospace;color:#14152A;outline:none;background:#F8F8FC"></input>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">{{ authField }}</div>
+          <input value="{{ authPlaceholder }}" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input>
+          <button style="margin-top:16px;border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 16px;font-size:12px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Test connection</button>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Map events</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Connect this API's webhooks to platform events</div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+          <sc-for list="{{ eventMaps }}" as="e" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+              <span style="font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;font-weight:700;color:#5B5E75;background:#F8F8FC;border:1px solid #ECEDF4;border-radius:7px;padding:5px 9px;flex:1">{{ e.webhook }}</span>
+              <span style="color:#C4C6D4;font-size:14px">→</span>
+              <span style="flex:1"><span style="font-size:11.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:7px;padding:5px 10px">{{ e.platform }}</span></span>
+              <span onClick="{{ e.onToggle }}" style="width:36px;height:20px;border-radius:99px;background:{{ e.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ e.left }};width:14px;height:14px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+            </div>
+          </sc-for>
+        </div>
+        <button style="margin-top:14px;border:1px dashed #C7C3F5;background:#FBFAFF;border-radius:9px;padding:9px 16px;font-size:12px;font-weight:800;color:#7C3AED;cursor:pointer;font-family:inherit;width:100%" style-hover="background:#F1EBFE">+ Add event mapping</button>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isFields }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Map data fields</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Match API response fields to the unified customer profile</div>
+        <div style="display:grid;grid-template-columns:1.2fr 40px 1.2fr;gap:8px;padding:12px 4px 8px 4px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>API field</span><span></span><span>Platform field</span></div>
+        <sc-for list="{{ fieldMaps }}" as="f" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:1.2fr 40px 1.2fr;gap:8px;align-items:center;padding:10px 4px;border-bottom:1px solid #F7F7FB">
+            <span style="font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:#5B5E75;background:#F8F8FC;border:1px solid #ECEDF4;border-radius:7px;padding:5px 9px">{{ f.api }}</span>
+            <span style="color:#C4C6D4;font-size:14px;text-align:center">→</span>
+            <span style="font-size:11.5px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:7px;padding:5px 10px;justify-self:start">{{ f.platform }}</span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isTest }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Webhook tester</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Send a sample payload through your new connector</div>
+          <div style="background:#0C0D1E;border-radius:11px;padding:14px;margin-top:14px;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:#9EA0C8;line-height:1.6;white-space:pre-wrap">{{ samplePayload }}</div>
+          <button onClick="{{ runTest }}" style="margin-top:14px;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:10px 18px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">{{ testBtn }}</button>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Live event viewer</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#0E9F6E;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:#0E9F6E;animation:blink 1.4s ease infinite"></span>LISTENING</span></div>
+          <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ testResults }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:9px;border:1px solid #F3F3FA;border-radius:9px;padding:10px 12px"><span style="font-size:9.5px;font-weight:800;color:{{ r.color }};background:{{ r.bg }};border-radius:6px;padding:3px 8px">{{ r.status }}</span><span style="font-family:'SF Mono',ui-monospace,monospace;font-size:11px;color:#5B5E75;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.text }}</span><span style="font-size:10px;font-weight:700;color:#A5A8BD">{{ r.time }}</span></div>
+            </sc-for>
+            <sc-if value="{{ noResults }}" hint-placeholder-val="{{ true }}"><div style="text-align:center;padding:30px 0;color:#A5A8BD;font-size:12px;font-weight:600">Run a test to see events appear here</div></sc-if>
+          </div>
+          <button style="margin-top:16px;width:100%;border:none;background:linear-gradient(135deg,#0E9F6E,#059669);color:#fff;border-radius:9px;padding:10px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit" style-hover="opacity:.92">Publish connector</button>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { step: 'source', source: 'rest', auth: 'oauth', evToggles: {}, tested: false };
+  renderVals() {
+    const order = [['source', 'Connect'], ['events', 'Events'], ['fields', 'Fields'], ['test', 'Test & Publish']];
+    const idx = order.findIndex(o => o[0] === this.state.step);
+    const steps = order.map((o, i) => ({ label: o[1], n: i + 1, onClick: () => this.setState({ step: o[0] }),
+      weight: this.state.step === o[0] ? 800 : 600, color: this.state.step === o[0] ? '#4F46E5' : '#8A8DA3', border: this.state.step === o[0] ? '#4F46E5' : 'transparent',
+      numBg: i <= idx ? '#4F46E5' : '#F3F3FA', numColor: i <= idx ? '#fff' : '#A5A8BD' }));
+    const st = this.state.step;
+    const sourceTypes = [
+      ['rest', 'REST API', 'Standard JSON REST endpoint', '🔗', '#EEF0FE'],
+      ['graphql', 'GraphQL', 'Query a GraphQL schema', '◈', '#F1EBFE'],
+      ['webhook', 'Incoming webhook', 'Receive events pushed to us', '📥', '#EDF9F1'],
+      ['plugin', 'WordPress plugin hook', 'Tap a plugin\u2019s action/filter hooks', '🧩', '#FFF3E8'],
+    ].map(s => ({ id: s[0], name: s[1], detail: s[2], glyph: s[3], tint: s[4], active: this.state.source === s[0], border: this.state.source === s[0] ? '#4F46E5' : '#ECEDF4', bg: this.state.source === s[0] ? '#F7F6FE' : '#fff', onClick: () => this.setState({ source: s[0] }) }));
+    const authTypes = [['OAuth 2.0', 'oauth'], ['Bearer token', 'bearer'], ['API key', 'apikey'], ['Basic auth', 'basic']].map(a => ({ label: a[0], onClick: () => this.setState({ auth: a[1] }), border: this.state.auth === a[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.auth === a[1] ? '#EEF0FE' : '#fff', color: this.state.auth === a[1] ? '#4F46E5' : '#8A8DA3' }));
+    const authField = { oauth: 'Client ID', bearer: 'Bearer token', apikey: 'API key', basic: 'Username : password' }[this.state.auth];
+    const authPlaceholder = { oauth: 'clt_••••••••••••3f9a', bearer: 'Bearer ••••••••••7d2a', apikey: 'key_••••••••••41c9', basic: 'admin : ••••••••' }[this.state.auth];
+    const evt = (key, webhook, platform, def) => { const on = this.state.evToggles[key] === undefined ? def : this.state.evToggles[key]; return { webhook, platform, onToggle: () => this.setState(s => ({ evToggles: { ...s.evToggles, [key]: !on } })), bg: on ? '#4F46E5' : '#D9DBEA', left: on ? '19px' : '3px' }; };
+    return {
+      steps,
+      isSource: st === 'source', isEvents: st === 'events', isFields: st === 'fields', isTest: st === 'test',
+      sourceTypes, authTypes, authField, authPlaceholder,
+      eventMaps: [
+        evt('e1', 'user.created', 'customer.registered', true),
+        evt('e2', 'order.paid', 'purchase.completed', true),
+        evt('e3', 'subscription.renew', 'subscription.renewed', true),
+        evt('e4', 'ticket.open', 'ticket.created', false),
+      ],
+      fieldMaps: [
+        { api: 'data.email', platform: 'customer.email' }, { api: 'data.first_name', platform: 'customer.firstName' },
+        { api: 'data.last_name', platform: 'customer.lastName' }, { api: 'data.total', platform: 'order.total' },
+        { api: 'data.currency', platform: 'order.currency' }, { api: 'data.created_at', platform: 'event.timestamp' },
+      ],
+      samplePayload: '{\n  "event": "order.paid",\n  "data": {\n    "email": "elena@gmail.com",\n    "total": 189.00,\n    "currency": "USD"\n  }\n}',
+      runTest: () => this.setState({ tested: true }),
+      testBtn: this.state.tested ? '✓ Sent — run again' : 'Send test payload',
+      tested: this.state.tested, noResults: !this.state.tested,
+      testResults: this.state.tested ? [
+        { status: '200 OK', color: '#0E9F6E', bg: '#EDF9F1', text: 'order.paid → purchase.completed mapped', time: 'now' },
+        { status: 'MAPPED', color: '#4F46E5', bg: '#EEF0FE', text: 'email → customer.email · $189 → order.total', time: 'now' },
+        { status: 'PROFILE', color: '#7C3AED', bg: '#F1EBFE', text: 'Merged into elena@gmail.com', time: 'now' },
+      ] : [],
+    };
+  }
+}
+</script>
+</body>
+</html>

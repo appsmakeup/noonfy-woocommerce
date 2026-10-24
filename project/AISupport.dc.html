@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="aisupport" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;color:#0E9F6E"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:blink 1.6s ease infinite"></span>AI resolving 82% autonomously</div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px">
+              <div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div>
+              <div style="font-size:20px;font-weight:800;color:#14152A;margin-top:5px">{{ k.value }}</div>
+              <div style="font-size:10.5px;font-weight:800;color:{{ k.deltaColor }};margin-top:2px">{{ k.delta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Tickets over time</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">AI-resolved vs. escalated to human</div>
+            <div style="height:220px;margin-top:12px"><canvas ref="{{ chartRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Sentiment breakdown</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+              <sc-for list="{{ sentiment }}" as="s" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex;font-size:12px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px">{{ s.glyph }} {{ s.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ s.pct }}</span></div>
+                  <div style="height:7px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:7px;border-radius:99px;background:{{ s.color }};width:{{ s.pct }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border-top:1px solid #F3F3FA;margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ flags }}" as="f" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:700;color:#5B5E75"><span style="font-size:13px">{{ f.glyph }}</span>{{ f.label }}<span style="margin-left:auto;font-weight:800;color:{{ f.color }}">{{ f.count }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isTickets }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid #F3F3FA">
+          <input placeholder="Search tickets…" style="border:1px solid #ECEDF4;border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:240px;background:#F8F8FC"></input>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <sc-for list="{{ ticketFilters }}" as="f" hint-placeholder-count="4">
+              <button onClick="{{ f.onClick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ f.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:.7fr 2fr 1fr 1fr 1fr 1fr;gap:8px;padding:11px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA">
+          <span>ID</span><span>Subject</span><span>Customer</span><span>Priority</span><span>Handled by</span><span>Status</span>
+        </div>
+        <sc-for list="{{ tickets }}" as="t" hint-placeholder-count="8">
+          <div style="display:grid;grid-template-columns:.7fr 2fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB" style-hover="background:#FAFAFE">
+            <span style="font-size:11.5px;font-weight:800;color:#4F46E5">{{ t.id }}</span>
+            <span style="min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.subject }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ t.category }} · {{ t.time }}</span></span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ t.customer }}</span>
+            <span><span style="font-size:10px;font-weight:800;color:{{ t.prColor }};background:{{ t.prBg }};border-radius:99px;padding:3px 8px">{{ t.priority }}</span></span>
+            <span style="font-size:11.5px;font-weight:700;color:{{ t.byColor }}">{{ t.by }}</span>
+            <span><span style="font-size:10px;font-weight:800;color:{{ t.stColor }};background:{{ t.stBg }};border-radius:99px;padding:3px 8px">{{ t.status }}</span></span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isKb }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+          <sc-for list="{{ kbStats }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:#14152A;margin-top:5px">{{ k.value }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Knowledge base articles</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+              <sc-for list="{{ articles }}" as="a" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:10px;padding:11px 13px">
+                  <span style="width:30px;height:30px;border-radius:8px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ a.glyph }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ a.title }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">Used by AI {{ a.uses }}× · {{ a.helpful }} helpful</span></span>
+                  <span style="font-size:10px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 8px">LIVE</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">AI training sources</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">What the support AI has learned from</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ sources }}" as="s" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:11px">
+                  <span style="width:30px;height:30px;border-radius:8px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ s.glyph }}</span>
+                  <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ s.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ s.detail }}</span></span>
+                  <span style="font-size:10px;font-weight:800;color:{{ s.stColor }};background:{{ s.stBg }};border-radius:99px;padding:3px 8px">{{ s.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <a href="AgentStudio.dc.html#kb" style="display:block;text-align:center;margin-top:14px;border:1px solid #C7C3F5;background:#FBFAFF;border-radius:9px;padding:8px;font-size:12px;font-weight:800;color:#7C3AED" style-hover="background:#F1EBFE;color:#7C3AED">+ Add training source</a>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#dashboard').slice(1), tf: 'all' };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#dashboard').slice(1) }); setTimeout(() => this.initChart(), 60); };
+    window.addEventListener('hashchange', this.hh);
+    this.initChart();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); this.ch && this.ch.destroy(); }
+  initChart() {
+    if ((location.hash || '#dashboard').slice(1) !== 'dashboard') return;
+    if (!window.Chart || !this.chartEl || !this.chartEl.isConnected) { setTimeout(() => this.initChart(), 140); return; }
+    if (this.ch) return;
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    const days = Array.from({ length: 14 }, (_, i) => 'D' + (i + 1));
+    this.ch = new Chart(this.chartEl, { type: 'bar', data: { labels: days, datasets: [
+      { label: 'AI resolved', data: days.map((_, i) => 180 + Math.round(Math.sin(i / 2) * 40) + i * 4), backgroundColor: '#4F46E5', borderRadius: 5, barPercentage: .7, stack: 's' },
+      { label: 'Escalated', data: days.map(() => 20 + Math.round(Math.random() * 18)), backgroundColor: '#DDD6FE', borderRadius: 5, barPercentage: .7, stack: 's' },
+    ] }, options: { maintainAspectRatio: false, plugins: { legend: { display: true, labels: { boxWidth: 9, boxHeight: 9, font: { size: 11, weight: 700 } } } },
+      scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10, weight: 600 } } }, y: { stacked: true, border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 } } } } } });
+  }
+  renderVals() {
+    const valid = ['dashboard', 'tickets', 'kb'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'dashboard';
+    const titles = { dashboard: ['AI Support Center', 'Autonomous customer service across every channel'], tickets: ['Ticket Center', '284 open · 82% auto-resolved'], kb: ['Knowledge Base', 'What your support AI knows'] };
+    const tabs = [['Dashboard', '#dashboard'], ['Ticket Center', '#tickets'], ['Knowledge Base', '#kb']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const pr = { URGENT: ['#E02424', '#FDEDED'], HIGH: ['#C2620A', '#FFF3E8'], NORMAL: ['#4F46E5', '#EEF0FE'], LOW: ['#8A8DA3', '#F3F3FA'] };
+    const stt = { RESOLVED: ['#0E9F6E', '#EDF9F1'], OPEN: ['#4F46E5', '#EEF0FE'], PENDING: ['#C2620A', '#FFF3E8'], ESCALATED: ['#E02424', '#FDEDED'] };
+    const T = (id, subject, category, time, customer, priority, by, status) => ({ id, subject, category, time, customer, priority, prColor: pr[priority][0], prBg: pr[priority][1], by, byColor: by === 'AI Agent' ? '#7C3AED' : '#3C3F55', status, stColor: stt[status][0], stBg: stt[status][1] });
+    let tickets = [
+      T('#4821', 'Where is my order #28470?', 'Shipment tracking', '2m ago', 'Jonas L.', 'NORMAL', 'AI Agent', 'RESOLVED'),
+      T('#4820', 'Return waffle towel set — wrong color', 'Returns', '14m ago', 'Tom B.', 'NORMAL', 'AI Agent', 'RESOLVED'),
+      T('#4819', 'Charged twice for one order!', 'Billing', '22m ago', 'Alice F.', 'URGENT', 'Lena O.', 'ESCALATED'),
+      T('#4818', 'Can I change my delivery address?', 'Order modify', '35m ago', 'Priya R.', 'HIGH', 'AI Agent', 'RESOLVED'),
+      T('#4817', 'Is the alpaca throw machine washable?', 'Product question', '48m ago', 'Hana S.', 'LOW', 'AI Agent', 'RESOLVED'),
+      T('#4816', 'Cancel my subscription please', 'Subscription', '1h ago', 'Marcus W.', 'HIGH', 'AI Agent', 'PENDING'),
+      T('#4815', 'Warranty claim — cracked vase', 'Warranty', '2h ago', 'David C.', 'HIGH', 'Noah P.', 'OPEN'),
+      T('#4814', 'Invoice for order #28102?', 'Invoice', '3h ago', 'Elena M.', 'LOW', 'AI Agent', 'RESOLVED'),
+    ];
+    if (this.state.tf === 'ai') tickets = tickets.filter(t => t.by === 'AI Agent');
+    else if (this.state.tf === 'escalated') tickets = tickets.filter(t => t.status === 'ESCALATED' || t.by !== 'AI Agent');
+    else if (this.state.tf === 'urgent') tickets = tickets.filter(t => t.priority === 'URGENT' || t.priority === 'HIGH');
+    const ticketFilters = [['All', 'all'], ['AI handled', 'ai'], ['Escalated', 'escalated'], ['Urgent', 'urgent']].map(f => ({
+      label: f[0], onClick: () => this.setState({ tf: f[1] }), border: this.state.tf === f[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.tf === f[1] ? '#EEF0FE' : '#fff', color: this.state.tf === f[1] ? '#4F46E5' : '#8A8DA3' }));
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isDashboard: page === 'dashboard', isTickets: page === 'tickets', isKb: page === 'kb',
+      kpis: [
+        { label: 'OPEN TICKETS', value: '284', delta: '▼ 12%', deltaColor: '#0E9F6E' },
+        { label: 'AI RESOLVED', value: '82%', delta: '▲ 6pt', deltaColor: '#0E9F6E' },
+        { label: 'AVG RESPONSE', value: '8 sec', delta: '▼ instant', deltaColor: '#0E9F6E' },
+        { label: 'AVG RESOLUTION', value: '4.2 min', delta: '▼ 38%', deltaColor: '#0E9F6E' },
+        { label: 'CSAT', value: '4.7/5', delta: '▲ 0.3', deltaColor: '#0E9F6E' },
+      ],
+      chartRef: (el) => { if (el && el !== this.chartEl) { this.chartEl = el; this.initChart(); } },
+      sentiment: [
+        { glyph: '😊', label: 'Positive', pct: '64%', color: '#0E9F6E' },
+        { glyph: '😐', label: 'Neutral', pct: '24%', color: '#4F46E5' },
+        { glyph: '😟', label: 'Negative', pct: '9%', color: '#C2620A' },
+        { glyph: '😡', label: 'Angry', pct: '3%', color: '#E02424' },
+      ],
+      flags: [
+        { glyph: '🚨', label: 'Complaints detected', color: '#E02424', count: '14' },
+        { glyph: '🛡️', label: 'Fraud flags', color: '#C2620A', count: '3' },
+        { glyph: '⏰', label: 'SLA at risk', color: '#C2620A', count: '6' },
+      ],
+      ticketFilters, tickets,
+      kbStats: [
+        { label: 'ARTICLES', value: '148' }, { label: 'AI DEFLECTION', value: '82%' }, { label: 'AVG HELPFULNESS', value: '94%' }, { label: 'GAPS FOUND', value: '7' },
+      ],
+      articles: [
+        { title: 'Shipping times & costs by region', glyph: '🚚', tint: '#EEF0FE', uses: '4,210', helpful: '96%' },
+        { title: 'How to start a return or exchange', glyph: '↩️', tint: '#F1EBFE', uses: '3,180', helpful: '94%' },
+        { title: 'Linen care & washing guide', glyph: '🧺', tint: '#EDF9F1', uses: '2,640', helpful: '92%' },
+        { title: 'Order tracking & delivery updates', glyph: '📦', tint: '#FFF3E8', uses: '2,410', helpful: '95%' },
+        { title: 'Warranty & damage claims', glyph: '🛡️', tint: '#FDEDED', uses: '1,120', helpful: '89%' },
+        { title: 'Managing your subscription', glyph: '🔄', tint: '#EEF0FE', uses: '980', helpful: '91%' },
+      ],
+      sources: [
+        { name: 'WooCommerce products', glyph: '🛒', tint: '#EDF9F1', detail: '148 products · specs & stock', status: 'SYNCED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Help center (website crawl)', glyph: '🌐', tint: '#EEF0FE', detail: '86 pages indexed', status: 'SYNCED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Shipping policy PDF', glyph: '📄', tint: '#F1EBFE', detail: 'Uploaded Jun 28', status: 'TRAINED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Past 12k support tickets', glyph: '🎫', tint: '#FFF3E8', detail: 'Resolved conversations', status: 'TRAINED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Returns policy DOCX', glyph: '📝', tint: '#FDEDED', detail: 'Needs re-sync', status: 'STALE', stColor: '#C2620A', stBg: '#FFF3E8' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

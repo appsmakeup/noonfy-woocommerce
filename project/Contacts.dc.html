@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="{{ sidebarKey }}" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <button style="margin-left:auto;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Import CSV</button>
+      <button style="margin-left:10px;display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Add contact</button>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+    <sc-if value="{{ isCustomers }}" hint-placeholder-val="{{ true }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+        <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #F3F3FA;gap:10px">
+          <input placeholder="Search 48,212 customers…" style="border:1px solid #ECEDF4;border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:260px;background:#F8F8FC"></input>
+          <span style="margin-left:auto;font-size:11.5px;font-weight:700;color:#8A8DA3">Sorted by lifetime value</span>
+        </div>
+        <div style="display:grid;grid-template-columns:2.2fr 1fr .8fr .9fr .9fr 1fr .9fr;gap:8px;padding:11px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA">
+          <span>Customer</span><span>Segment</span><span>Orders</span><span>LTV</span><span>AI Score</span><span>Last order</span><span>Status</span>
+        </div>
+        <sc-for list="{{ customers }}" as="c" hint-placeholder-count="9">
+          <a href="#detail" style="display:grid;grid-template-columns:2.2fr 1fr .8fr .9fr .9fr 1fr .9fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB;color:#14152A" style-hover="background:#FAFAFE;color:#14152A">
+            <span style="display:flex;align-items:center;gap:11px">
+              <span style="width:32px;height:32px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+              <span><span style="display:block;font-size:13px;font-weight:700">{{ c.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ c.email }}</span></span>
+            </span>
+            <span><span style="font-size:10.5px;font-weight:800;color:{{ c.segColor }};background:{{ c.segBg }};border-radius:99px;padding:3px 9px">{{ c.segment }}</span></span>
+            <span style="font-size:12.5px;font-weight:700;color:#5B5E75">{{ c.orders }}</span>
+            <span style="font-size:13px;font-weight:800">{{ c.ltv }}</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:34px;height:5px;border-radius:99px;background:#F3F3FA;overflow:hidden;display:inline-block"><span style="display:block;height:5px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ c.score }}%"></span></span><span style="font-size:11.5px;font-weight:800;color:#7C3AED">{{ c.score }}</span></span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.lastOrder }}</span>
+            <span style="font-size:11px;font-weight:800;color:{{ c.stColor }}">{{ c.status }}</span>
+          </a>
+        </sc-for>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isSegments }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <sc-for list="{{ segments }}" as="s" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px" style-hover="box-shadow:0 8px 22px rgba(20,21,42,.07)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="width:34px;height:34px;border-radius:10px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ s.glyph }}</span>
+              <span style="flex:1;font-size:13.5px;font-weight:800;color:#14152A">{{ s.name }}</span>
+              <sc-if value="{{ s.ai }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 8px">AI</span></sc-if>
+            </div>
+            <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:9px;line-height:1.5">{{ s.rule }}</div>
+            <div style="display:flex;align-items:baseline;gap:8px;margin-top:13px">
+              <span style="font-size:21px;font-weight:800;color:#14152A">{{ s.count }}</span>
+              <span style="font-size:11px;font-weight:800;color:#0E9F6E">{{ s.delta }}</span>
+              <span style="margin-left:auto;font-size:11px;font-weight:700;color:#A5A8BD">avg LTV {{ s.ltv }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isTags }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:22px">
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
+          <sc-for list="{{ tags }}" as="t" hint-placeholder-count="14">
+            <span style="display:flex;align-items:center;gap:8px;border:1px solid {{ t.border }};background:{{ t.bg }};border-radius:99px;padding:7px 14px;font-size:12.5px;font-weight:800;color:{{ t.color }};cursor:pointer" style-hover="box-shadow:0 3px 10px rgba(20,21,42,.07)">{{ t.name }}<span style="font-size:11px;font-weight:800;color:#A5A8BD">{{ t.count }}</span></span>
+          </sc-for>
+        </div>
+        <div style="font-size:11.5px;font-weight:600;color:#8A8DA3;margin-top:18px">Tags are applied automatically by workflows and manually from customer profiles.</div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isLists }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+        <sc-for list="{{ lists }}" as="l" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px">
+            <span style="width:38px;height:38px;border-radius:11px;background:{{ l.tint }};display:flex;align-items:center;justify-content:center;font-size:16px">{{ l.glyph }}</span>
+            <span style="flex:1"><span style="display:block;font-size:13.5px;font-weight:800;color:#14152A">{{ l.name }}</span><span style="display:block;font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:2px">{{ l.desc }}</span></span>
+            <span style="text-align:right"><span style="display:block;font-size:17px;font-weight:800;color:#14152A">{{ l.count }}</span><span style="display:block;font-size:10.5px;font-weight:700;color:#0E9F6E">{{ l.growth }}</span></span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px">
+          <span style="width:52px;height:52px;border-radius:99px;background:linear-gradient(135deg,#8B5CF6,#EC4899);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff">EM</span>
+          <div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="font-size:17px;font-weight:800;color:#14152A">Elena Moreau</span><span style="font-size:10px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 9px">VIP</span></div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:2px">elena.moreau@gmail.com · Lyon, France · Customer since Jan 2024</div>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <sc-for list="{{ custTags }}" as="t" hint-placeholder-count="4">
+                <span style="font-size:10px;font-weight:800;color:#5B5E75;background:#F3F3FA;border-radius:99px;padding:3px 9px">{{ t }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:20px;text-align:center">
+            <div><div style="font-size:10.5px;font-weight:800;color:#A5A8BD">LIFETIME VALUE</div><div style="font-size:19px;font-weight:800;color:#14152A;margin-top:2px">$3,840</div></div>
+            <div><div style="font-size:10.5px;font-weight:800;color:#A5A8BD">ORDERS</div><div style="font-size:19px;font-weight:800;color:#14152A;margin-top:2px">24</div></div>
+            <div><div style="font-size:10.5px;font-weight:800;color:#A5A8BD">LAST VISIT</div><div style="font-size:19px;font-weight:800;color:#14152A;margin-top:2px">2h ago</div></div>
+            <div><div style="font-size:10.5px;font-weight:800;color:#A5A8BD">AI SCORE</div><div style="font-size:19px;font-weight:800;color:#7C3AED;margin-top:2px">94</div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:linear-gradient(135deg,#4F46E5,#8B5CF6);border-radius:14px;padding:18px 20px;color:#fff">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.6px;opacity:.8">🔮 PURCHASE PREDICTION</div>
+            <div style="font-size:16px;font-weight:800;margin-top:10px;line-height:1.4">87% likely to order within 9 days</div>
+            <div style="font-size:12px;font-weight:600;opacity:.85;margin-top:6px;line-height:1.55">Predicted basket: bedding refresh, ~$210. Best send: Thu 10:00.</div>
+            <a href="Builder.dc.html" style="display:inline-block;margin-top:12px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:7px 13px;font-size:11.5px;font-weight:800" style-hover="background:rgba(255,255,255,.25);color:#fff">Trigger a flow</a>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:800;color:#14152A">Recently viewed</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <sc-for list="{{ viewed }}" as="v" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;background:{{ v.tint }};display:flex;align-items:center;justify-content:center;font-size:12px">{{ v.glyph }}</span><span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ v.name }}</span><span style="font-size:11px;font-weight:700;color:#A5A8BD">{{ v.when }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:800;color:#14152A">Wishlist &amp; coupons</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <sc-for list="{{ wishlist }}" as="w" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;background:{{ w.tint }};display:flex;align-items:center;justify-content:center;font-size:12px">{{ w.glyph }}</span><span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ w.name }}</span><span style="font-size:11.5px;font-weight:800;color:#4F46E5">{{ w.price }}</span></div>
+              </sc-for>
+              <div style="border:1.5px dashed #C7C3F5;background:#FBFAFF;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:8px"><span style="font-size:13px">🎟️</span><span style="flex:1"><span style="display:block;font-size:11.5px;font-weight:800;color:#14152A;letter-spacing:1px">VIP15</span><span style="display:block;font-size:10.5px;font-weight:600;color:#8A8DA3">15% off · unused · expires Jul 28</span></span></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:800;color:#14152A">Order history</div>
+            <sc-for list="{{ orders }}" as="o" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #F7F7FB">
+                <span style="width:30px;height:30px;border-radius:8px;background:#F3F3FA;display:flex;align-items:center;justify-content:center;font-size:12px">🧾</span>
+                <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ o.id }} · {{ o.items }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ o.date }} · {{ o.source }}</span></span>
+                <span style="font-size:13px;font-weight:800;color:#14152A">{{ o.total }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13px;font-weight:800;color:#14152A">Automation &amp; email timeline</div>
+            <div style="display:flex;flex-direction:column;margin-top:14px">
+              <sc-for list="{{ timeline }}" as="ev" hint-placeholder-count="6">
+                <div style="display:flex;gap:11px;padding-bottom:13px">
+                  <div style="display:flex;flex-direction:column;align-items:center"><span style="width:8px;height:8px;border-radius:99px;background:{{ ev.dot }};margin-top:4px"></span><span style="width:1.5px;flex:1;background:#EFEFF7;margin-top:4px"></span></div>
+                  <div><div style="font-size:12px;font-weight:600;color:#3C3F55;line-height:1.45">{{ ev.text }}</div><div style="font-size:10.5px;color:#A5A8BD;font-weight:600;margin-top:1px">{{ ev.time }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#customers').slice(1) };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#customers').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); }
+  renderVals() {
+    const valid = ['customers', 'segments', 'tags', 'lists', 'detail'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'customers';
+    const titles = {
+      customers: ['Customers', '48,212 contacts · 31,840 subscribed'],
+      segments: ['Segments', 'Dynamic groups that update in real time'],
+      tags: ['Tags', 'Labels applied by flows and your team'],
+      lists: ['Lists', 'Static lists for imports and one-off sends'],
+      detail: ['Customer Profile', 'Elena Moreau'],
+    };
+    const tabs = [['Customers', '#customers'], ['Segments', '#segments'], ['Tags', '#tags'], ['Lists', '#lists'], ['Profile', '#detail']].map(t => {
+      const key = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === key ? 800 : 600, color: page === key ? '#4F46E5' : '#8A8DA3', border: page === key ? '#4F46E5' : 'transparent' };
+    });
+    const seg = { VIP: ['#7C3AED', '#F1EBFE'], Loyal: ['#4F46E5', '#EEF0FE'], New: ['#0E9F6E', '#EDF9F1'], 'At risk': ['#C2620A', '#FFF3E8'], Lapsed: ['#E02424', '#FDEDED'] };
+    const CU = (name, email, segment, orders, ltv, score, lastOrder, status, tint, fg) => ({
+      name, email, segment, orders, ltv, score, lastOrder, status,
+      initials: name.split(' ').map(w => w[0]).join(''), tint, fg,
+      segColor: seg[segment][0], segBg: seg[segment][1],
+      stColor: status === 'Subscribed' ? '#0E9F6E' : '#8A8DA3' });
+    const customers = [
+      CU('Elena Moreau','elena.moreau@gmail.com','VIP',24,'$3,840',94,'2 days ago','Subscribed','#F1EBFE','#7C3AED'),
+      CU('David Chen','d.chen@outlook.com','VIP',19,'$2,910',91,'6 days ago','Subscribed','#EEF0FE','#4F46E5'),
+      CU('Sofia Ricci','sofia.ricci@libero.it','Loyal',17,'$2,480',82,'1 week ago','Subscribed','#EDF9F1','#0E9F6E'),
+      CU('Marcus Webb','marcus.w@gmail.com','Loyal',14,'$2,120',78,'2 weeks ago','Subscribed','#FFF3E8','#C2620A'),
+      CU('Hana Suzuki','hana.szk@gmail.com','Loyal',12,'$1,960',76,'3 weeks ago','Subscribed','#FDEDED','#E02424'),
+      CU('Maya Okafor','maya.okafor@gmail.com','New',2,'$310',64,'Today','Subscribed','#F1EBFE','#7C3AED'),
+      CU('Jonas Lindqvist','jonas.l@proton.me','At risk',8,'$1,240',41,'2 months ago','Subscribed','#EEF0FE','#4F46E5'),
+      CU('Priya Raman','priya.raman@gmail.com','New',1,'$248',58,'Today','Subscribed','#FFF3E8','#C2620A'),
+      CU('Alice Fontaine','alice.f@orange.fr','Lapsed',6,'$890',22,'4 months ago','Unsubscribed','#FDEDED','#E02424'),
+      CU('Tom Becker','tbecker@gmx.de','Loyal',9,'$1,180',69,'1 month ago','Subscribed','#EDF9F1','#0E9F6E'),
+    ];
+    return {
+      sidebarKey: page === 'detail' ? 'customers' : page,
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isCustomers: page === 'customers', isSegments: page === 'segments', isTags: page === 'tags', isLists: page === 'lists', isDetail: page === 'detail',
+      customers,
+      segments: [
+        { name: 'VIP Customers', glyph: '👑', tint: '#F1EBFE', rule: 'LTV over $1,500 AND 3+ orders in 6 months', count: '214', delta: '+12', ltv: '$2,640', ai: false },
+        { name: 'Likely to churn', glyph: '⚠️', tint: '#FFF3E8', rule: 'AI churn probability above 70%', count: '1,208', delta: '+64', ltv: '$820', ai: true },
+        { name: 'Ready to buy', glyph: '🎯', tint: '#EDF9F1', rule: 'AI purchase intent above 80% this week', count: '2,861', delta: '+340', ltv: '$1,120', ai: true },
+        { name: 'New subscribers', glyph: '🌱', tint: '#EEF0FE', rule: 'Joined in the last 30 days, no order yet', count: '4,120', delta: '+1,204', ltv: '$0', ai: false },
+        { name: 'Bedding enthusiasts', glyph: '🛏️', tint: '#F1EBFE', rule: 'Viewed Bedding 3+ times in 30 days', count: '6,480', delta: '+218', ltv: '$640', ai: false },
+        { name: 'Discount-driven', glyph: '🏷️', tint: '#FDEDED', rule: 'Only purchases with a coupon applied', count: '3,914', delta: '+96', ltv: '$410', ai: true },
+      ],
+      tags: [
+        ['vip','#7C3AED','#F1EBFE','#DDD3FA',214],['wholesale','#4F46E5','#EEF0FE','#D8DCFB',48],['newsletter','#0E9F6E','#EDF9F1','#C4E9D3',31840],
+        ['gift-buyer','#C2620A','#FFF3E8','#F8DFC5',1820],['review-left','#0E9F6E','#EDF9F1','#C4E9D3',2914],['support-contact','#E02424','#FDEDED','#F8D0D0',412],
+        ['popup-june','#4F46E5','#EEF0FE','#D8DCFB',4120],['abandoned-cart','#C2620A','#FFF3E8','#F8DFC5',1284],['bedding','#7C3AED','#F1EBFE','#DDD3FA',6480],
+        ['kitchen','#0E9F6E','#EDF9F1','#C4E9D3',5120],['referral','#4F46E5','#EEF0FE','#D8DCFB',680],['birthday-set','#E02424','#FDEDED','#F8D0D0',12480],
+        ['sms-optin','#7C3AED','#F1EBFE','#DDD3FA',9214],['back-in-stock','#C2620A','#FFF3E8','#F8DFC5',1872],
+      ].map(t => ({ name: t[0], color: t[1], bg: t[2], border: t[3], count: t[4].toLocaleString() })),
+      lists: [
+        { name: 'Master Newsletter', glyph: '📰', tint: '#EEF0FE', desc: 'Default list for all site signups', count: '31,840', growth: '+2.4% this month' },
+        { name: 'SMS Subscribers', glyph: '💬', tint: '#EDF9F1', desc: 'Opted in to text messages at checkout', count: '9,214', growth: '+5.1% this month' },
+        { name: 'Wholesale Partners', glyph: '🏢', tint: '#F1EBFE', desc: 'B2B buyers — separate pricing emails', count: '48', growth: '+2 this month' },
+        { name: 'Event: Pop-up Portland', glyph: '📍', tint: '#FFF3E8', desc: 'Collected at the June pop-up shop', count: '412', growth: 'Imported Jun 18' },
+      ],
+      custTags: ['vip', 'bedding', 'review-left', 'sms-optin'],
+      viewed: [
+        { name: 'Linen Duvet Set — Terracotta', glyph: '🛏️', tint: '#FFF3E8', when: '2h ago' },
+        { name: 'Waffle Bath Towel Set', glyph: '🛁', tint: '#EEF0FE', when: '2h ago' },
+        { name: 'Ceramic Table Lamp', glyph: '💡', tint: '#F1EBFE', when: 'Yesterday' },
+        { name: 'Oak Serving Board, Large', glyph: '🪵', tint: '#EDF9F1', when: '3 days ago' },
+      ],
+      wishlist: [
+        { name: 'Alpaca Throw — Slate', glyph: '🧶', tint: '#F1EBFE', price: '$120' },
+        { name: 'Stoneware Vase, Tall', glyph: '🏺', tint: '#FFF3E8', price: '$68' },
+      ],
+      orders: [
+        { id: '#28102', items: 'Linen Duvet Set + 2 more', date: 'Jul 2, 2026', source: 'Cart Recovery email', total: '$342.00' },
+        { id: '#27418', items: 'Waffle Towel Set ×2', date: 'Jun 11, 2026', source: 'Flash Sale campaign', total: '$96.00' },
+        { id: '#26903', items: 'Ceramic Table Lamp', date: 'May 24, 2026', source: 'Organic', total: '$110.00' },
+        { id: '#26240', items: 'Oak Serving Board + 1 more', date: 'Apr 30, 2026', source: 'Cross-sell flow', total: '$84.00' },
+        { id: '#25811', items: 'Alpaca Throw — Oat', date: 'Apr 8, 2026', source: 'VIP early access', total: '$120.00' },
+      ],
+      timeline: [
+        { text: 'Opened “Your VIP early access starts now” (2 clicks)', time: '2 hours ago', dot: '#4F46E5' },
+        { text: 'Viewed Linen Duvet — Terracotta 3 times', time: '2 hours ago', dot: '#8B5CF6' },
+        { text: 'Entered VIP Loyalty Rewards flow', time: 'Yesterday', dot: '#7C3AED' },
+        { text: 'Converted from Cart Recovery — order #28102, $342.00', time: 'Jul 2', dot: '#0E9F6E' },
+        { text: 'Received Cart Recovery Email 1', time: 'Jul 1', dot: '#4F46E5' },
+        { text: 'Left a 5★ review on Waffle Towel Set', time: 'Jun 20', dot: '#C2620A' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

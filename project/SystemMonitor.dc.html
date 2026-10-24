@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#0C0D1E;}
+a{color:#A5B4FC;text-decoration:none;}a:hover{color:#C7D2FE;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#26284A;border-radius:8px;}
+@keyframes liveDot{0%,100%{opacity:1;}50%{opacity:.3;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#0C0D1E">
+  <dc-import name="Sidebar" active="sysmon" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 26px 40px 26px;color:#E6E7F5">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.3px">System Monitoring</h1>
+        <p style="margin:3px 0 0 0;font-size:12.5px;color:#8E90B8;font-weight:500">Infrastructure health · all systems operational</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;color:#34D399">
+        <span style="width:7px;height:7px;border-radius:99px;background:#34D399;animation:liveDot 1.4s ease infinite"></span>OPERATIONAL
+      </div>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+      <sc-for list="{{ gauges }}" as="g" hint-placeholder-count="4">
+        <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:16px 18px">
+          <div style="display:flex;align-items:center"><span style="font-size:11px;font-weight:800;color:#8E90B8">{{ g.label }}</span><span style="margin-left:auto;font-size:16px;font-weight:800;color:{{ g.color }}">{{ g.value }}%</span></div>
+          <div style="height:7px;border-radius:99px;background:#24264A;margin-top:10px;overflow:hidden"><div style="height:7px;border-radius:99px;background:{{ g.color }};width:{{ g.value }}%;transition:width .5s ease"></div></div>
+          <div style="font-size:10.5px;font-weight:700;color:#5B5E88;margin-top:6px">{{ g.note }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#fff">Services &amp; APIs</div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+          <sc-for list="{{ services }}" as="s" hint-placeholder-count="7">
+            <div style="display:flex;align-items:center;gap:11px;background:#1A1B36;border:1px solid #24264A;border-radius:10px;padding:10px 13px">
+              <span style="width:8px;height:8px;border-radius:99px;background:{{ s.dot }};animation:{{ s.anim }}"></span>
+              <span style="flex:1;font-size:12.5px;font-weight:700;color:#E6E7F5">{{ s.name }}</span>
+              <span style="font-size:11px;font-weight:700;color:#8E90B8">{{ s.latency }}</span>
+              <span style="font-size:10.5px;font-weight:800;color:{{ s.stColor }};background:{{ s.stBg }};border-radius:99px;padding:3px 9px">{{ s.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#fff">Queue workers</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px">
+            <sc-for list="{{ workers }}" as="w" hint-placeholder-count="12">
+              <div style="aspect-ratio:1;border-radius:8px;background:{{ w.bg }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ w.color }}">{{ w.id }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:12px;font-size:11px;font-weight:700;color:#8E90B8"><span>Active: <span style="color:#34D399;font-weight:800">11</span></span><span>Idle: <span style="color:#fff;font-weight:800">1</span></span><span>Throughput: <span style="color:#fff;font-weight:800">214/s</span></span></div>
+        </div>
+        <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px;flex:1">
+          <div style="font-size:13.5px;font-weight:800;color:#fff">Cron jobs</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <sc-for list="{{ crons }}" as="c" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:700;color:#9EA0C8"><span style="width:6px;height:6px;border-radius:99px;background:{{ c.dot }}"></span><span style="flex:1">{{ c.name }}</span><span style="color:#5B5E88">{{ c.last }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px;margin-top:14px">
+      <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#fff">Error logs</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#FBBF24;background:rgba(251,191,36,.14);border-radius:99px;padding:3px 10px">3 warnings · 0 errors · 24h</span></div>
+      <div style="margin-top:12px;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px">
+        <sc-for list="{{ logs }}" as="l" hint-placeholder-count="5">
+          <div style="display:flex;gap:11px;padding:7px 0;border-bottom:1px solid #1E1F3D">
+            <span style="color:#5B5E88;flex-shrink:0;width:96px">{{ l.time }}</span>
+            <span style="font-weight:800;color:{{ l.color }};width:64px;flex-shrink:0">{{ l.level }}</span>
+            <span style="color:#9EA0C8;flex:1;min-width:0">{{ l.msg }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { cpu: 34, ram: 58, disk: 41, net: 62, tick: 0 };
+  componentDidMount() {
+    this.iv = setInterval(() => {
+      const j = (v, lo, hi) => Math.max(lo, Math.min(hi, v + Math.round((Math.random() - 0.5) * 12)));
+      this.setState(s => ({ cpu: j(s.cpu, 22, 68), ram: j(s.ram, 48, 74), disk: j(s.disk, 38, 46), net: j(s.net, 40, 82), tick: s.tick + 1 }));
+    }, 1800);
+  }
+  componentWillUnmount() { clearInterval(this.iv); }
+  renderVals() {
+    const col = (v) => v >= 80 ? '#F87171' : v >= 65 ? '#FBBF24' : '#34D399';
+    const svc = (name, latency, status) => {
+      const s = status === 'UP' ? ['#34D399', 'rgba(52,211,153,.14)', '#34D399', 'liveDot 1.4s ease infinite'] : status === 'DEGRADED' ? ['#FBBF24', 'rgba(251,191,36,.14)', '#FBBF24', 'none'] : ['#F87171', 'rgba(248,113,113,.14)', '#F87171', 'none'];
+      return { name, latency, status, dot: s[0], stBg: s[1], stColor: s[2], anim: s[3] };
+    };
+    return {
+      gauges: [
+        { label: 'CPU', value: this.state.cpu, color: col(this.state.cpu), note: '8 vCPU · auto-scaling' },
+        { label: 'MEMORY', value: this.state.ram, color: col(this.state.ram), note: '16 GB allocated' },
+        { label: 'DISK', value: this.state.disk, color: col(this.state.disk), note: '512 GB SSD' },
+        { label: 'NETWORK', value: this.state.net, color: col(this.state.net), note: 'egress load' },
+      ],
+      services: [
+        svc('REST API', '48 ms', 'UP'), svc('Sending pipeline', '112 ms', 'UP'),
+        svc('WooCommerce sync', '1.2 s', 'UP'), svc('Webhook dispatcher', '64 ms', 'UP'),
+        svc('AI inference', '340 ms', 'DEGRADED'), svc('Cache (Redis)', '2 ms', 'UP'), svc('Database (primary)', '8 ms', 'UP'),
+      ],
+      workers: Array.from({ length: 12 }, (_, i) => ({ id: 'W' + (i + 1),
+        bg: i === 11 ? '#1A1B36' : 'rgba(52,211,153,.16)', color: i === 11 ? '#5B5E88' : '#34D399' })),
+      crons: [
+        { name: 'AI model retrain', last: '4h ago', dot: '#34D399' }, { name: 'Segment refresh', last: '5m ago', dot: '#34D399' },
+        { name: 'Bounce cleanup', last: '1h ago', dot: '#34D399' }, { name: 'Nightly backup', last: '9h ago', dot: '#34D399' },
+      ],
+      logs: [
+        { time: '09:41:02', level: 'INFO', color: '#60A5FA', msg: 'Batch #4821 completed — 12,406 delivered' },
+        { time: '09:12:44', level: 'WARN', color: '#FBBF24', msg: 'AI inference latency above 300ms — scaling replica' },
+        { time: '08:50:19', level: 'INFO', color: '#60A5FA', msg: 'WooCommerce sync: 148 products, 39 orders updated' },
+        { time: '07:33:05', level: 'WARN', color: '#FBBF24', msg: 'Postmark pool at 82% quota — rotation adjusted' },
+        { time: '06:00:00', level: 'INFO', color: '#60A5FA', msg: 'Nightly backup completed — 2.4 GB snapshot' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

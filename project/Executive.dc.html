@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes liveDot{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="executive" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;gap:14px;padding:20px 0 18px 0">
+      <div>
+        <h1 style="margin:0;font-size:22px;font-weight:800;color:#14152A;letter-spacing:-.3px">Executive Dashboard</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Bruma Home · the whole business at a glance</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;color:#0E9F6E">
+        <span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:liveDot 1.6s ease infinite"></span>Live · updated {{ clock }}
+      </div>
+      <button style="background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Export board pack</button>
+    </header>
+
+    <section style="display:grid;grid-template-columns:2fr 1fr;gap:14px;animation:fadeUp .4s ease">
+      <div style="background:linear-gradient(120deg,#4F46E5 0%,#6D5AE8 50%,#8B5CF6 100%);border-radius:16px;padding:22px 26px;color:#fff;position:relative;overflow:hidden">
+        <div style="display:flex;gap:34px;position:relative;z-index:1">
+          <div>
+            <div style="font-size:11px;font-weight:800;letter-spacing:.8px;opacity:.8">REVENUE THIS MONTH</div>
+            <div style="font-size:34px;font-weight:800;margin-top:6px;letter-spacing:-.6px">{{ mrr }}</div>
+            <div style="font-size:12.5px;font-weight:700;opacity:.9;margin-top:4px">▲ 18.2% vs. last month</div>
+          </div>
+          <div style="border-left:1px solid rgba(255,255,255,.2);padding-left:34px">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.8px;opacity:.8">REVENUE TODAY</div>
+            <div style="font-size:34px;font-weight:800;margin-top:6px;letter-spacing:-.6px">{{ today }}</div>
+            <div style="font-size:12.5px;font-weight:700;opacity:.9;margin-top:4px">▲ 6.4% vs. yesterday</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px;position:relative;z-index:1">
+          <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:11px;padding:10px 15px"><div style="font-size:9.5px;font-weight:800;opacity:.8;letter-spacing:.5px">EMAIL REVENUE</div><div style="font-size:17px;font-weight:800;margin-top:3px">$52.7k</div></div>
+          <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:11px;padding:10px 15px"><div style="font-size:9.5px;font-weight:800;opacity:.8;letter-spacing:.5px">AUTOMATION</div><div style="font-size:17px;font-weight:800;margin-top:3px">$41.2k</div></div>
+          <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:11px;padding:10px 15px"><div style="font-size:9.5px;font-weight:800;opacity:.8;letter-spacing:.5px">RECOVERED CARTS</div><div style="font-size:17px;font-weight:800;margin-top:3px">$18.4k</div></div>
+          <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:11px;padding:10px 15px"><div style="font-size:9.5px;font-weight:800;opacity:.8;letter-spacing:.5px">EMAIL ROI</div><div style="font-size:17px;font-weight:800;margin-top:3px">42×</div></div>
+        </div>
+        <svg style="position:absolute;right:-10px;bottom:-10px;opacity:.14;z-index:0" width="240" height="140" viewBox="0 0 240 140" fill="none"><path d="M0 120 C40 60 80 100 120 50 C160 10 200 70 240 20" stroke="#fff" stroke-width="4" fill="none"/></svg>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">Store health</span><span style="margin-left:auto;font-size:11px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 9px">EXCELLENT</span></div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:8px">
+          <div style="position:relative;width:96px;height:96px;flex-shrink:0"><canvas ref="{{ gaugeRef }}"></canvas><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:24px;font-weight:800;color:#14152A">{{ health }}</span><span style="font-size:9px;font-weight:800;color:#8A8DA3">/ 100</span></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ healthBars }}" as="h" hint-placeholder-count="3">
+              <div><div style="display:flex;font-size:11px;font-weight:700;color:#5B5E75"><span>{{ h.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ h.value }}</span></div><div style="height:5px;border-radius:99px;background:#F3F3FA;margin-top:4px"><div style="height:5px;border-radius:99px;background:{{ h.color }};width:{{ h.width }}"></div></div></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:14px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="12">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:13px 15px">
+          <div style="font-size:10.5px;font-weight:800;color:#8A8DA3;letter-spacing:.2px">{{ k.label }}</div>
+          <div style="font-size:19px;font-weight:800;color:#14152A;margin-top:6px;letter-spacing:-.4px;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+          <div style="font-size:10.5px;font-weight:800;color:{{ k.deltaColor }};margin-top:3px">{{ k.delta }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center">
+          <div><div style="font-size:14px;font-weight:800;color:#14152A">Revenue forecast</div><div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Actuals + AI-predicted, next 90 days</div></div>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <sc-for list="{{ ranges }}" as="r" hint-placeholder-count="3">
+              <button onClick="{{ r.onClick }}" style="border:1px solid {{ r.border }};background:{{ r.bg }};color:{{ r.color }};border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ r.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="height:230px;margin-top:12px"><canvas ref="{{ forecastRef }}"></canvas></div>
+      </div>
+      <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">✨</span><span style="font-size:13.5px;font-weight:800">AI growth insights</span></div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+          <sc-for list="{{ insights }}" as="i" hint-placeholder-count="4">
+            <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:11px 13px">
+              <div style="display:flex;align-items:center;gap:7px"><span style="font-size:9.5px;font-weight:800;color:{{ i.tagColor }};background:{{ i.tagBg }};border-radius:99px;padding:2px 8px">{{ i.tag }}</span><span style="margin-left:auto;font-size:11px;font-weight:800;color:#A5B4FC">{{ i.impact }}</span></div>
+              <div style="font-size:12px;font-weight:600;line-height:1.5;margin-top:7px;color:#E6E4F5">{{ i.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">Top performers</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+          <sc-for list="{{ topPerf }}" as="t" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:32px;height:32px;border-radius:9px;background:{{ t.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ t.glyph }}</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:700">{{ t.kind }}</span></span>
+              <span style="font-size:12.5px;font-weight:800;color:#14152A">{{ t.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">AI action recommendations</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+          <sc-for list="{{ actions }}" as="a" hint-placeholder-count="4">
+            <div style="border:1px solid #F0EFFB;background:#FBFAFF;border-radius:11px;padding:11px 13px">
+              <div style="font-size:12px;font-weight:700;color:#14152A;line-height:1.45">{{ a.text }}</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><span style="font-size:10.5px;font-weight:800;color:#0E9F6E">{{ a.gain }}</span><a href="{{ a.href }}" style="margin-left:auto;font-size:11px;font-weight:800;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:7px;padding:5px 12px" style-hover="opacity:.9;color:#fff">{{ a.cta }}</a></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">Live activity</span><span style="margin-left:auto;width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:liveDot 1.6s ease infinite"></span></div>
+        <div style="display:flex;flex-direction:column;margin-top:14px">
+          <sc-for list="{{ feed }}" as="ev" hint-placeholder-count="6">
+            <div style="display:flex;gap:10px;padding-bottom:12px">
+              <span style="width:26px;height:26px;border-radius:8px;background:{{ ev.tint }};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">{{ ev.glyph }}</span>
+              <div style="min-width:0"><div style="font-size:11.5px;font-weight:600;color:#3C3F55;line-height:1.4">{{ ev.text }}</div><div style="font-size:10px;color:#A5A8BD;font-weight:700;margin-top:1px">{{ ev.time }}</div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { t: 0, range: '90', clock: '', feedTick: 0 };
+  componentDidMount() {
+    const start = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - start) / 1200);
+      this.setState({ t: 1 - Math.pow(1 - p, 3) });
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    this.setClock();
+    this.ci = setInterval(() => this.setClock(), 1000);
+    this.fi = setInterval(() => this.setState(s => ({ feedTick: s.feedTick + 1 })), 4200);
+    this.initCharts();
+  }
+  setClock() {
+    const d = new Date();
+    this.setState({ clock: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) });
+  }
+  componentWillUnmount() { clearInterval(this.ci); clearInterval(this.fi); [this.gauge, this.forecast].forEach(c => c && c.destroy()); }
+  initCharts() {
+    if (!window.Chart || !this.gaugeEl || !this.forecastEl) { setTimeout(() => this.initCharts(), 120); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    if (!this.gauge) {
+      this.gauge = new Chart(this.gaugeEl, { type: 'doughnut',
+        data: { datasets: [{ data: [92, 8], backgroundColor: ['#0E9F6E', '#EDF1F0'], borderWidth: 0, cutout: '78%' }] },
+        options: { maintainAspectRatio: false, rotation: -90, circumference: 360, plugins: { legend: { display: false }, tooltip: { enabled: false } } } });
+    }
+    this.buildForecast();
+  }
+  buildForecast() {
+    if (!window.Chart || !this.forecastEl) return;
+    if (this.forecast) this.forecast.destroy();
+    const map = { '30': 30, '90': 90, '365': 365 };
+    const n = map[this.state.range] || 90;
+    const actualLen = Math.round(n * 0.45);
+    const labels = [], actual = [], predicted = [], lower = [], upper = [];
+    const daily = 4200;
+    for (let i = 0; i < n; i++) {
+      labels.push('D' + (i + 1));
+      const base = daily + i * (n > 100 ? 22 : 60) + Math.sin(i / 4) * 700;
+      if (i < actualLen) { actual.push(Math.round(base)); predicted.push(null); }
+      else {
+        if (i === actualLen) { actual.push(Math.round(base)); }
+        else actual.push(null);
+        const spread = (i - actualLen) * (n > 100 ? 9 : 26);
+        predicted.push(Math.round(base + spread * 0.5));
+        lower.push(Math.round(base - spread));
+        upper.push(Math.round(base + spread * 1.6));
+      }
+    }
+    while (lower.length < n) lower.unshift(null);
+    while (upper.length < n) upper.unshift(null);
+    const g = this.forecastEl.getContext('2d').createLinearGradient(0, 0, 0, 230);
+    g.addColorStop(0, 'rgba(79,70,229,.16)'); g.addColorStop(1, 'rgba(79,70,229,0)');
+    this.forecast = new Chart(this.forecastEl, { type: 'line',
+      data: { labels, datasets: [
+        { label: 'Upper', data: upper, borderColor: 'transparent', backgroundColor: 'rgba(139,92,246,.1)', fill: '+1', pointRadius: 0, tension: .4 },
+        { label: 'Lower', data: lower, borderColor: 'transparent', backgroundColor: 'transparent', fill: false, pointRadius: 0, tension: .4 },
+        { label: 'Actual', data: actual, borderColor: '#4F46E5', backgroundColor: g, fill: true, borderWidth: 2.6, pointRadius: 0, tension: .4 },
+        { label: 'AI forecast', data: predicted, borderColor: '#8B5CF6', borderDash: [5, 4], borderWidth: 2.4, pointRadius: 0, tension: .4 },
+      ] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { filter: it => it.dataset.label === 'Actual' || it.dataset.label === 'AI forecast', callbacks: { label: c => ' ' + c.dataset.label + ': $' + Math.round(c.raw).toLocaleString() } } },
+        scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10, weight: 600 } } },
+          y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: v => '$' + (v / 1000).toFixed(0) + 'k' } } } } });
+  }
+  renderVals() {
+    const t = this.state.t;
+    const money = (v) => '$' + Math.round(v * t).toLocaleString();
+    const kpis = [
+      { label: 'AVG ORDER VALUE', value: money(45.1).replace('$45','$45.10'), delta: '▲ $3.20', up: 1 },
+      { label: 'CUSTOMER LTV', value: money(486), delta: '▲ $42', up: 1 },
+      { label: 'REPEAT PURCHASE', value: (31.4 * t).toFixed(1) + '%', delta: '▲ 3.8pt', up: 1 },
+      { label: 'ACQUISITION COST', value: money(18.4).replace('$18','$18.40'), delta: '▼ $2.10', up: 1 },
+      { label: 'MARKETING ROI', value: (6.2 * t).toFixed(1) + '×', delta: '▲ 0.8×', up: 1 },
+      { label: 'EMAIL ROI', value: Math.round(42 * t) + '×', delta: '▲ 5×', up: 1 },
+      { label: 'PREDICTED MRR', value: money(142800), delta: '▲ 11.2%', up: 1 },
+      { label: 'DELIVERABILITY', value: (99.2 * t).toFixed(1) + '%', delta: 'Excellent', up: 1 },
+      { label: 'CSAT SCORE', value: (4.7 * t).toFixed(1) + '/5', delta: '▲ 0.2', up: 1 },
+      { label: 'SUBSCRIBERS', value: Math.round(48212 * t).toLocaleString(), delta: '▲ 1,204', up: 1 },
+      { label: 'ORDERS / MO', value: Math.round(2847 * t).toLocaleString(), delta: '▲ 11.9%', up: 1 },
+      { label: 'CHURN RATE', value: (2.1 * t).toFixed(1) + '%', delta: '▼ 0.4pt', up: 1 },
+    ].map(k => ({ ...k, deltaColor: k.up ? '#0E9F6E' : '#E02424' }));
+    const ranges = ['30', '90', '365'].map(r => ({ label: r + 'd', onClick: () => { this.setState({ range: r }); setTimeout(() => this.buildForecast(), 0); },
+      border: this.state.range === r ? '#4F46E5' : '#ECEDF4', bg: this.state.range === r ? '#EEF0FE' : '#fff', color: this.state.range === r ? '#4F46E5' : '#8A8DA3' }));
+    const feedAll = [
+      { glyph: '🛒', tint: '#EEF0FE', text: 'Maya Okafor converted from Cart Recovery — $186.00', time: 'just now' },
+      { glyph: '✨', tint: '#F1EBFE', text: 'AI moved 148 contacts into “Ready to buy”', time: '1 min ago' },
+      { glyph: '📤', tint: '#EDF9F1', text: 'Flash Sale batch sent to 12,406 subscribers', time: '3 min ago' },
+      { glyph: '🎟️', tint: '#FFF3E8', text: 'Coupon LINEN10 redeemed 4× in the last 10 min', time: '6 min ago' },
+      { glyph: '🧪', tint: '#F1EBFE', text: 'A/B test “June Sale” reached significance', time: '12 min ago' },
+      { glyph: '👑', tint: '#EEF0FE', text: 'Elena Moreau crossed $3,800 lifetime value', time: '18 min ago' },
+      { glyph: '📦', tint: '#EDF9F1', text: 'Back-in-stock alert fired for Alpaca Throw', time: '24 min ago' },
+    ];
+    const off = this.state.feedTick % feedAll.length;
+    const feed = feedAll.slice(off).concat(feedAll.slice(0, off)).slice(0, 6);
+    return {
+      clock: this.state.clock, mrr: money(128460), today: money(6280), health: Math.round(92 * t),
+      kpis, ranges,
+      healthBars: [
+        { label: 'Deliverability', value: '99.2%', width: '99%', color: '#0E9F6E' },
+        { label: 'Engagement', value: '88%', width: '88%', color: '#4F46E5' },
+        { label: 'Retention', value: '84%', width: '84%', color: '#8B5CF6' },
+      ],
+      insights: [
+        { tag: 'OPPORTUNITY', tagColor: '#141433', tagBg: '#A5B4FC', impact: '+$8.4k/mo', text: 'Bedding browsers who don\u2019t buy in 48h convert 3.2× with a Browse Abandonment flow — 6,480 contacts eligible.' },
+        { tag: 'TIMING', tagColor: '#141433', tagBg: '#C4B5FD', impact: '+21% opens', text: 'Shifting campaigns from Sunday evening to Thursday 10am lifts opens 2.4× for your list.' },
+        { tag: 'RISK', tagColor: '#fff', tagBg: '#EF4444', impact: '1,208 at risk', text: 'Churn probability above 70% for 1,208 customers — a Win Back flow could retain ~$18k.' },
+        { tag: 'MARGIN', tagColor: '#141433', tagBg: '#6EE7B7', impact: '+$1.9k/mo', text: '164 VIPs convert identically with or without coupons — exclude them from discount sends.' },
+      ],
+      topPerf: [
+        { glyph: '⚡', tint: '#FDEDED', name: 'July Flash Sale', kind: 'TOP CAMPAIGN', value: '$8,420' },
+        { glyph: '🛒', tint: '#EEF0FE', name: 'Cart Recovery', kind: 'TOP AUTOMATION', value: '$18,420' },
+        { glyph: '🛏️', tint: '#EDF9F1', name: 'Linen Duvet — Sage', kind: 'TOP PRODUCT', value: '$28,080' },
+        { glyph: '🗃️', tint: '#F1EBFE', name: 'Bedding', kind: 'TOP CATEGORY', value: '$42,300' },
+        { glyph: '👑', tint: '#FFF3E8', name: 'Elena Moreau', kind: 'TOP CUSTOMER', value: '$3,840' },
+      ],
+      actions: [
+        { text: 'Launch Browse Abandonment for 6,480 bedding browsers', gain: '+$8.4k/mo est.', cta: 'Build flow', href: 'AIBuilder.dc.html' },
+        { text: 'Enroll 1,208 at-risk customers in Win Back', gain: 'Retain ~$18k', cta: 'Enroll', href: 'AI.dc.html#predictive' },
+        { text: 'Move all campaigns to AI-optimized send time', gain: '+21% opens', cta: 'Apply', href: 'AI.dc.html#sendtime' },
+        { text: 'Exclude 164 coupon-independent VIPs from discounts', gain: '+$1.9k margin', cta: 'Review', href: 'Contacts.dc.html#segments' },
+      ],
+      feed,
+      gaugeRef: (el) => { this.gaugeEl = el; }, forecastRef: (el) => { this.forecastEl = el; },
+    };
+  }
+}
+</script>
+</body>
+</html>

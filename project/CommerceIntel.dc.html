@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="commerce" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <button style="margin-left:auto;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Export executive report</button>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+        <a href="{{ tb.href }}" style="padding:9px 13px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="background:linear-gradient(120deg,#141433,#2A2456,#4C1D95);border-radius:16px;padding:22px 26px;color:#fff;animation:fadeUp .35s ease">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#C4B5FD">✨ AI EXECUTIVE SUMMARY · WEEK OF JUL 14</div>
+          <div style="font-size:17px;font-weight:700;margin-top:9px;line-height:1.5;max-width:820px">Revenue is tracking <strong>+18% MoM</strong>, driven by AI-assisted sales and automations. Churn risk is rising in the "discount-driven" segment — a win-back flow could protect ~$18k. Bedding demand will peak in 12 days; recommend restocking the sage duvet now.</div>
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+            <a href="AIBuilder.dc.html" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:800" style-hover="background:rgba(255,255,255,.22);color:#fff">Launch win-back flow</a>
+            <a href="Woo.dc.html#products" style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:800" style-hover="background:rgba(255,255,255,.22);color:#fff">Review inventory</a>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="8">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px">
+              <div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div>
+              <div style="font-size:20px;font-weight:800;color:#14152A;margin-top:5px">{{ k.value }}</div>
+              <div style="font-size:10.5px;font-weight:800;color:{{ k.deltaColor }};margin-top:2px">{{ k.delta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">AI revenue forecast</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Actuals + 60-day prediction with confidence band</div>
+            <div style="height:230px;margin-top:12px"><canvas ref="{{ fcRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Growth opportunities</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ opportunities }}" as="o" hint-placeholder-count="4">
+                <div style="border:1px solid #F0EFFB;background:#FBFAFF;border-radius:11px;padding:11px 13px">
+                  <div style="display:flex;align-items:center;gap:7px"><span style="font-size:12px">{{ o.glyph }}</span><span style="font-size:12px;font-weight:800;color:#14152A">{{ o.title }}</span><span style="margin-left:auto;font-size:11px;font-weight:800;color:#0E9F6E">{{ o.gain }}</span></div>
+                  <div style="font-size:11px;font-weight:600;color:#8A8DA3;margin-top:5px;line-height:1.45">{{ o.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isSection }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <sc-for list="{{ sectionKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#A5A8BD;margin-top:2px">{{ k.note }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">{{ chartTitle }}</div>
+            <div style="height:230px;margin-top:12px"><canvas ref="{{ secRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">{{ listTitle }}</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+              <sc-for list="{{ sectionRows }}" as="r" hint-placeholder-count="6">
+                <div>
+                  <div style="display:flex;align-items:center;font-size:12px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px">{{ r.glyph }} {{ r.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ r.value }}</span></div>
+                  <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ r.width }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;margin-top:14px;color:#fff">
+          <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">✨</span><span style="font-size:13px;font-weight:800">AI insight</span></div>
+          <div style="font-size:13px;font-weight:600;color:#E6E4F5;line-height:1.55;margin-top:9px;max-width:760px">{{ sectionInsight }}</div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#dashboard').slice(1) };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#dashboard').slice(1) }); setTimeout(() => this.build(), 60); };
+    window.addEventListener('hashchange', this.hh);
+    this.build();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); this.destroy(); }
+  destroy() { [this.fc, this.sec].forEach(c => c && c.destroy()); this.fc = null; this.sec = null; }
+  build() {
+    if (!window.Chart) { setTimeout(() => this.build(), 140); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    const page = (location.hash || '#dashboard').slice(1);
+    if (page === 'dashboard' && this.fcEl && this.fcEl.isConnected && !this.fc) {
+      const days = Array.from({ length: 60 }, (_, i) => 'D' + (i + 1));
+      const cut = 30;
+      const actual = [], pred = [], band = [];
+      for (let i = 0; i < 60; i++) {
+        const base = 3200 + i * 40 + Math.sin(i / 4) * 500;
+        actual.push(i <= cut ? Math.round(base) : null);
+        pred.push(i >= cut ? Math.round(base + (i - cut) * 20) : null);
+        band.push(i >= cut ? Math.round(base + (i - cut) * 90) : null);
+      }
+      const g = this.fcEl.getContext('2d').createLinearGradient(0, 0, 0, 230);
+      g.addColorStop(0, 'rgba(79,70,229,.18)'); g.addColorStop(1, 'rgba(79,70,229,0)');
+      this.fc = new Chart(this.fcEl, { type: 'line', data: { labels: days, datasets: [
+        { label: 'Upper band', data: band, borderColor: 'transparent', backgroundColor: 'rgba(139,92,246,.1)', fill: '+1', pointRadius: 0, tension: .4 },
+        { label: 'Forecast', data: pred, borderColor: '#8B5CF6', borderDash: [5, 4], borderWidth: 2.4, pointRadius: 0, tension: .4 },
+        { label: 'Actual', data: actual, borderColor: '#4F46E5', backgroundColor: g, fill: true, borderWidth: 2.6, pointRadius: 0, tension: .4 },
+      ] }, options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { filter: it => it.dataset.label !== 'Upper band', callbacks: { label: c => ' ' + c.dataset.label + ': $' + Math.round(c.raw).toLocaleString() } } },
+        scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10, weight: 600 } } }, y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: v => '$' + (v / 1000).toFixed(0) + 'k' } } } } });
+    }
+    if (page !== 'dashboard' && this.secEl && this.secEl.isConnected) {
+      if (this.sec) this.sec.destroy();
+      const cfg = this.sectionChart(page);
+      this.sec = new Chart(this.secEl, cfg);
+    }
+  }
+  sectionChart(page) {
+    const days = Array.from({ length: 12 }, (_, i) => 'M' + (i + 1));
+    const mk = (data, color, type) => ({ type: type || 'line', data: { labels: days, datasets: [{ data, borderColor: color, backgroundColor: color + '22', fill: type !== 'bar', tension: .4, borderWidth: 2.6, pointRadius: 0, borderRadius: 5, barPercentage: .6 }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 10, weight: 600 } } }, y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 } } } } } });
+    if (page === 'customer') return mk([310, 348, 365, 402, 421, 456, 480, 512, 540, 575, 590, 618], '#8B5CF6', 'bar');
+    if (page === 'product') return mk([42, 48, 51, 55, 60, 58, 64, 70, 72, 78, 82, 88], '#0E9F6E');
+    if (page === 'marketing') return mk([2.1, 2.4, 2.8, 3.2, 3.6, 4.1, 4.4, 4.8, 5.2, 5.6, 6.0, 6.2], '#4F46E5');
+    return mk([88, 92, 96, 101, 108, 112, 118, 122, 128, 132, 138, 142], '#4F46E5');
+  }
+  renderVals() {
+    const valid = ['dashboard', 'revenue', 'customer', 'product', 'marketing'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'dashboard';
+    const titles = {
+      dashboard: ['AI Commerce Intelligence', 'Predictive intelligence across your whole business'],
+      revenue: ['Revenue Intelligence', 'Forecasts, ROI and revenue drivers'],
+      customer: ['Customer Intelligence', 'LTV, churn and next-purchase predictions'],
+      product: ['Product Intelligence', 'Demand, performance and inventory forecasts'],
+      marketing: ['Marketing Intelligence', 'Channel ROI and campaign attribution'],
+    };
+    const tabs = [['Dashboard', '#dashboard'], ['Revenue', '#revenue'], ['Customer', '#customer'], ['Product', '#product'], ['Marketing', '#marketing']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const section = {
+      revenue: { kpis: [['PREDICTED MRR', '$142.8k', '90% confidence', '#14152A'], ['SALES FORECAST', '$1.68M', 'next 12 mo', '#14152A'], ['AI-ATTRIBUTED', '$38.4k', 'this month', '#0E9F6E'], ['REVENUE / VISITOR', '$1.42', '▲ $0.18', '#0E9F6E']],
+        chartTitle: 'Revenue trajectory', listTitle: 'Revenue by driver', rows: [['Automations', '⚙️', '$52.7k', '100%'], ['AI sales agents', '🤖', '$38.4k', '73%'], ['Campaigns', '✉️', '$41.2k', '78%'], ['Organic', '🛒', '$24.9k', '47%'], ['Social', '📣', '$8.3k', '16%']],
+        insight: 'AI-assisted revenue is compounding ~9% week-over-week. If the trend holds, AI channels will overtake campaigns within 6 weeks — worth shifting budget toward agent coverage on WhatsApp.' },
+      customer: { kpis: [['AVG CLV', '$486', '▲ $42', '#0E9F6E'], ['CHURN RISK', '1,208', 'customers', '#E02424'], ['PREDICTED BUYERS', '2,861', 'next 14d', '#0E9F6E'], ['REPEAT RATE', '31.4%', '▲ 3.8pt', '#0E9F6E']],
+        chartTitle: 'CLV by cohort month', listTitle: 'CLV by segment', rows: [['VIP', '👑', '$2,640', '100%'], ['Loyal', '💜', '$1,180', '45%'], ['New', '🌱', '$212', '8%'], ['At risk', '⚠️', '$820', '31%'], ['Lapsed', '😴', '$640', '24%']],
+        insight: 'Churn probability crossed 70% for 1,208 customers, concentrated in the discount-driven segment. A win-back flow with a personal note (not a coupon) is predicted to retain ~$18k at higher margin.' },
+      product: { kpis: [['DEMAND FORECAST', '+22%', 'bedding, 30d', '#0E9F6E'], ['STOCKOUT RISK', '3 SKUs', 'within 14d', '#C2620A'], ['TOP MOVER', 'Sage Duvet', '312 orders', '#14152A'], ['DEAD STOCK', '6 SKUs', 'consider clearing', '#E02424']],
+        chartTitle: 'Demand trend index', listTitle: 'Predicted top sellers', rows: [['Linen Duvet — Sage', '🛏️', '+34%', '100%'], ['Pour-Over Kettle', '☕', '+21%', '72%'], ['Alpaca Throw', '🧶', '+18%', '64%'], ['Ceramic Lamp', '💡', '+12%', '48%'], ['Waffle Towels', '🛁', '+9%', '36%']],
+        insight: 'Bedding demand will peak in ~12 days based on seasonality and browsing velocity. The sage duvet is at stockout risk — restock 200+ units now to avoid ~$14k in lost sales.' },
+      marketing: { kpis: [['MARKETING ROI', '6.2×', '▲ 0.8×', '#0E9F6E'], ['EMAIL ROI', '42×', '▲ 5×', '#0E9F6E'], ['WHATSAPP ROI', '18×', 'new channel', '#0E9F6E'], ['BLENDED CAC', '$18.40', '▼ $2.10', '#0E9F6E']],
+        chartTitle: 'ROI trend (×)', listTitle: 'ROI by channel', rows: [['Email', '✉️', '42×', '100%'], ['WhatsApp', '🟢', '18×', '43%'], ['Automations', '⚙️', '31×', '74%'], ['Messenger', '💙', '12×', '29%'], ['Instagram', '📸', '9×', '21%'], ['Paid social', '📣', '3.1×', '8%']],
+        insight: 'WhatsApp is your fastest-rising channel at 18× ROI and climbing. Reallocating 15% of paid-social spend (3.1× ROI) into WhatsApp agent coverage is projected to add ~$6k/month.' },
+    };
+    const s = section[page];
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isDashboard: page === 'dashboard', isSection: page !== 'dashboard',
+      kpis: [
+        { label: 'PREDICTED MRR', value: '$142.8k', delta: '▲ 11.2%', deltaColor: '#0E9F6E' },
+        { label: 'SALES FORECAST · 12M', value: '$1.68M', delta: '90% confidence', deltaColor: '#8A8DA3' },
+        { label: 'CHURN PREVENTED', value: '$18.2k', delta: 'AI win-backs', deltaColor: '#0E9F6E' },
+        { label: 'DEMAND ALERT', value: '3 SKUs', delta: 'restock soon', deltaColor: '#C2620A' },
+        { label: 'AI MARKETING ROI', value: '6.2×', delta: '▲ 0.8×', deltaColor: '#0E9F6E' },
+        { label: 'PREDICTED BUYERS', value: '2,861', delta: 'next 14 days', deltaColor: '#0E9F6E' },
+        { label: 'AVG CLV', value: '$486', delta: '▲ $42', deltaColor: '#0E9F6E' },
+        { label: 'GROWTH SCORE', value: '92/100', delta: 'excellent', deltaColor: '#0E9F6E' },
+      ],
+      opportunities: [
+        { glyph: '📦', title: 'Restock sage duvet', gain: '+$14k', text: 'Demand peaks in 12 days; current stock covers ~8 days.' },
+        { glyph: '🟢', title: 'Expand WhatsApp agent', gain: '+$6k/mo', text: 'Highest-rising ROI channel at 18× — under-staffed.' },
+        { glyph: '💫', title: 'Win-back discount-driven', gain: 'Retain $18k', text: '1,208 customers at >70% churn risk this month.' },
+        { glyph: '🎁', title: 'Bundle bedding + bath', gain: '+$3.9k/mo', text: 'Strong FBT signal not yet used in email or agents.' },
+      ],
+      sectionKpis: s ? s.kpis.map(k => ({ label: k[0], value: k[1], note: k[2], color: k[3] })) : [],
+      chartTitle: s ? s.chartTitle : '', listTitle: s ? s.listTitle : '',
+      sectionRows: s ? s.rows.map(r => ({ label: r[0], glyph: r[1], value: r[2], width: r[3] })) : [],
+      sectionInsight: s ? s.insight : '',
+      fcRef: (el) => { if (el && el !== this.fcEl) { this.fcEl = el; this.build(); } },
+      secRef: (el) => { if (el && el !== this.secEl) { this.secEl = el; this.build(); } },
+    };
+  }
+}
+</script>
+</body>
+</html>

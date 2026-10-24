@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="connectors" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <a href="AppCenter.dc.html#marketplace" style="margin-left:auto;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:800;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92;color:#fff">+ Add connector</a>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="3">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isConnectors }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.note }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <sc-for list="{{ connectors }}" as="c" hint-placeholder-count="9">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px">
+              <div style="display:flex;align-items:center;gap:11px">
+                <span style="width:38px;height:38px;border-radius:10px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:{{ c.fg }}">{{ c.mark }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:800;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ c.version }} · {{ c.objects }} objects</span></span>
+                <span style="display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;color:{{ c.stColor }}"><span style="width:7px;height:7px;border-radius:99px;background:{{ c.stColor }}"></span>{{ c.status }}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:12px"><span style="font-size:10.5px;font-weight:700;color:#8A8DA3">Health</span><span style="flex:1;height:6px;border-radius:99px;background:#F3F3FA"><span style="display:block;height:6px;border-radius:99px;background:{{ c.healthColor }};width:{{ c.health }}%"></span></span><span style="font-size:11px;font-weight:800;color:{{ c.healthColor }}">{{ c.health }}</span></div>
+              <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:11px">
+                <sc-for list="{{ c.events }}" as="e" hint-placeholder-count="3"><span style="font-size:9.5px;font-weight:800;color:#5B5E75;background:#F3F3FA;border-radius:6px;padding:3px 7px">{{ e }}</span></sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:11px;border-top:1px solid #F3F3FA">
+                <span style="font-size:10.5px;font-weight:700;color:#A5A8BD">Last sync {{ c.sync }}</span>
+                <button onClick="{{ c.onSync }}" style="margin-left:auto;border:1px solid #ECEDF4;background:#fff;border-radius:7px;padding:5px 11px;font-size:11px;font-weight:800;color:#4F46E5;cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">{{ c.syncLabel }}</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Event mapping</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">How plugin events map to platform triggers used in the automation builder</div>
+        <div style="display:grid;grid-template-columns:1.2fr 40px 1.2fr 1fr .8fr;gap:8px;padding:12px 4px 8px 4px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Plugin event</span><span></span><span>Platform event</span><span>Fired · 24h</span><span>Status</span></div>
+        <sc-for list="{{ mappings }}" as="m" hint-placeholder-count="8">
+          <div style="display:grid;grid-template-columns:1.2fr 40px 1.2fr 1fr .8fr;gap:8px;align-items:center;padding:11px 4px;border-bottom:1px solid #F7F7FB">
+            <span style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:7px;background:{{ m.tint }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ m.fg }}">{{ m.mark }}</span><span style="font-size:12px;font-weight:700;color:#14152A">{{ m.from }}</span></span>
+            <span style="color:#C4C6D4;font-size:14px;text-align:center">→</span>
+            <span style="font-size:11.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:7px;padding:5px 9px;justify-self:start">{{ m.to }}</span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ m.fired }}</span>
+            <span><span style="font-size:10px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 8px">MAPPED</span></span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+          <sc-for list="{{ queueKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div></div>
+          </sc-for>
+        </div>
+        <div style="background:#0C0D1E;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+          <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#fff">Live event stream</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#34D399;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:#34D399;animation:blink 1.4s ease infinite"></span>STREAMING</span></div>
+          <div style="margin-top:12px;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px">
+            <sc-for list="{{ logs }}" as="l" hint-placeholder-count="8">
+              <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #1E1F3D">
+                <span style="color:#5B5E88;flex-shrink:0">{{ l.time }}</span>
+                <span style="font-weight:800;color:{{ l.color }};width:70px;flex-shrink:0">{{ l.status }}</span>
+                <span style="color:#9EA0C8;flex-shrink:0;width:96px">{{ l.plugin }}</span>
+                <span style="color:#E6E7F5;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.event }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#connectors').slice(1), tick: 0, logs: [] };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#connectors').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+    this.seed();
+    this.iv = setInterval(() => { if ((location.hash || '#connectors').slice(1) === 'queue') this.setState(s => ({ logs: this.next(s.logs) })); }, 1600);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearInterval(this.iv); }
+  mkLog() {
+    const evs = [['woocommerce', 'order.completed #28' + (400 + Math.floor(Math.random() * 99))], ['tutor-lms', 'course.enrolled — Ceramics 101'], ['amelia', 'appointment.booked — 3pm slot'], ['memberpress', 'membership.renewed — Gold'], ['fluent-forms', 'lead.submitted — contact'], ['givewp', 'donation.received $' + (20 + Math.floor(Math.random() * 180))]];
+    const e = evs[Math.floor(Math.random() * evs.length)];
+    const r = Math.random(); const st = r < 0.86 ? ['PROCESSED', '#34D399'] : r < 0.95 ? ['QUEUED', '#FBBF24'] : ['RETRY', '#F87171'];
+    return { time: new Date().toLocaleTimeString([], { hour12: false }), status: st[0], color: st[1], plugin: e[0], event: e[1] };
+  }
+  seed() { const logs = []; for (let i = 0; i < 9; i++) logs.push(this.mkLog()); this.setState({ logs }); }
+  next(prev) { return [this.mkLog(), this.mkLog()].concat(prev).slice(0, 11); }
+  renderVals() {
+    const valid = ['connectors', 'events', 'queue'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'connectors';
+    const titles = { connectors: ['Connector Manager', '9 connectors active across your WordPress stack'], events: ['Event Mapping', 'Plugin events → platform triggers'], queue: ['Queue Monitor', 'Real-time event processing across all connectors'] };
+    const tabs = [['Connectors', '#connectors'], ['Event Mapping', '#events'], ['Queue Monitor', '#queue']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const C = (name, mark, tint, fg, version, objects, status, health, events, sync) => ({ name, mark, tint, fg, version, objects, status, stColor: status === 'Connected' ? '#0E9F6E' : status === 'Syncing' ? '#C2620A' : '#E02424', health, healthColor: health >= 90 ? '#0E9F6E' : health >= 75 ? '#C2620A' : '#E02424', events, sync, syncLabel: 'Sync now', onSync: () => this.setState(s => ({ tick: s.tick + 1 })) });
+    const connectors = [
+      C('WooCommerce', 'W', '#F1EBFE', '#7C3AED', 'v2.4.1', 5, 'Connected', 99, ['purchase.completed', 'refund', 'subscription'], '2 min ago'),
+      C('Tutor LMS', 'TL', '#EDF9F1', '#0E9F6E', 'v2.1.0', 4, 'Connected', 98, ['course.enrolled', 'lesson.completed'], '1 min ago'),
+      C('MemberPress', 'MP', '#FFF3E8', '#C2620A', 'v1.9.4', 3, 'Connected', 96, ['membership.purchased', 'renewed'], '5 min ago'),
+      C('Amelia', 'AM', '#EEF0FE', '#4F46E5', 'v1.7.2', 3, 'Connected', 94, ['appointment.booked', 'cancelled'], '3 min ago'),
+      C('Fluent Forms', 'FF', '#F1EBFE', '#7C3AED', 'v5.1.0', 2, 'Connected', 100, ['lead.submitted', 'newsletter.signup'], 'just now'),
+      C('Fluent Support', 'FS', '#EDF9F1', '#0E9F6E', 'v1.8.0', 2, 'Connected', 92, ['ticket.created', 'ticket.closed'], '8 min ago'),
+      C('GiveWP', 'GW', '#FDEDED', '#E02424', 'v3.2.1', 2, 'Syncing', 88, ['donation.received', 'recurring'], 'in progress'),
+      C('LearnDash', 'LD', '#EDF9F1', '#0E9F6E', 'v4.9.0', 4, 'Connected', 91, ['course.completed', 'quiz.passed'], '12 min ago'),
+      C('The Events Calendar', 'EC', '#EEF0FE', '#4F46E5', 'v6.3.0', 2, 'Disconnected', 0, ['event.registered'], 'never'),
+    ];
+    const M = (from, to, mark, tint, fg, fired) => ({ from, to, mark, tint, fg, fired });
+    const mappings = [
+      M('WooCommerce · order completed', 'purchase.completed', 'W', '#F1EBFE', '#7C3AED', '284'),
+      M('Tutor LMS · course enrolled', 'course.enrolled', 'TL', '#EDF9F1', '#0E9F6E', '96'),
+      M('Tutor LMS · quiz passed', 'quiz.passed', 'TL', '#EDF9F1', '#0E9F6E', '142'),
+      M('MemberPress · subscription started', 'membership.purchased', 'MP', '#FFF3E8', '#C2620A', '38'),
+      M('Amelia · appointment booked', 'appointment.booked', 'AM', '#EEF0FE', '#4F46E5', '54'),
+      M('Fluent Forms · form submitted', 'lead.submitted', 'FF', '#F1EBFE', '#7C3AED', '410'),
+      M('Fluent Support · ticket created', 'ticket.created', 'FS', '#EDF9F1', '#0E9F6E', '72'),
+      M('GiveWP · donation received', 'donation.received', 'GW', '#FDEDED', '#E02424', '29'),
+    ];
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isConnectors: page === 'connectors', isEvents: page === 'events', isQueue: page === 'queue',
+      kpis: [
+        { label: 'CONNECTED', value: '8 / 9', color: '#14152A', note: '1 needs attention' },
+        { label: 'AVG HEALTH', value: '94', color: '#0E9F6E', note: 'excellent' },
+        { label: 'EVENTS · 24H', value: '18,420', color: '#14152A', note: '▲ 12%' },
+        { label: 'SYNC LATENCY', value: '1.2s', color: '#0E9F6E', note: 'p95' },
+      ],
+      connectors,
+      mappings,
+      queueKpis: [
+        { label: 'PROCESSED · 24H', value: '18,420', color: '#14152A' }, { label: 'IN QUEUE', value: '12', color: '#4F46E5' },
+        { label: 'RETRY QUEUE', value: '3', color: '#C2620A' }, { label: 'FAILED', value: '0', color: '#0E9F6E' },
+      ],
+      logs: this.state.logs,
+    };
+  }
+}
+</script>
+</body>
+</html>

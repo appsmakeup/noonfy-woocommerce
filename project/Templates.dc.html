@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="templates" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="padding:20px 0 16px 0;display:flex;align-items:flex-end">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Automation Templates</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ countLabel }} proven workflows, ready to launch in one click.</p>
+      </div>
+      <input onInput="{{ onSearch }}" placeholder="Search templates…" style="margin-left:auto;border:1px solid #ECEDF4;border-radius:9px;padding:8px 13px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:250px;background:#fff"></input>
+    </header>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+        <button onClick="{{ c.onClick }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.label }}</button>
+      </sc-for>
+    </div>
+    <section style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+      <sc-for list="{{ templates }}" as="t" hint-placeholder-count="12">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:15px;padding:18px;display:flex;flex-direction:column;transition:box-shadow .15s ease,transform .15s ease" style-hover="box-shadow:0 10px 28px rgba(20,21,42,.08);transform:translateY(-2px)">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:38px;height:38px;border-radius:11px;background:{{ t.tint }};display:flex;align-items:center;justify-content:center;font-size:17px">{{ t.glyph }}</span>
+            <span style="flex:1;font-size:13.5px;font-weight:800;color:#14152A;line-height:1.25">{{ t.name }}</span>
+            <sc-if value="{{ t.popular }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:9.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 8px;letter-spacing:.3px">POPULAR</span>
+            </sc-if>
+          </div>
+          <p style="margin:11px 0 0 0;font-size:12px;color:#8A8DA3;font-weight:600;line-height:1.55;flex:1">{{ t.desc }}</p>
+          <div style="display:flex;gap:14px;margin-top:12px;font-size:10.5px;font-weight:800;color:#A5A8BD">
+            <span>{{ t.emails }} EMAILS</span><span>AVG {{ t.avgRev }} / STORE</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:13px">
+            <a href="Automations.dc.html#detail" style="flex:1;text-align:center;border:1px solid #ECEDF4;border-radius:9px;padding:7px;font-size:12px;font-weight:800;color:#3C3F55;background:#fff" style-hover="border-color:#D9DBEA;color:#14152A">Preview</a>
+            <a href="Builder.dc.html" style="flex:1;text-align:center;border:none;border-radius:9px;padding:8px;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(135deg,#4F46E5,#8B5CF6)" style-hover="opacity:.92;color:#fff">Use template</a>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+    <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center;padding:70px 0;color:#8A8DA3">
+        <div style="font-size:34px">🔍</div>
+        <div style="font-size:14px;font-weight:800;color:#14152A;margin-top:10px">No templates match</div>
+        <div style="font-size:12.5px;font-weight:600;margin-top:4px">Try a different search or category.</div>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { cat: 'All', q: '' };
+  data() {
+    const T = (name, cat, glyph, tint, emails, avgRev, desc, popular) => ({ name, cat, glyph, tint, emails, avgRev, desc, popular: !!popular });
+    const P = '#F1EBFE', B = '#EEF0FE', O = '#FFF3E8', G = '#EDF9F1', R = '#FDEDED';
+    return [
+      T('Welcome Series','Lifecycle','👋',P,4,'$8.2k','Greet new subscribers, tell your story and drive the first order.',1),
+      T('Cart Recovery','Recovery','🛒',B,3,'$12.4k','Win back abandoned carts with reminders and a timed incentive.',1),
+      T('Browse Abandonment','Recovery','👀',G,2,'$5.1k','Follow up when a customer views a product but never adds to cart.',1),
+      T('Checkout Recovery','Recovery','💳',B,2,'$6.8k','Recover customers who dropped off during checkout.'),
+      T('First Purchase','Lifecycle','🎉',O,3,'$4.3k','Turn first-time buyers into repeat customers with a warm follow-up.'),
+      T('Cross Sell','Revenue','🎁',P,2,'$3.9k','Recommend complementary products after each purchase.',1),
+      T('Upsell','Revenue','📈',B,2,'$4.6k','Offer premium alternatives to recent shoppers.'),
+      T('Win Back','Lifecycle','💫',O,3,'$7.2k','Re-engage customers who haven\u2019t ordered in 90 days.',1),
+      T('VIP Customers','Loyalty','👑',P,3,'$5.8k','Reward your highest-value customers with early access and perks.'),
+      T('Birthday','Loyalty','🎂',R,1,'$1.9k','Send a birthday treat that converts goodwill into an order.'),
+      T('Anniversary','Loyalty','💜',P,1,'$1.4k','Celebrate a customer\u2019s first-purchase anniversary.'),
+      T('Review Request','Post-purchase','⭐',O,2,'$0.9k','Ask for reviews at the moment of peak delight.'),
+      T('Price Drop','Merchandising','📉',G,1,'$3.2k','Alert interested customers when a wishlisted item drops in price.'),
+      T('Back In Stock','Merchandising','📦',B,1,'$4.1k','Notify waitlisted customers the moment inventory returns.',1),
+      T('Replenishment','Revenue','🔄',G,2,'$5.4k','Remind customers to reorder consumables right on schedule.'),
+      T('Subscription Renewal','Revenue','🗓️',B,2,'$3.7k','Reduce churn with pre-renewal reminders and win-back offers.'),
+      T('Recently Viewed','Recovery','🕶️',G,1,'$2.8k','Bring shoppers back to the products they lingered on.'),
+      T('Category Interest','Merchandising','🗂️',O,2,'$2.4k','Nurture shoppers by the categories they browse most.'),
+      T('Best Sellers','Merchandising','🏆',P,1,'$2.1k','Showcase what everyone\u2019s buying this month.'),
+      T('Frequently Bought Together','Revenue','🧺',B,1,'$3.3k','Bundle suggestions based on real purchase pairs.'),
+      T('Seasonal Campaign','Campaigns','🍂',O,3,'$6.2k','A ready-made seasonal push with countdown and hero offers.'),
+      T('Flash Sale','Campaigns','⚡',R,2,'$8.9k','High-urgency sale sequence with live countdown timers.',1),
+      T('Loyalty Rewards','Loyalty','🎯',P,3,'$4.4k','Points balances, tier upgrades and redemption nudges.'),
+      T('Referral Program','Loyalty','🤝',G,2,'$2.6k','Turn happy customers into your acquisition channel.'),
+      T('High Value Customers','Lifecycle','💎',B,2,'$5.2k','Special treatment for customers above a spend threshold.'),
+      T('Inactive Customers','Lifecycle','😴',O,3,'$3.8k','A gentle re-permission series for long-dormant contacts.'),
+      T('Product Launch','Campaigns','🚀',P,3,'$7.6k','Tease, reveal and follow up on a new product drop.'),
+      T('New Arrivals','Merchandising','✨',B,1,'$2.9k','Weekly digest of what just landed in the store.'),
+      T('Coupon Reminder','Recovery','🎟️',O,2,'$3.1k','Nudge customers holding unused coupons before expiry.'),
+      T('Shipping Follow-up','Post-purchase','🚚',G,1,'$0.4k','Proactive shipping updates that cut support tickets.'),
+      T('Delivery Follow-up','Post-purchase','📬',B,1,'$0.7k','Check in after delivery and open the door to a review.'),
+      T('Post Purchase Survey','Post-purchase','📝',O,1,'$0.3k','One-question NPS survey with smart routing.'),
+      T('Negative Review Recovery','Post-purchase','🩹',R,2,'$0.8k','Reach unhappy reviewers before they churn for good.'),
+      T('Dynamic Discounts','AI-powered','🧮',P,2,'$4.8k','AI-sized discounts — just enough to convert each customer.'),
+      T('AI Recommendations','AI-powered','🤖',P,2,'$5.6k','Per-customer product picks powered by the recommendation engine.',1),
+      T('Predicted Purchase','AI-powered','🔮',P,2,'$4.2k','Reach customers right before their predicted next order date.'),
+      T('Geo Targeting','Campaigns','📍',G,1,'$1.8k','Localized offers by region, store proximity or shipping zone.'),
+      T('Weather Campaign','Campaigns','🌤️',B,1,'$1.6k','Trigger sends off local weather — rain jackets when it pours.'),
+      T('Abandoned Category','Recovery','🗑️',O,2,'$2.2k','Recover interest in a category a shopper explored then left.'),
+      T('Premium Customer Journey','Lifecycle','🥂',P,5,'$9.4k','A white-glove multi-touch journey for top-tier customers.',1),
+      T('Sunset Unengaged','Lifecycle','🌇',R,2,'$0.5k','Cleanly retire contacts who never open — protect deliverability.'),
+      T('Holiday Gift Guide','Campaigns','🎄',R,3,'$7.1k','A curated gifting series with segment-aware picks.'),
+    ];
+  }
+  renderVals() {
+    const all = this.data();
+    const catNames = ['All', 'Recovery', 'Lifecycle', 'Revenue', 'Loyalty', 'Merchandising', 'Post-purchase', 'Campaigns', 'AI-powered'];
+    const q = this.state.q.toLowerCase();
+    let templates = all.filter(t => (this.state.cat === 'All' || t.cat === this.state.cat) && (!q || (t.name + ' ' + t.desc).toLowerCase().includes(q)));
+    const cats = catNames.map(c => ({ label: c, onClick: () => this.setState({ cat: c }),
+      border: this.state.cat === c ? '#4F46E5' : '#ECEDF4',
+      bg: this.state.cat === c ? '#EEF0FE' : '#fff',
+      color: this.state.cat === c ? '#4F46E5' : '#8A8DA3' }));
+    return { templates, cats, empty: templates.length === 0, countLabel: String(all.length),
+      onSearch: (e) => this.setState({ q: e.target.value }) };
+  }
+}
+</script>
+</body>
+</html>

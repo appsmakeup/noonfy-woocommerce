@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}::-webkit-scrollbar-track{background:transparent;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+</style>
+</helmet>
+<aside style="width:248px;min-width:248px;height:100vh;background:#FFFFFF;border-right:1px solid #ECEDF4;display:flex;flex-direction:column;position:sticky;top:0;font-family:'Manrope',sans-serif">
+  <div style="display:flex;align-items:center;gap:10px;padding:18px 18px 14px 18px">
+    <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(99,82,229,.3)">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9 6 9-6M4 19h16a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1z"></path></svg>
+    </div>
+    <div>
+      <div style="font-size:15px;font-weight:800;color:#14152A;letter-spacing:-.2px">Noonfy</div>
+      <div style="font-size:10px;font-weight:600;color:#8A8DA3;letter-spacing:.4px;text-transform:uppercase">Email Automation</div>
+    </div>
+  </div>
+  <button onClick="{{ openPalette }}" style="margin:0 14px 10px 14px;display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #ECEDF4;border-radius:9px;background:#F8F8FC;color:#8A8DA3;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA;background:#F3F3FA">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+    <span>Search…</span>
+    <span style="margin-left:auto;font-size:10.5px;background:#fff;border:1px solid #E7E8F0;border-radius:5px;padding:1px 5px;color:#A0A3B8">⌘K</span>
+  </button>
+  <nav style="flex:1;overflow-y:auto;padding:0 10px 16px 10px">
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+      <div style="margin-top:10px">
+        <sc-if value="{{ g.label }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:10px;font-weight:800;letter-spacing:.9px;text-transform:uppercase;color:#A5A8BD;padding:6px 10px 4px 10px">{{ g.label }}</div>
+        </sc-if>
+        <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+          <a href="{{ it.href }}" style="display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;font-size:13px;font-weight:{{ it.weight }};color:{{ it.color }};background:{{ it.bg }};margin-top:1px" style-hover="background:#F3F3FA;color:#14152A">
+            <sc-if value="{{ it.icon }}" hint-placeholder-val="{{ true }}">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{ it.iconColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="{{ it.icon }}"></path></svg>
+            </sc-if>
+            <sc-if value="{{ it.sub }}" hint-placeholder-val="{{ false }}">
+              <span style="width:15px;display:inline-block"></span>
+            </sc-if>
+            <span>{{ it.label }}</span>
+            <sc-if value="{{ it.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="margin-left:auto;font-size:10px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:2px 7px">{{ it.badge }}</span>
+            </sc-if>
+          </a>
+        </sc-for>
+      </div>
+    </sc-for>
+  </nav>
+  <div style="border-top:1px solid #ECEDF4;padding:12px 14px;display:flex;align-items:center;gap:10px">
+    <div style="width:30px;height:30px;border-radius:99px;background:linear-gradient(135deg,#F59E0B,#EF4444);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:800">SD</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:12.5px;font-weight:700;color:#14152A">Sam Dorel</div>
+      <div style="font-size:11px;color:#8A8DA3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">brumahome.com</div>
+    </div>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A0A3B8" stroke-width="2" stroke-linecap="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"></path></svg>
+  </div>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePalette }}" style="position:fixed;inset:0;background:rgba(20,21,42,.4);backdrop-filter:blur(3px);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding-top:14vh">
+      <div onClick="{{ stopProp }}" style="width:560px;max-width:92vw;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(20,21,42,.35);overflow:hidden;animation:fadeUp .18s ease">
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid #ECEDF4">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8DA3" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4-4"></path></svg>
+          <input ref="{{ paletteInput }}" onInput="{{ onQuery }}" placeholder="Jump to a page or action…" style="flex:1;border:none;outline:none;font-size:14.5px;font-family:'Manrope',sans-serif;color:#14152A;background:transparent"></input>
+          <span style="font-size:10px;background:#F3F3FA;border-radius:5px;padding:2px 6px;color:#A0A3B8;font-weight:700">ESC</span>
+        </div>
+        <div style="max-height:340px;overflow-y:auto;padding:8px">
+          <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
+            <a href="{{ r.href }}" onClick="{{ closePalette }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:#14152A;font-size:13.5px;font-weight:600" style-hover="background:#F5F4FE">
+              <span style="width:26px;height:26px;border-radius:7px;background:{{ r.tint }};display:flex;align-items:center;justify-content:center;font-size:12px">{{ r.glyph }}</span>
+              <span>{{ r.label }}</span>
+              <span style="margin-left:auto;font-size:11px;color:#A0A3B8;font-weight:600">{{ r.group }}</span>
+            </a>
+          </sc-for>
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:24px;text-align:center;color:#8A8DA3;font-size:13px">No matches — try “automations” or “revenue”.</div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</aside>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;248px&quot;,&quot;height&quot;:&quot;900px&quot;},&quot;active&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;dashboard&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { paletteOpen: false, query: '' };
+  componentDidMount() {
+    this.keyHandler = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); this.setState({ paletteOpen: true, query: '' }); }
+      if (e.key === 'Escape') this.setState({ paletteOpen: false });
+    };
+    window.addEventListener('keydown', this.keyHandler);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this.keyHandler); }
+  routes() {
+    return [
+      ['Dashboard','Dashboard.dc.html','Overview','📊','#EEF0FE'],
+      ['Executive Dashboard','Executive.dc.html','Overview','📈','#EEF0FE'],
+      ['Live Send Monitor','Monitor.dc.html','Email Marketing','📡','#EDF9F1'],
+      ['AI Flow Builder','AIBuilder.dc.html','Automations','✨','#F1EBFE'],
+      ['Customer 360 Profile','Customer360.dc.html','Contacts','🧑','#FFF3E8'],
+      ['Revenue Attribution','Attribution.dc.html','Analytics','💰','#EEF0FE'],
+      ['Deliverability','Deliverability.dc.html','Email Marketing','📬','#EDF9F1'],
+      ['AI Assistant','Command.dc.html','Overview','🧠','#F1EBFE'],
+      ['Automation Marketplace','Marketplace.dc.html','Automations','🛒','#EEF0FE'],
+      ['Campaign Calendar','Calendar.dc.html','Email Marketing','🗓️','#FFF3E8'],
+      ['Stores \u0026 Sites','Network.dc.html','WordPress OS','🏬','#EEF0FE'],
+      ['Customer Journey Map','Journey.dc.html','Analytics','🛤️','#EDF9F1'],
+      ['Recommendation Engine','Recommend.dc.html','AI Agents','🛍️','#F1EBFE'],
+      ['Coupon Intelligence','Coupons.dc.html','Commerce','🎟️','#FFF3E8'],
+      ['All Channels','MarketingHub.dc.html','Channels','📣','#EEF0FE'],
+      ['Advanced Analytics','AdvAnalytics.dc.html','Analytics','📊','#EDF9F1'],
+      ['SMTP Dashboard','SMTP.dc.html#dashboard','Delivery','📮','#EEF0FE'],
+      ['SMTP Providers','SMTP.dc.html#providers','Delivery','🔌','#EDF9F1'],
+      ['Smart Routing','SMTP.dc.html#routing','Delivery','🔀','#F1EBFE'],
+      ['Email Queue &amp; Logs','SMTP.dc.html#queue','Delivery','📋','#FFF3E8'],
+      ['Sending Domains','SMTP.dc.html#domains','Delivery','🌐','#EDF9F1'],
+      ['Email Deliverability','SMTP.dc.html#deliverability','Delivery','📬','#EEF0FE'],
+      ['Bounces &amp; Suppressions','SMTP.dc.html#suppressions','Delivery','🚫','#FDEDED'],
+      ['SMTP Monitoring &amp; Tools','SMTP.dc.html#tools','Delivery','🩺','#F1EBFE'],
+      ['Compliance Center','Compliance.dc.html','Workspace','🛡️','#EEF0FE'],
+      ['System Health','SystemMonitor.dc.html','Workspace','🖥️','#EDF9F1'],
+      ['White Label','WhiteLabel.dc.html','Workspace','🏷️','#F1EBFE'],
+      ['Push Dashboard','Push.dc.html#dashboard','Push','🔔','#EEF0FE'],
+      ['Push Campaigns','Push.dc.html#campaigns','Push','📣','#EEF0FE'],
+      ['Push Subscribers','Push.dc.html#subscribers','Push','👥','#EDF9F1'],
+      ['Push Segments','Push.dc.html#segments','Push','🧬','#EDF9F1'],
+      ['Notification Builder','Push.dc.html#builder','Push','🎨','#F1EBFE'],
+      ['AI Notification Studio','Push.dc.html#studio','Push','✨','#F1EBFE'],
+      ['Push Templates','Push.dc.html#templates','Push','🗂️','#FFF3E8'],
+      ['Delivery Monitor','Push.dc.html#delivery','Push','📡','#EDF9F1'],
+      ['Push Analytics','Push.dc.html#analytics','Push','📈','#EEF0FE'],
+      ['Subscription Lifecycle','Push.dc.html#lifecycle','Push','🔄','#F1EBFE'],
+      ['Push Automation','Push.dc.html#automation','Push','⚡','#F1EBFE'],
+      ['Browsers \u0026 Devices','Push.dc.html#reach','Push','🌐','#EDF9F1'],
+      ['Push Settings','PushSettings.dc.html#general','Push','⚙️','#F3F3FA'],
+      ['Lead Pipeline','CRM.dc.html#leads','CRM Intelligence','🎯','#EEF0FE'],
+      ['Deal Pipeline','CRM.dc.html#deals','CRM Intelligence','💼','#EEF0FE'],
+      ['AI Sales Insights','CRM.dc.html#insights','CRM Intelligence','✨','#F1EBFE'],
+      ['Customer Health','CRM.dc.html#health','CRM Intelligence','💚','#EDF9F1'],
+      ['Voice of Customer','CRM.dc.html#voc','CRM Intelligence','🗣️','#FFF3E8'],
+      ['Executive Insights','CRM.dc.html#executive','CRM Intelligence','📋','#F1EBFE'],
+      ['App Marketplace','AppCenter.dc.html#marketplace','WordPress OS','🧩','#EEF0FE'],
+      ['Installed Apps','AppCenter.dc.html#installed','WordPress OS','📦','#EEF0FE'],
+      ['License Manager','AppCenter.dc.html#licenses','WordPress OS','🔑','#EEF0FE'],
+      ['Connector Manager','Connectors.dc.html#connectors','WordPress OS','🔌','#EDF9F1'],
+      ['Event Mapping','Connectors.dc.html#events','WordPress OS','🗺️','#EDF9F1'],
+      ['Queue Monitor','Connectors.dc.html#queue','WordPress OS','📊','#EDF9F1'],
+      ['Universal Customer CDP','UniversalCDP.dc.html','WordPress OS','🧑','#FFF3E8'],
+      ['Universal Event Engine','EventEngine.dc.html','WordPress OS','⚡','#F1EBFE'],
+      ['AI Connector Studio','ConnectorStudio.dc.html','WordPress OS','🛠️','#F1EBFE'],
+      ['Cross-Plugin Automation','CrossAutomation.dc.html','WordPress OS','🔗','#EEF0FE'],
+      ['Business Intelligence','BusinessIntel.dc.html#executive','WordPress OS','💠','#EDF9F1'],
+      ['Multi-Site Network','Network.dc.html','WordPress OS','🌐','#EEF0FE'],
+      ['Developer Platform','DevPlatform.dc.html#overview','WordPress OS','⌨️','#FFF3E8'],
+      ['Omnichannel Inbox','Inbox.dc.html','AI Engagement','💬','#EEF0FE'],
+      ['AI Sales Center','AISales.dc.html#dashboard','AI Engagement','🤖','#F1EBFE'],
+      ['AI Sales Agents','AISales.dc.html#agents','AI Engagement','🧑‍💼','#F1EBFE'],
+      ['Conversation Analytics','AISales.dc.html#analytics','AI Engagement','📈','#F1EBFE'],
+      ['AI Support Center','AISupport.dc.html#dashboard','AI Engagement','🎧','#EDF9F1'],
+      ['Ticket Center','AISupport.dc.html#tickets','AI Engagement','🎫','#EDF9F1'],
+      ['Knowledge Base','AISupport.dc.html#kb','AI Engagement','📚','#EDF9F1'],
+      ['Live Chat Center','LiveChat.dc.html#dashboard','AI Engagement','💭','#EEF0FE'],
+      ['Chat Widget Designer','LiveChat.dc.html#widget','AI Engagement','🎨','#EEF0FE'],
+      ['Live Visitor Intelligence','Visitors.dc.html','AI Engagement','👁️','#FFF3E8'],
+      ['WhatsApp Business','WhatsApp.dc.html#dashboard','AI Engagement','🟢','#EDF9F1'],
+      ['WhatsApp Broadcast','WhatsApp.dc.html#broadcast','AI Engagement','📢','#EDF9F1'],
+      ['Facebook Messenger AI','Social.dc.html#messenger','AI Engagement','💙','#EEF0FE'],
+      ['Instagram AI','Social.dc.html#instagram','AI Engagement','📸','#F1EBFE'],
+      ['AI Agent Studio','AgentStudio.dc.html#agents','AI Engagement','🛠️','#F1EBFE'],
+      ['AI Playground','AgentStudio.dc.html#playground','AI Engagement','🧪','#F1EBFE'],
+      ['AI Commerce Intelligence','CommerceIntel.dc.html#dashboard','AI Engagement','💠','#EEF0FE'],
+      ['All Workflows','Automations.dc.html#workflows','Automations','⚡','#F1EBFE'],
+      ['Visual Builder','Builder.dc.html','Automations','🧩','#F1EBFE'],
+      ['Automation Templates','Templates.dc.html','Automations','🗂️','#F1EBFE'],
+      ['Journey Analytics','Automations.dc.html#journeys','Automations','🛤️','#F1EBFE'],
+      ['Automation Detail','Automations.dc.html#detail','Automations','🔍','#F1EBFE'],
+      ['Email Campaigns','Campaigns.dc.html#all','Campaigns','✉️','#EEF0FE'],
+      ['Scheduled','Campaigns.dc.html#scheduled','Campaigns','🕑','#EEF0FE'],
+      ['Drafts','Campaigns.dc.html#drafts','Campaigns','📝','#EEF0FE'],
+      ['Sent','Campaigns.dc.html#sent','Campaigns','📤','#EEF0FE'],
+      ['A/B Testing','Campaigns.dc.html#ab','Campaigns','🧪','#EEF0FE'],
+      ['Email Builder','Campaigns.dc.html#builder','Campaigns','🎨','#EEF0FE'],
+      ['Customers','Contacts.dc.html#customers','Contacts','👥','#FFF3E8'],
+      ['Segments','Contacts.dc.html#segments','Contacts','🧬','#FFF3E8'],
+      ['Tags','Contacts.dc.html#tags','Contacts','🏷️','#FFF3E8'],
+      ['Lists','Contacts.dc.html#lists','Contacts','📋','#FFF3E8'],
+      ['Import Subscribers','Import.dc.html#import','Contacts','📥','#FFF3E8'],
+      ['Email Verification','Import.dc.html#verify','Contacts','✅','#FFF3E8'],
+      ['Products','Woo.dc.html#products','WooCommerce','📦','#EDF9F1'],
+      ['Orders','Woo.dc.html#orders','WooCommerce','🧾','#EDF9F1'],
+      ['Categories','Woo.dc.html#categories','WooCommerce','🗃️','#EDF9F1'],
+      ['Coupons','Woo.dc.html#coupons','WooCommerce','🎟️','#EDF9F1'],
+      ['Revenue','Analytics.dc.html#revenue','Analytics','💰','#EEF0FE'],
+      ['Open Rate','Analytics.dc.html#open','Analytics','📬','#EEF0FE'],
+      ['Click Rate','Analytics.dc.html#click','Analytics','🖱️','#EEF0FE'],
+      ['Conversions','Analytics.dc.html#conversions','Analytics','🎯','#EEF0FE'],
+      ['Automation Revenue','Analytics.dc.html#autorev','Analytics','⚙️','#EEF0FE'],
+      ['Email Performance','Analytics.dc.html#performance','Analytics','📈','#EEF0FE'],
+      ['Customer Lifetime Value','Analytics.dc.html#clv','Analytics','💎','#EEF0FE'],
+      ['AI Center','AI.dc.html#home','AI','✨','#F1EBFE'],
+      ['AI Subject Generator','AI.dc.html#subject','AI','💡','#F1EBFE'],
+      ['AI Content Writer','AI.dc.html#writer','AI','🖋️','#F1EBFE'],
+      ['Product Recommendations','AI.dc.html#recommend','AI','🛍️','#F1EBFE'],
+      ['Predictive Customers','AI.dc.html#predictive','AI','🔮','#F1EBFE'],
+      ['Best Send Time','AI.dc.html#sendtime','AI','⏰','#F1EBFE'],
+      ['Smart Segments','AI.dc.html#smartseg','AI','🧠','#F1EBFE'],
+      ['SMTP','Settings.dc.html#smtp','Settings','🔌','#F3F3FA'],
+      ['Integrations','Settings.dc.html#integrations','Settings','🔗','#F3F3FA'],
+      ['API','Settings.dc.html#api','Settings','🔑','#F3F3FA'],
+      ['Domains','Settings.dc.html#domains','Settings','🌐','#F3F3FA'],
+      ['Branding','Settings.dc.html#branding','Settings','🎨','#F3F3FA'],
+      ['Users','Settings.dc.html#users','Settings','👤','#F3F3FA'],
+    ];
+  }
+  renderVals() {
+    const active = this.props.active ?? 'dashboard';
+    const I = {
+      dash: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
+      bolt: 'M13 2L4 14h6l-1 8 9-12h-6l1-8z',
+      builder: 'M6 3v6M6 15v6M6 9a3 3 0 0 0 3 3h6a3 3 0 0 1 3 3M18 3v6m0 6v6M3.5 6.5h5m7 0h5m-17 11h5m7 0h5',
+      grid: 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',
+      chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+      mail: 'M3 7l9 6 9-6M4 19h16a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1z',
+      users: 'M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2M12 7a4 4 0 1 0-8 0 4 4 0 0 0 8 0M21 21v-2a4 4 0 0 0-3-3.87M15 3.13a4 4 0 0 1 0 7.75',
+      bag: 'M6 7V6a6 6 0 0 1 12 0v1M4 7h16l-1.2 13.2a1.5 1.5 0 0 1-1.5 1.3H6.7a1.5 1.5 0 0 1-1.5-1.3L4 7z',
+      spark: 'M12 2l2.2 6.8L21 11l-6.8 2.2L12 20l-2.2-6.8L3 11l6.8-2.2L12 2zM19 17l.9 2.6L22.5 20.5l-2.6.9L19 24l-.9-2.6-2.6-.9 2.6-.9L19 17z',
+      gear: 'M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
+      tag: 'M20.6 13.4L12 22 2 12V2h10l8.6 8.6a2 2 0 0 1 0 2.8zM7 7h.01',
+    };
+    const mk = (key, label, href, icon, sub, badge) => {
+      const isActive = active === key;
+      return { key, label, href, icon: icon || '', sub: !!sub, badge: badge || '',
+        color: isActive ? '#4F46E5' : (sub ? '#5B5E75' : '#3C3F55'),
+        bg: isActive ? 'linear-gradient(90deg,#EEF0FE,#F4EFFE)' : 'transparent',
+        weight: isActive ? 800 : 600,
+        iconColor: isActive ? '#4F46E5' : '#8A8DA3' };
+    };
+    const groups = [
+      { label: '', items: [
+        mk('dashboard','Dashboard','Dashboard.dc.html',I.dash),
+        mk('executive','Executive Dashboard','Executive.dc.html',I.chart,false,'★'),
+        mk('command','AI Assistant','Command.dc.html',I.spark),
+      ]},
+      { label: 'Email Marketing', items: [
+        mk('campaigns','Campaigns','Campaigns.dc.html#all',I.mail),
+        mk('scheduled','Scheduled','Campaigns.dc.html#scheduled','',true),
+        mk('drafts','Drafts','Campaigns.dc.html#drafts','',true),
+        mk('sent','Sent','Campaigns.dc.html#sent','',true),
+        mk('ab','A/B Testing','Campaigns.dc.html#ab','',true),
+        mk('calendar','Campaign Calendar','Calendar.dc.html',I.dash,true),
+        mk('monitor','Live Send Monitor','Monitor.dc.html','',true),
+        mk('deliverability','Deliverability','Deliverability.dc.html','',true),
+      ]},
+      { label: 'Automations', items: [
+        mk('workflows','All Workflows','Automations.dc.html#workflows',I.bolt),
+        mk('builder','Visual Builder','Builder.dc.html',I.builder,true),
+        mk('aibuilder','AI Flow Builder','AIBuilder.dc.html',I.spark,true),
+        mk('templates','Templates','Templates.dc.html',I.grid,true,'42'),
+        mk('marketplace','Marketplace','Marketplace.dc.html','',true),
+        mk('crossauto','Cross-Plugin Flows','CrossAutomation.dc.html','',true),
+        mk('journeys','Journey Analytics','Automations.dc.html#journeys','',true),
+      ]},
+      { label: 'Push Notifications', items: [
+        mk('pushdash','Push Dashboard','Push.dc.html#dashboard',I.bolt,false,'New'),
+        mk('pushcampaigns','Campaigns','Push.dc.html#campaigns','',true),
+        mk('pushautomation','Automation','Push.dc.html#automation','',true),
+        mk('pushsubs','Subscribers','Push.dc.html#subscribers','',true),
+        mk('pushlifecycle','Subscription Lifecycle','Push.dc.html#lifecycle','',true),
+        mk('pushsegments','Segments','Push.dc.html#segments','',true),
+        mk('pushbuilder','Notification Builder','Push.dc.html#builder','',true),
+        mk('pushstudio','AI Notification Studio','Push.dc.html#studio','',true),
+        mk('pushtemplates','Templates','Push.dc.html#templates','',true),
+        mk('pushdelivery','Delivery Monitor','Push.dc.html#delivery','',true),
+        mk('pushanalytics','Analytics','Push.dc.html#analytics','',true),
+        mk('pushreach','Browsers \u0026 Devices','Push.dc.html#reach','',true),
+        mk('pushsettings','Settings','PushSettings.dc.html#general','',true),
+      ]},
+      { label: 'Channels \u0026 Inbox', items: [
+        mk('inbox','Omnichannel Inbox','Inbox.dc.html',I.mail,false,'12'),
+        mk('livechat','Live Chat','LiveChat.dc.html#dashboard','',true),
+        mk('whatsapp','WhatsApp','WhatsApp.dc.html#dashboard','',true),
+        mk('social','Messenger \u0026 Instagram','Social.dc.html#messenger','',true),
+        mk('marketinghub','All Channels','MarketingHub.dc.html','',true),
+      ]},
+      { label: 'AI Agents', items: [
+        mk('aisales','AI Sales Center','AISales.dc.html#dashboard',I.spark),
+        mk('aisupport','AI Support Center','AISupport.dc.html#dashboard','',true),
+        mk('agentstudio','Agent Studio','AgentStudio.dc.html#agents','',true),
+        mk('ai','AI Toolkit','AI.dc.html#home','',true),
+        mk('recommend2','Recommendation Engine','Recommend.dc.html','',true),
+      ]},
+      { label: 'Contacts', items: [
+        mk('customers','Customers','Contacts.dc.html#customers',I.users),
+        mk('customer360','Customer 360° Profile','Customer360.dc.html','',true),
+        mk('visitors','Live Visitors','Visitors.dc.html','',true,'live'),
+        mk('segments','Segments','Contacts.dc.html#segments','',true),
+        mk('tags','Tags','Contacts.dc.html#tags','',true),
+        mk('lists','Lists','Contacts.dc.html#lists','',true),
+        mk('import','Import','Import.dc.html#import','',true),
+        mk('verify','Email Verification','Import.dc.html#verify','',true),
+      ]},
+      { label: 'CRM Intelligence', items: [
+        mk('crmleads','Lead Pipeline','CRM.dc.html#leads',I.bolt),
+        mk('crmdeals','Deal Pipeline','CRM.dc.html#deals','',true),
+        mk('crminsights','AI Sales Insights','CRM.dc.html#insights','',true),
+        mk('crmhealth','Customer Health','CRM.dc.html#health','',true),
+        mk('crmvoc','Voice of Customer','CRM.dc.html#voc','',true),
+        mk('crmexec','Executive Insights','CRM.dc.html#executive','',true),
+      ]},
+      { label: 'Commerce', items: [
+        mk('products','Products','Woo.dc.html#products',I.bag),
+        mk('orders','Orders','Woo.dc.html#orders','',true),
+        mk('categories','Categories','Woo.dc.html#categories','',true),
+        mk('coupons','Coupons','Woo.dc.html#coupons','',true),
+        mk('coupons2','Coupon Intelligence','Coupons.dc.html','',true),
+      ]},
+      { label: 'Analytics', items: [
+        mk('revenue','Revenue','Analytics.dc.html#revenue',I.chart),
+        mk('open','Open Rate','Analytics.dc.html#open','',true),
+        mk('click','Click Rate','Analytics.dc.html#click','',true),
+        mk('conversions','Conversions','Analytics.dc.html#conversions','',true),
+        mk('autorev','Automation Revenue','Analytics.dc.html#autorev','',true),
+        mk('performance','Email Performance','Analytics.dc.html#performance','',true),
+        mk('clv','Lifetime Value','Analytics.dc.html#clv','',true),
+        mk('attribution','Revenue Attribution','Attribution.dc.html','',true),
+        mk('advanalytics','Advanced Analytics','AdvAnalytics.dc.html','',true),
+        mk('journey','Customer Journey Map','Journey.dc.html','',true),
+        mk('commerce','AI Forecasting','CommerceIntel.dc.html#dashboard','',true),
+      ]},
+      { label: 'WordPress OS', items: [
+        mk('appcenter','App Marketplace','AppCenter.dc.html#marketplace',I.grid),
+        mk('connectors','Connector Manager','Connectors.dc.html#connectors','',true),
+        mk('connectorstudio','Connector Studio','ConnectorStudio.dc.html','',true),
+        mk('cdp','Universal CDP','UniversalCDP.dc.html','',true),
+        mk('events','Event Engine','EventEngine.dc.html','',true),
+        mk('bi','Business Intelligence','BusinessIntel.dc.html#executive','',true),
+        mk('network','Stores \u0026 Sites','Network.dc.html','',true),
+        mk('devplatform','Developer Platform','DevPlatform.dc.html#overview','',true),
+      ]},
+      { label: 'Delivery', items: [
+        mk('smtpdash','SMTP Dashboard','SMTP.dc.html#dashboard',I.mail,false,'New'),
+        mk('smtpconn','Providers','SMTP.dc.html#providers','',true),
+        mk('smtprouting','Smart Routing','SMTP.dc.html#routing','',true),
+        mk('smtpqueue','Queue &amp; Logs','SMTP.dc.html#queue','',true),
+        mk('smtpdomains','Domains &amp; Auth','SMTP.dc.html#domains','',true),
+        mk('smtpdeliver','Deliverability','SMTP.dc.html#deliverability','',true),
+        mk('smtpsuppress','Bounces &amp; Suppressions','SMTP.dc.html#suppressions','',true),
+        mk('smtptools','Monitoring &amp; Tools','SMTP.dc.html#tools','',true),
+      ]},
+      { label: 'Workspace', items: [
+        mk('settings','Settings','Settings.dc.html#smtp',I.gear),
+        mk('compliance','Compliance','Compliance.dc.html','',true),
+        mk('sysmon','System Health','SystemMonitor.dc.html','',true),
+        mk('whitelabel','White Label','WhiteLabel.dc.html','',true),
+      ]},
+    ];
+    const q = this.state.query.toLowerCase();
+    const all = this.routes().map(r => ({ label: r[0], href: r[1], group: r[2], glyph: r[3], tint: r[4] }));
+    const results = q ? all.filter(r => (r.label + ' ' + r.group).toLowerCase().includes(q)) : all.slice(0, 9);
+    return {
+      groups, results, noResults: results.length === 0,
+      paletteOpen: this.state.paletteOpen,
+      openPalette: () => this.setState({ paletteOpen: true, query: '' }),
+      closePalette: () => this.setState({ paletteOpen: false }),
+      stopProp: (e) => e.stopPropagation(),
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      paletteInput: (el) => { if (el) setTimeout(() => el.focus(), 50); },
+    };
+  }
+}
+</script>
+</body>
+</html>

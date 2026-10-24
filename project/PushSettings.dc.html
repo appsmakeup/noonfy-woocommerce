@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="pushsettings" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0;gap:12px">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Push Notification Settings</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Provider, prompt, delivery, security and developer configuration</p>
+      </div>
+      <button onClick="{{ save }}" style="margin-left:auto;border:none;background:{{ saveBg }};color:#fff;border-radius:9px;padding:9px 18px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3);display:flex;align-items:center;gap:8px" style-hover="opacity:.92">
+        <sc-if value="{{ saving }}" hint-placeholder-val="{{ false }}"><span style="width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:99px;animation:spin .7s linear infinite;display:inline-block"></span></sc-if>
+        {{ saveLabel }}
+      </button>
+    </header>
+
+    <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <nav style="position:sticky;top:16px;width:186px;flex-shrink:0">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#A5A8BD;padding:0 10px 8px 10px">Settings</div>
+        <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="8">
+          <a href="{{ n.href }}" style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12.5px;font-weight:{{ n.weight }};color:{{ n.color }};background:{{ n.bg }};margin-top:1px" style-hover="background:#F3F3FA;color:#14152A"><span style="font-size:13px">{{ n.glyph }}</span>{{ n.label }}</a>
+        </sc-for>
+      </nav>
+
+      <div style="flex:1 1 420px;min-width:0;animation:fadeUp .3s ease">
+        <sc-if value="{{ isGeneral }}" hint-placeholder-val="{{ true }}">
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Channels</div>
+              <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Turn push delivery on per surface</div>
+              <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+                <sc-for list="{{ generalToggles }}" as="t" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px">
+                    <span style="width:32px;height:32px;border-radius:9px;background:{{ t.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ t.glyph }}</span>
+                    <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ t.label }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ t.detail }}</span></span>
+                    <span onClick="{{ t.onClick }}" style="width:38px;height:22px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Defaults</div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px">
+                <div><div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">Default landing URL</div><input value="https://brumahome.com/shop" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input></div>
+                <div><div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">Notification lifetime (TTL)</div><div style="display:flex;gap:6px"><sc-for list="{{ ttlOptions }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.onClick }}" style="flex:1;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }};border-radius:8px;padding:8px 6px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ o.label }}</button></sc-for></div></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px">
+                <div><div style="display:flex;font-size:11px;font-weight:800;color:#5B5E75"><span>Max notifications / day</span><span style="margin-left:auto;color:#4F46E5">{{ maxDay }}</span></div><input type="range" min="1" max="12" value="{{ maxDay }}" onInput="{{ onMaxDay }}" style="width:100%;margin-top:8px;accent-color:#4F46E5"></input></div>
+                <div><div style="display:flex;font-size:11px;font-weight:800;color:#5B5E75"><span>Max notifications / hour</span><span style="margin-left:auto;color:#4F46E5">{{ maxHour }}</span></div><input type="range" min="1" max="6" value="{{ maxHour }}" onInput="{{ onMaxHour }}" style="width:100%;margin-top:8px;accent-color:#4F46E5"></input></div>
+              </div>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isProvider }}" hint-placeholder-val="{{ false }}">
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Push provider</div>
+              <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Route delivery through your chosen push engine</div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:16px">
+                <sc-for list="{{ providers }}" as="p" hint-placeholder-count="5">
+                  <div onClick="{{ p.onClick }}" style="display:flex;align-items:center;gap:11px;border:1.5px solid {{ p.border }};background:{{ p.bg }};border-radius:12px;padding:13px 15px;cursor:pointer">
+                    <span style="width:34px;height:34px;border-radius:9px;background:{{ p.tint }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ p.fg }}">{{ p.mark }}</span>
+                    <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ p.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ p.detail }}</span></span>
+                    <span style="font-size:9.5px;font-weight:800;color:{{ p.stColor }};background:{{ p.stBg }};border-radius:99px;padding:3px 8px;white-space:nowrap;flex-shrink:0">{{ p.status }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">{{ providerName }} configuration</span><span style="margin-left:auto;font-size:10px;font-weight:800;color:{{ activeStColor }};background:{{ activeStBg }};border-radius:99px;padding:3px 10px">{{ activeStatus }}</span></div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px">
+                <sc-for list="{{ providerFields }}" as="f" hint-placeholder-count="6">
+                  <div style="grid-column:{{ f.span }}"><div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">{{ f.label }}</div><input value="{{ f.value }}" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input></div>
+                </sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:16px;padding-top:14px;border-top:1px solid #F3F3FA">
+                <button onClick="{{ testConn }}" style="border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 16px;font-size:12px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px" style-hover="border-color:#D9DBEA">
+                  <sc-if value="{{ testing }}" hint-placeholder-val="{{ false }}"><span style="width:12px;height:12px;border:2px solid #E0D7FE;border-top-color:#7C3AED;border-radius:99px;animation:spin .7s linear infinite;display:inline-block"></span></sc-if>
+                  {{ testLabel }}
+                </button>
+                <sc-if value="{{ testPassed }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;font-weight:800;color:#0E9F6E;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E"></span>Handshake OK · 142ms · 3 test devices reached</span></sc-if>
+              </div>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isPrompt }}" hint-placeholder-val="{{ false }}">
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="display:flex;align-items:center"><div><div style="font-size:14px;font-weight:800;color:#14152A">Permission prompt</div><div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">How visitors are asked to subscribe</div></div>
+                <span onClick="{{ togglePrompt }}" style="margin-left:auto;width:38px;height:22px;border-radius:99px;background:{{ promptBg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ promptLeft }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-top:16px">
+                <sc-for list="{{ promptStyles }}" as="p" hint-placeholder-count="3">
+                  <div onClick="{{ p.onClick }}" style="border:1.5px solid {{ p.border }};background:{{ p.bg }};border-radius:12px;padding:13px 15px;cursor:pointer">
+                    <div style="font-size:16px">{{ p.glyph }}</div>
+                    <div style="font-size:12px;font-weight:800;color:#14152A;margin-top:7px">{{ p.name }}</div>
+                    <div style="font-size:10.5px;color:#8A8DA3;font-weight:600;margin-top:2px;line-height:1.4">{{ p.detail }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Trigger rules</div>
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+                <sc-for list="{{ triggers }}" as="t" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+                    <span style="font-size:14px">{{ t.glyph }}</span>
+                    <span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ t.label }}</span>
+                    <sc-if value="{{ t.hasValue }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px;font-weight:800;color:#4F46E5;background:#EEF0FE;border-radius:7px;padding:4px 10px">{{ t.value }}</span></sc-if>
+                    <span onClick="{{ t.onClick }}" style="width:36px;height:20px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:14px;height:14px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:16px"><div style="display:flex;font-size:11px;font-weight:800;color:#5B5E75"><span>Prompt delay</span><span style="margin-left:auto;color:#4F46E5">{{ delay }}s after page load</span></div><input type="range" min="0" max="60" step="5" value="{{ delay }}" onInput="{{ onDelay }}" style="width:100%;margin-top:8px;accent-color:#4F46E5"></input></div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Live preview</span><button onClick="{{ replayPreview }}" style="margin-left:auto;border:1px solid #ECEDF4;background:#fff;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;color:#4F46E5;cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">Replay</button></div>
+              <div style="background:linear-gradient(135deg,#EEF0FE,#F4EFFE);border-radius:12px;padding:24px;margin-top:14px;display:flex;justify-content:center">
+                <div style="width:330px;background:#fff;border:1px solid #ECEDF4;border-radius:12px;padding:14px 16px;box-shadow:0 10px 28px rgba(20,21,42,.14);animation:fadeUp .4s ease {{ previewKey }}">
+                  <div style="display:flex;gap:11px"><span style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0">B</span><div><div style="font-size:12.5px;font-weight:800;color:#14152A">{{ promptTitle }}</div><div style="font-size:11px;color:#8A8DA3;font-weight:600;margin-top:2px;line-height:1.45">{{ promptCopy }}</div></div></div>
+                  <div style="display:flex;gap:8px;margin-top:12px"><span style="flex:1;text-align:center;font-size:11px;font-weight:800;color:#8A8DA3;border:1px solid #ECEDF4;border-radius:8px;padding:7px">Not now</span><span style="flex:1;text-align:center;font-size:11px;font-weight:800;color:#fff;background:linear-gradient(135deg,#4F46E5,#8B5CF6);border-radius:8px;padding:7px">Allow</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isBranding }}" hint-placeholder-val="{{ false }}">
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Brand identity</div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px">
+                <div><div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">Application name</div><input value="Bruma Home" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:700;font-family:inherit;color:#14152A;outline:none;background:#F8F8FC"></input></div>
+                <div><div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">Default click URL</div><input value="https://brumahome.com" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input></div>
+              </div>
+              <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:7px">Brand color</div>
+              <div style="display:flex;gap:9px">
+                <sc-for list="{{ brandColors }}" as="c" hint-placeholder-count="5">
+                  <button onClick="{{ c.onClick }}" style="width:36px;height:36px;border-radius:10px;background:{{ c.value }};border:2px solid {{ c.border }};cursor:pointer;box-shadow:0 0 0 {{ c.ring }} {{ c.value }}"></button>
+                </sc-for>
+              </div>
+              <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:7px">Assets</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:11px">
+                <sc-for list="{{ assets }}" as="a" hint-placeholder-count="3">
+                  <div style="border:1.5px dashed #C7C3F5;background:#FBFAFF;border-radius:11px;padding:14px;text-align:center;cursor:pointer" style-hover="border-color:#8B5CF6">
+                    <div style="width:{{ a.size }};height:{{ a.size }};border-radius:{{ a.radius }};background:{{ a.bg }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:{{ a.font }};font-weight:800;margin:0 auto">{{ a.mark }}</div>
+                    <div style="font-size:11px;font-weight:800;color:#14152A;margin-top:9px">{{ a.label }}</div>
+                    <div style="font-size:10px;color:#A5A8BD;font-weight:700;margin-top:1px">{{ a.spec }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Notification preview</div>
+              <div style="background:linear-gradient(135deg,#EEF0FE,#F4EFFE);border-radius:12px;padding:22px;margin-top:14px;display:flex;justify-content:center">
+                <div style="width:340px;background:#fff;border-radius:12px;box-shadow:0 10px 28px rgba(20,21,42,.16);overflow:hidden">
+                  <div style="height:88px;background:{{ brandColor }};display:flex;align-items:center;justify-content:center;font-size:26px">🛏️</div>
+                  <div style="padding:12px 14px;display:flex;gap:11px">
+                    <span style="width:34px;height:34px;border-radius:8px;background:{{ brandColor }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0">B</span>
+                    <div><div style="font-size:12.5px;font-weight:800;color:#14152A">Back in stock: Linen Duvet — Sage</div><div style="font-size:11.5px;color:#5B5E75;font-weight:500;margin-top:3px;line-height:1.45">Free shipping this week only.</div><div style="font-size:10px;color:#A5A8BD;font-weight:700;margin-top:5px">brumahome.com · now</div></div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:14px">
+                <span style="font-size:11px;font-weight:800;color:#5B5E75">Notification sound</span>
+                <div style="display:flex;gap:6px">
+                  <sc-for list="{{ sounds }}" as="s" hint-placeholder-count="3"><button onClick="{{ s.onClick }}" style="border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:99px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit">{{ s.label }}</button></sc-for>
+                </div>
+              </div>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isDelivery }}" hint-placeholder-val="{{ false }}">
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Delivery behavior</div>
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+                <sc-for list="{{ deliveryToggles }}" as="t" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+                    <span style="font-size:14px">{{ t.glyph }}</span>
+                    <span style="flex:1"><span style="display:block;font-size:12px;font-weight:800;color:#14152A">{{ t.label }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ t.detail }}</span></span>
+                    <span onClick="{{ t.onClick }}" style="width:36px;height:20px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:14px;height:14px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Queue &amp; retry</div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px">
+                <div><div style="display:flex;font-size:11px;font-weight:800;color:#5B5E75"><span>Batch size</span><span style="margin-left:auto;color:#4F46E5">{{ batchSize }}</span></div><input type="range" min="500" max="10000" step="500" value="{{ batchSize }}" onInput="{{ onBatch }}" style="width:100%;margin-top:8px;accent-color:#4F46E5"></input></div>
+                <div><div style="display:flex;font-size:11px;font-weight:800;color:#5B5E75"><span>Max retry attempts</span><span style="margin-left:auto;color:#4F46E5">{{ retries }}</span></div><input type="range" min="0" max="8" value="{{ retries }}" onInput="{{ onRetries }}" style="width:100%;margin-top:8px;accent-color:#4F46E5"></input></div>
+              </div>
+              <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:7px">Delivery priority</div>
+              <div style="display:flex;gap:7px">
+                <sc-for list="{{ priorities }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.onClick }}" style="flex:1;border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.color }};border-radius:9px;padding:9px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ p.label }}</button></sc-for>
+              </div>
+              <div style="display:flex;align-items:center;gap:9px;margin-top:16px;padding-top:14px;border-top:1px solid #F3F3FA;font-size:11.5px;font-weight:700;color:#8A8DA3">
+                <span>Estimated throughput</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ throughput }} pushes / min</span>
+              </div>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isAdvanced }}" hint-placeholder-val="{{ false }}">
+          <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Tracking &amp; maintenance</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">What the push engine measures and cleans up automatically</div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:16px">
+              <sc-for list="{{ advancedToggles }}" as="t" hint-placeholder-count="9">
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+                  <span style="font-size:13px">{{ t.glyph }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:800;color:#14152A">{{ t.label }}</span><span style="display:block;font-size:10px;color:#8A8DA3;font-weight:600">{{ t.detail }}</span></span>
+                  <span onClick="{{ t.onClick }}" style="width:34px;height:19px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:13px;height:13px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isDeveloper }}" hint-placeholder-val="{{ false }}">
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">API access</div>
+              <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:5px">API token</div>
+              <div style="display:flex;gap:8px">
+                <input value="{{ apiKey }}" style="flex:1;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input>
+                <button onClick="{{ copyKey }}" style="border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 14px;font-size:11.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">{{ copyLabel }}</button>
+                <button onClick="{{ regenKey }}" style="border:1px solid #FDE1E1;background:#fff;border-radius:9px;padding:9px 14px;font-size:11.5px;font-weight:800;color:#E02424;cursor:pointer;font-family:inherit" style-hover="background:#FDEDED">Regenerate</button>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px">
+                <div><div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">Webhook URL</div><input value="https://brumahome.com/wp-json/noonfy/push" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input></div>
+                <div><div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">Webhook secret</div><input value="whsec_••••••••••7d2a" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:11px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input></div>
+              </div>
+            </div>
+            <div style="background:#0C0D1E;border-radius:14px;padding:20px 22px">
+              <div style="display:flex;align-items:center"><span style="font-size:13px;font-weight:800;color:#fff">SDK snippet</span>
+                <div style="margin-left:auto;display:flex;gap:5px">
+                  <sc-for list="{{ sdkTabs }}" as="s" hint-placeholder-count="2"><button onClick="{{ s.onClick }}" style="border:1px solid {{ s.border }};background:{{ s.bg }};color:{{ s.color }};border-radius:7px;padding:4px 11px;font-size:10.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ s.label }}</button></sc-for>
+                </div>
+              </div>
+              <pre style="margin:12px 0 0 0;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:#9EA0C8;line-height:1.7;white-space:pre-wrap">{{ sdkCode }}</pre>
+              <button onClick="{{ copyCode }}" style="margin-top:12px;border:1px solid #2C2E52;background:#1A1B36;color:#C7D2FE;border-radius:8px;padding:7px 14px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit" style-hover="border-color:#4F46E5">{{ copyCodeLabel }}</button>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ isSecurity }}" hint-placeholder-val="{{ false }}">
+          <section style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Domains &amp; validation</div>
+              <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+                <sc-for list="{{ domains }}" as="d" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+                    <span style="width:7px;height:7px;border-radius:99px;background:{{ d.dot }}"></span>
+                    <span style="flex:1;font-family:'SF Mono',ui-monospace,monospace;font-size:11.5px;color:#14152A">{{ d.name }}</span>
+                    <span style="font-size:10px;font-weight:800;color:{{ d.sslColor }};background:{{ d.sslBg }};border-radius:99px;padding:3px 8px">{{ d.ssl }}</span>
+                    <span style="font-size:10px;font-weight:800;color:{{ d.stColor }};background:{{ d.stBg }};border-radius:99px;padding:3px 8px">{{ d.status }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <button style="margin-top:12px;border:1px dashed #C7C3F5;background:#FBFAFF;border-radius:9px;padding:9px;font-size:11.5px;font-weight:800;color:#7C3AED;cursor:pointer;font-family:inherit;width:100%" style-hover="background:#F1EBFE">+ Add allowed domain</button>
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px;padding-top:14px;border-top:1px solid #F3F3FA">
+                <sc-for list="{{ securityToggles }}" as="t" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:10px"><span onClick="{{ t.onClick }}" style="width:36px;height:20px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:14px;height:14px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span><span style="font-size:12px;font-weight:700;color:#3C3F55">{{ t.label }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Role permissions</div>
+              <div style="display:grid;grid-template-columns:1.2fr repeat(3,.7fr);gap:8px;padding:12px 4px 8px 4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Role</span><span style="text-align:center">Send</span><span style="text-align:center">Edit</span><span style="text-align:center">Settings</span></div>
+              <sc-for list="{{ roles }}" as="r" hint-placeholder-count="4">
+                <div style="display:grid;grid-template-columns:1.2fr repeat(3,.7fr);gap:8px;align-items:center;padding:11px 4px;border-bottom:1px solid #F7F7FB">
+                  <span style="font-size:12px;font-weight:800;color:#14152A">{{ r.name }}</span>
+                  <sc-for list="{{ r.perms }}" as="p" hint-placeholder-count="3"><span onClick="{{ p.onClick }}" style="justify-self:center;width:20px;height:20px;border-radius:6px;background:{{ p.bg }};border:1px solid {{ p.border }};display:flex;align-items:center;justify-content:center;color:{{ p.color }};font-size:11px;font-weight:800;cursor:pointer">{{ p.mark }}</span></sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Audit log</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
+                <sc-for list="{{ auditLogs }}" as="l" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="width:26px;height:26px;border-radius:7px;background:{{ l.tint }};display:flex;align-items:center;justify-content:center;font-size:11px">{{ l.glyph }}</span><span style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#3C3F55">{{ l.text }}</span><span style="font-size:10.5px;font-weight:700;color:#A5A8BD;white-space:nowrap">{{ l.time }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+          </section>
+        </sc-if>
+      </div>
+
+      <aside style="flex:1 1 268px;max-width:100%;display:flex;flex-direction:column;gap:14px">
+        <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:14px;padding:18px 20px;color:#fff">
+          <div style="display:flex;align-items:center;gap:8px"><span style="width:7px;height:7px;border-radius:99px;background:#6EE7B7;animation:blink 1.6s ease infinite"></span><span style="font-size:10.5px;font-weight:800;letter-spacing:.5px;opacity:.9">CONNECTION STATUS</span></div>
+          <div style="font-size:16px;font-weight:800;margin-top:9px">{{ providerName }}</div>
+          <div style="font-size:11.5px;font-weight:600;opacity:.85;margin-top:2px">{{ activeStatusLong }}</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+            <sc-for list="{{ statusRows }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;font-size:11.5px;font-weight:600;opacity:.9"><span>{{ s.label }}</span><span style="margin-left:auto;font-weight:800">{{ s.value }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="display:flex;align-items:center"><span style="font-size:13px;font-weight:800;color:#14152A">Health score</span><span style="margin-left:auto;font-size:10px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 9px">EXCELLENT</span></div>
+          <div style="display:flex;align-items:baseline;gap:5px;margin-top:9px"><span style="font-size:30px;font-weight:800;color:#14152A">96</span><span style="font-size:11px;font-weight:800;color:#A5A8BD">/ 100</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+            <sc-for list="{{ healthBars }}" as="h" hint-placeholder-count="3">
+              <div><div style="display:flex;font-size:10.5px;font-weight:700;color:#5B5E75"><span>{{ h.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ h.value }}</span></div><div style="height:5px;border-radius:99px;background:#F3F3FA;margin-top:4px"><div style="height:5px;border-radius:99px;background:{{ h.color }};width:{{ h.width }}"></div></div></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13px;font-weight:800;color:#14152A">Quick actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+            <sc-for list="{{ quickActions }}" as="q" hint-placeholder-count="4">
+              <button onClick="{{ q.onClick }}" style="display:flex;align-items:center;gap:9px;border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 11px;cursor:pointer;font-family:inherit;text-align:left;width:100%" style-hover="border-color:#C7C3F5;background:#FBFAFF">
+                <span style="font-size:13px">{{ q.glyph }}</span><span style="font-size:11.5px;font-weight:800;color:#14152A">{{ q.label }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;align-items:center;gap:11px;background:{{ toastBg }};border:1px solid {{ toastBorder }};border-radius:12px;padding:13px 17px;box-shadow:0 12px 32px rgba(20,21,42,.18);animation:toastIn .25s ease">
+        <span style="width:26px;height:26px;border-radius:99px;background:{{ toastIconBg }};display:flex;align-items:center;justify-content:center;font-size:12px">{{ toastGlyph }}</span>
+        <div><div style="font-size:12.5px;font-weight:800;color:#14152A">{{ toastTitle }}</div><div style="font-size:11px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ toastText }}</div></div>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#general').slice(1), saving: false, saved: false,
+    tg: { web: true, pwa: true, enabled: true, smart: true, tzDelivery: true, quiet: true, retry: true, dedupe: true,
+      clickTrack: true, deliveryTrack: true, convTrack: true, revenue: true, utm: true, cleanup: true, compat: true, debug: false,
+      origin: true, apiAuth: true, ssl: true, promptOn: true,
+      trigSeconds: true, trigPages: true, trigScroll: false, trigLogin: true, trigPurchase: false },
+    ttl: '24h', maxDay: 3, maxHour: 1, provider: 'fcm', testing: false, testPassed: false,
+    promptStyle: 'soft', delay: 15, previewKey: 0, brandColor: '#4F46E5', sound: 'Default',
+    batchSize: 5000, retries: 3, priority: 'High', apiKey: 'pk_live_••••••••••••4c19', copied: false, codeCopied: false, sdk: 'js',
+    perms: { Administrator: [1, 1, 1], Manager: [1, 1, 0], Marketing: [1, 1, 0], Editor: [0, 1, 0] },
+    toast: null };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#general').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearTimeout(this.st); clearTimeout(this.tt); clearTimeout(this.ct); }
+  showToast(kind, title, text) {
+    clearTimeout(this.tt);
+    this.setState({ toast: { kind, title, text } });
+    this.tt = setTimeout(() => this.setState({ toast: null }), 3200);
+  }
+  tog(key) { return this.state.tg[key]; }
+  flip(key) { this.setState(s => ({ tg: { ...s.tg, [key]: !s.tg[key] } })); }
+  renderVals() {
+    const valid = ['general', 'provider', 'prompt', 'branding', 'delivery', 'advanced', 'developer', 'security'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'general';
+    const navItems = [['General', '#general', '⚙️'], ['Push Provider', '#provider', '🔌'], ['Permission Prompt', '#prompt', '🔔'], ['Branding', '#branding', '🎨'], ['Delivery', '#delivery', '📡'], ['Advanced', '#advanced', '🧪'], ['Developer', '#developer', '⌨️'], ['Security', '#security', '🛡️']].map(n => {
+      const k = n[1].slice(1);
+      return { label: n[0], href: n[1], glyph: n[2], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#3C3F55', bg: page === k ? '#EEF0FE' : 'transparent' };
+    });
+    const T = (key, label, detail, glyph, tint) => ({ label, detail, glyph, tint, onClick: () => this.flip(key), bg: this.tog(key) ? '#4F46E5' : '#D9DBEA', left: this.tog(key) ? '19px' : '3px' });
+    const provDefs = {
+      fcm: { name: 'Firebase Cloud Messaging', mark: 'FB', tint: '#FFF3E8', fg: '#C2620A', detail: 'Google FCM · HTTP v1 API', status: 'CONNECTED',
+        fields: [['Project ID', 'bruma-home-push', '1'], ['Sender ID', '482910374615', '1'], ['App ID', '1:4829:web:8f21ac', '1'], ['Server key', 'AAAA••••••••••7d2a', '1'], ['Service account JSON', 'bruma-home-firebase-adminsdk.json', 'span 2']] },
+      onesignal: { name: 'OneSignal', mark: 'OS', tint: '#FDEDED', fg: '#E02424', detail: 'Managed push · REST API', status: 'CONNECT',
+        fields: [['App ID', '8f21ac04-be7b-4c19-9d51-0e2a', 'span 2'], ['REST API key', 'os_••••••••••••41c9', 'span 2']] },
+      wonderpush: { name: 'WonderPush', mark: 'WP', tint: '#EEF0FE', fg: '#4F46E5', detail: 'EU-hosted · GDPR friendly', status: 'CONNECT',
+        fields: [['Client ID', 'wp_8f21ac04be7b', '1'], ['Client secret', 'wp_••••••••••7d2a', '1'], ['Web key', 'BM7••••••••••••4c19', 'span 2']] },
+      webpushr: { name: 'Webpushr', mark: 'WB', tint: '#EDF9F1', fg: '#0E9F6E', detail: 'Simple web push service', status: 'CONNECT',
+        fields: [['Auth token', 'wb_••••••••••3f9a', '1'], ['Public key', 'wb_pub_••••••7ba3', '1']] },
+      vapid: { name: 'Custom Web Push (VAPID)', mark: 'VP', tint: '#F1EBFE', fg: '#7C3AED', detail: 'Self-hosted · Web Push Protocol', status: 'CONNECT',
+        fields: [['VAPID public key', 'BJx8••••••••••••••••4c19', 'span 2'], ['VAPID private key', '••••••••••••••••7d2a', 'span 2'], ['Subject (mailto)', 'mailto:push@brumahome.com', 'span 2']] },
+    };
+    const providers = Object.keys(provDefs).map(k => {
+      const p = provDefs[k], active = this.state.provider === k;
+      const st = active ? 'CONNECTED' : p.status === 'CONNECTED' ? 'AVAILABLE' : 'CONNECT';
+      return { name: p.name, mark: p.mark, tint: p.tint, fg: p.fg, detail: p.detail, status: st,
+        stColor: st === 'CONNECTED' ? '#0E9F6E' : '#8A8DA3', stBg: st === 'CONNECTED' ? '#EDF9F1' : '#F3F3FA',
+        border: active ? '#4F46E5' : '#ECEDF4', bg: active ? '#F7F6FE' : '#fff',
+        onClick: () => this.setState({ provider: k, testPassed: false }) };
+    });
+    const activeProv = provDefs[this.state.provider];
+    const promptDefs = { native: ['Native browser prompt', 'Browser default dialog', '🌐', 'brumahome.com wants to', 'Show notifications'], soft: ['Custom soft prompt', 'Branded slide-in, then native', '💬', 'Stay in the loop?', 'Get restock alerts and early access to sales.'], delayed: ['Delayed prompt', 'Waits for engagement signals', '⏱️', 'Enjoying the collection?', 'Get notified when your favorites restock.'] };
+    const promptStyles = Object.keys(promptDefs).map(k => ({ name: promptDefs[k][0], detail: promptDefs[k][1], glyph: promptDefs[k][2],
+      border: this.state.promptStyle === k ? '#4F46E5' : '#ECEDF4', bg: this.state.promptStyle === k ? '#F7F6FE' : '#fff',
+      onClick: () => this.setState(s => ({ promptStyle: k, previewKey: s.previewKey + 1 })) }));
+    const pd = promptDefs[this.state.promptStyle];
+    const trig = (key, label, glyph, value) => ({ label, glyph, value: value || '', hasValue: !!value, onClick: () => this.flip(key), bg: this.tog(key) ? '#4F46E5' : '#D9DBEA', left: this.tog(key) ? '19px' : '3px' });
+    const ttlOptions = ['1h', '6h', '24h', '3d'].map(o => ({ label: o, onClick: () => this.setState({ ttl: o }), border: this.state.ttl === o ? '#4F46E5' : '#ECEDF4', bg: this.state.ttl === o ? '#EEF0FE' : '#fff', color: this.state.ttl === o ? '#4F46E5' : '#8A8DA3' }));
+    const brandColors = ['#4F46E5', '#7C3AED', '#0E9F6E', '#EC4899', '#F59E0B'].map(c => ({ value: c, onClick: () => this.setState({ brandColor: c }), border: this.state.brandColor === c ? '#14152A' : 'transparent', ring: this.state.brandColor === c ? '2px' : '0' }));
+    const sounds = ['Default', 'Chime', 'Silent'].map(s => ({ label: s, onClick: () => this.setState({ sound: s }), border: this.state.sound === s ? '#4F46E5' : '#ECEDF4', bg: this.state.sound === s ? '#EEF0FE' : '#fff', color: this.state.sound === s ? '#4F46E5' : '#8A8DA3' }));
+    const priorities = ['Normal', 'High', 'Urgent'].map(p => ({ label: p, onClick: () => this.setState({ priority: p }), border: this.state.priority === p ? '#4F46E5' : '#ECEDF4', bg: this.state.priority === p ? '#EEF0FE' : '#fff', color: this.state.priority === p ? '#4F46E5' : '#8A8DA3' }));
+    const sdkCodes = {
+      js: "import { NoonfyPush } from '@noonfy/push';\n\nNoonfyPush.init({\n  apiKey: 'pk_live_...',\n  provider: '" + this.state.provider + "',\n  prompt: '" + this.state.promptStyle + "',\n  delay: " + this.state.delay + "\n});",
+      php: "<?php\nuse Noonfy\\Push\\Client;\n\n$push = new Client('pk_live_...');\n$push->send([\n  'segment' => 'waitlist-bedding',\n  'title'   => 'Back in stock',\n  'url'     => 'https://brumahome.com/shop'\n]);",
+    };
+    const sdkTabs = [['JavaScript', 'js'], ['PHP', 'php']].map(s => ({ label: s[0], onClick: () => this.setState({ sdk: s[1] }), border: this.state.sdk === s[1] ? '#4F46E5' : '#2C2E52', bg: this.state.sdk === s[1] ? '#4F46E5' : '#1A1B36', color: this.state.sdk === s[1] ? '#fff' : '#8E90B8' }));
+    const roles = Object.keys(this.state.perms).map(r => ({ name: r, perms: this.state.perms[r].map((v, i) => ({
+      mark: v ? '✓' : '', bg: v ? '#4F46E5' : '#fff', border: v ? '#4F46E5' : '#D9DBEA', color: '#fff',
+      onClick: () => this.setState(s => { const next = { ...s.perms }; next[r] = next[r].map((x, j) => j === i ? (x ? 0 : 1) : x); return { perms: next }; }) })) }));
+    const toast = this.state.toast;
+    const throughput = Math.round(this.state.batchSize / 2.4 * (this.state.priority === 'Urgent' ? 1.6 : this.state.priority === 'High' ? 1.2 : 1)).toLocaleString();
+    return {
+      navItems,
+      isGeneral: page === 'general', isProvider: page === 'provider', isPrompt: page === 'prompt', isBranding: page === 'branding',
+      isDelivery: page === 'delivery', isAdvanced: page === 'advanced', isDeveloper: page === 'developer', isSecurity: page === 'security',
+      save: () => { this.setState({ saving: true }); clearTimeout(this.st); this.st = setTimeout(() => { this.setState({ saving: false }); this.showToast('ok', 'Settings saved', 'Your push configuration is live.'); }, 900); },
+      saving: this.state.saving, saveLabel: this.state.saving ? 'Saving…' : 'Save changes', saveBg: 'linear-gradient(135deg,#4F46E5,#8B5CF6)',
+      generalToggles: [
+        T('enabled', 'Enable push notifications', 'Master switch for the whole module', '🔔', '#EEF0FE'),
+        T('web', 'Web push', 'Chrome, Edge, Firefox, Opera, Brave', '🌐', '#EDF9F1'),
+        T('pwa', 'PWA push', 'Installed progressive web apps', '📱', '#F1EBFE'),
+      ],
+      ttlOptions, maxDay: this.state.maxDay, maxHour: this.state.maxHour,
+      onMaxDay: (e) => this.setState({ maxDay: +e.target.value }), onMaxHour: (e) => this.setState({ maxHour: +e.target.value }),
+      providers, providerName: activeProv.name,
+      activeStatus: 'CONNECTED', activeStColor: '#0E9F6E', activeStBg: '#EDF9F1',
+      activeStatusLong: 'Connected · last sync 2 min ago',
+      providerFields: activeProv.fields.map(f => ({ label: f[0], value: f[1], span: f[2] })),
+      testConn: () => { this.setState({ testing: true, testPassed: false }); clearTimeout(this.ct); this.ct = setTimeout(() => { this.setState({ testing: false, testPassed: true }); this.showToast('ok', 'Connection verified', activeProv.name + ' responded in 142ms.'); }, 1100); },
+      testing: this.state.testing, testPassed: this.state.testPassed, testLabel: this.state.testing ? 'Testing…' : 'Test connection',
+      togglePrompt: () => this.flip('promptOn'), promptBg: this.tog('promptOn') ? '#4F46E5' : '#D9DBEA', promptLeft: this.tog('promptOn') ? '19px' : '3px',
+      promptStyles, promptTitle: pd[3], promptCopy: pd[4],
+      triggers: [
+        trig('trigSeconds', 'Show after time on page', '⏱️', this.state.delay + 's'),
+        trig('trigPages', 'Show after pages viewed', '📄', '2 pages'),
+        trig('trigScroll', 'Show after scroll depth', '🖱️', '50%'),
+        trig('trigLogin', 'Show after login', '🔐', ''),
+        trig('trigPurchase', 'Show after purchase', '🛒', ''),
+      ],
+      delay: this.state.delay, onDelay: (e) => this.setState(s => ({ delay: +e.target.value, previewKey: s.previewKey + 1 })),
+      replayPreview: () => this.setState(s => ({ previewKey: s.previewKey + 1 })), previewKey: String(this.state.previewKey),
+      brandColors, brandColor: this.state.brandColor, sounds,
+      assets: [
+        { label: 'Notification icon', spec: '192×192 PNG', mark: 'B', size: '44px', radius: '11px', bg: this.state.brandColor, font: '17px' },
+        { label: 'Badge icon', spec: '96×96 mono', mark: '🔔', size: '36px', radius: '99px', bg: '#14152A', font: '15px' },
+        { label: 'Hero image', spec: '720×360 JPG', mark: '🛏️', size: '52px', radius: '9px', bg: '#EEF0FE', font: '20px' },
+      ],
+      deliveryToggles: [
+        T('smart', 'Smart delivery', 'AI picks the best send time per subscriber', '✨', '#F1EBFE'),
+        T('tzDelivery', 'Timezone delivery', 'Send at local time for each subscriber', '🌍', '#EEF0FE'),
+        T('quiet', 'Quiet hours', 'Hold sends between 21:00 and 08:00 local', '🌙', '#F1EBFE'),
+        T('retry', 'Retry failed notifications', 'Exponential backoff on transient failures', '🔁', '#EDF9F1'),
+        T('dedupe', 'Automatic duplicate prevention', 'Suppress identical pushes within 24h', '🧯', '#FFF3E8'),
+      ],
+      batchSize: this.state.batchSize, onBatch: (e) => this.setState({ batchSize: +e.target.value }),
+      retries: this.state.retries, onRetries: (e) => this.setState({ retries: +e.target.value }),
+      priorities, throughput,
+      advancedToggles: [
+        T('clickTrack', 'Click tracking', 'Record every notification click', '👆', ''),
+        T('deliveryTrack', 'Delivery tracking', 'Confirm receipts from the browser', '📬', ''),
+        T('convTrack', 'Conversion tracking', 'Attribute orders to pushes', '🎯', ''),
+        T('revenue', 'Revenue attribution', '5-day last-click window', '💰', ''),
+        T('utm', 'UTM parameters', 'Append utm_source=noonfy_push', '🏷️', ''),
+        T('cleanup', 'Auto cleanup', 'Purge expired subscriptions weekly', '🧹', ''),
+        T('compat', 'Browser compatibility check', 'Skip unsupported browsers silently', '🧭', ''),
+        T('dedupe', 'Duplicate prevention', 'Block repeats of the same payload', '🧯', ''),
+        T('debug', 'Debug mode', 'Verbose logs in the browser console', '🐞', ''),
+      ],
+      apiKey: this.state.apiKey,
+      copyKey: () => { this.setState({ copied: true }); this.showToast('ok', 'API key copied', 'Paste it into your integration.'); setTimeout(() => this.setState({ copied: false }), 1600); },
+      copyLabel: this.state.copied ? 'Copied ✓' : 'Copy',
+      regenKey: () => { this.setState({ apiKey: 'pk_live_••••••••••••' + Math.random().toString(16).slice(2, 6) }); this.showToast('warn', 'API key regenerated', 'The previous key was revoked immediately.'); },
+      sdkTabs, sdkCode: sdkCodes[this.state.sdk],
+      copyCode: () => { this.setState({ codeCopied: true }); this.showToast('ok', 'Snippet copied', 'SDK code copied to clipboard.'); setTimeout(() => this.setState({ codeCopied: false }), 1600); },
+      copyCodeLabel: this.state.codeCopied ? 'Copied ✓' : 'Copy snippet',
+      domains: [
+        { name: 'brumahome.com', dot: '#0E9F6E', ssl: 'HTTPS', sslColor: '#0E9F6E', sslBg: '#EDF9F1', status: 'VERIFIED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'shop.brumahome.com', dot: '#0E9F6E', ssl: 'HTTPS', sslColor: '#0E9F6E', sslBg: '#EDF9F1', status: 'VERIFIED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'academy.brumahome.com', dot: '#C2620A', ssl: 'HTTPS', sslColor: '#0E9F6E', sslBg: '#EDF9F1', status: 'PENDING', stColor: '#C2620A', stBg: '#FFF3E8' },
+      ],
+      securityToggles: [
+        T('origin', 'Origin validation on every subscription', '', '', ''),
+        T('apiAuth', 'Require API authentication for all requests', '', '', ''),
+        T('ssl', 'Strict SSL certificate verification', '', '', ''),
+      ],
+      roles,
+      auditLogs: [
+        { glyph: '🔑', tint: '#F1EBFE', text: 'Sam Dorel regenerated the push API key', time: '2h ago' },
+        { glyph: '🔌', tint: '#EEF0FE', text: 'Provider switched to Firebase Cloud Messaging', time: 'Yesterday' },
+        { glyph: '🌐', tint: '#EDF9F1', text: 'Domain shop.brumahome.com verified', time: '3 days ago' },
+        { glyph: '🛡️', tint: '#FFF3E8', text: 'Lena Ortiz enabled origin validation', time: '1 week ago' },
+        { glyph: '⚙️', tint: '#F3F3FA', text: 'Frequency cap changed from 5 to 3 per day', time: '2 weeks ago' },
+      ],
+      statusRows: [
+        { label: 'Connected browsers', value: '7' }, { label: 'Active subscribers', value: '169,480' },
+        { label: 'Last sync', value: '2 min ago' }, { label: 'Delivery rate', value: '96.8%' },
+      ],
+      healthBars: [
+        { label: 'Provider uptime', value: '99.9%', width: '99%', color: '#0E9F6E' },
+        { label: 'Delivery rate', value: '96.8%', width: '97%', color: '#0E9F6E' },
+        { label: 'Opt-in rate', value: '18.4%', width: '62%', color: '#4F46E5' },
+      ],
+      quickActions: [
+        { glyph: '🔔', label: 'Send test notification', onClick: () => this.showToast('ok', 'Test notification sent', 'Delivered to 3 registered test devices.') },
+        { glyph: '🔌', label: 'Verify connection', onClick: () => this.showToast('ok', 'Connection verified', activeProv.name + ' responded in 142ms.') },
+        { glyph: '🔑', label: 'Generate VAPID keys', onClick: () => this.showToast('ok', 'VAPID keys generated', 'New key pair stored securely.') },
+        { glyph: '📚', label: 'View documentation', onClick: () => this.showToast('info', 'Docs', 'Opening the push integration guide.') },
+      ],
+      toastOpen: !!toast,
+      toastTitle: toast ? toast.title : '', toastText: toast ? toast.text : '',
+      toastGlyph: toast ? (toast.kind === 'ok' ? '✓' : toast.kind === 'warn' ? '!' : 'i') : '',
+      toastBg: '#fff',
+      toastBorder: toast ? (toast.kind === 'warn' ? '#F8DFC5' : '#C4E9D3') : '#ECEDF4',
+      toastIconBg: toast ? (toast.kind === 'ok' ? '#EDF9F1' : toast.kind === 'warn' ? '#FFF3E8' : '#EEF0FE') : '#F3F3FA',
+    };
+  }
+}
+</script>
+</body>
+</html>

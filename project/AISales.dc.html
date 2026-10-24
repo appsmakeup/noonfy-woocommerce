@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="aisales" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <a href="AgentStudio.dc.html#agents" style="margin-left:auto;display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92;color:#fff">+ New sales agent</a>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="background:linear-gradient(120deg,#4F46E5,#7C3AED);border-radius:16px;padding:22px 26px;color:#fff;display:flex;align-items:center;gap:24px;animation:fadeUp .35s ease">
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.7px;opacity:.8;display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:99px;background:#6EE7B7;animation:blink 1.6s ease infinite"></span>AI SALES AGENTS · LIVE</div>
+            <div style="font-size:26px;font-weight:800;margin-top:7px;letter-spacing:-.4px">$38,410 sold by AI this month</div>
+            <div style="font-size:13px;font-weight:600;opacity:.85;margin-top:5px">4,182 conversations · 1,204 orders assisted · 28.4% AI conversion rate</div>
+          </div>
+          <div style="display:flex;gap:16px">
+            <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:13px;padding:14px 18px;text-align:center"><div style="font-size:22px;font-weight:800">142</div><div style="font-size:10px;font-weight:700;opacity:.8;margin-top:2px">ACTIVE NOW</div></div>
+            <div style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-radius:13px;padding:14px 18px;text-align:center"><div style="font-size:22px;font-weight:800">4.8</div><div style="font-size:10px;font-weight:700;opacity:.8;margin-top:2px">SATISFACTION</div></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px">
+          <sc-for list="{{ widgets }}" as="w" hint-placeholder-count="10">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px">
+              <div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ w.label }}</div>
+              <div style="font-size:19px;font-weight:800;color:#14152A;margin-top:5px">{{ w.value }}</div>
+              <div style="font-size:10.5px;font-weight:800;color:{{ w.deltaColor }};margin-top:2px">{{ w.delta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">AI-generated revenue</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Sales assisted by AI agents, daily</div>
+            <div style="height:220px;margin-top:12px"><canvas ref="{{ revRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Live conversations</div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+              <sc-for list="{{ liveConvos }}" as="c" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="width:30px;height:30px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.intent }}</span></span>
+                  <span style="font-size:11px;font-weight:800;color:{{ c.scoreColor }}">{{ c.score }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <a href="Inbox.dc.html" style="display:block;text-align:center;margin-top:14px;border:1px solid #C7C3F5;background:#FBFAFF;border-radius:9px;padding:8px;font-size:12px;font-weight:800;color:#7C3AED" style-hover="background:#F1EBFE;color:#7C3AED">Open inbox →</a>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAgents }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <sc-for list="{{ agents }}" as="a" hint-placeholder-count="6">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:15px;padding:18px 20px" style-hover="box-shadow:0 8px 22px rgba(20,21,42,.07)">
+            <div style="display:flex;align-items:center;gap:11px">
+              <span style="width:42px;height:42px;border-radius:12px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:19px">{{ a.glyph }}</span>
+              <span style="flex:1"><span style="display:block;font-size:14px;font-weight:800;color:#14152A">{{ a.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ a.role }}</span></span>
+              <span style="font-size:9.5px;font-weight:800;color:{{ a.stColor }};background:{{ a.stBg }};border-radius:99px;padding:3px 8px">{{ a.status }}</span>
+            </div>
+            <p style="margin:11px 0 0 0;font-size:12px;color:#8A8DA3;font-weight:600;line-height:1.5">{{ a.desc }}</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">
+              <div><div style="font-size:9.5px;font-weight:800;color:#A5A8BD">CONVOS</div><div style="font-size:14px;font-weight:800;color:#14152A;margin-top:2px">{{ a.convos }}</div></div>
+              <div><div style="font-size:9.5px;font-weight:800;color:#A5A8BD">CONV RATE</div><div style="font-size:14px;font-weight:800;color:#14152A;margin-top:2px">{{ a.conv }}</div></div>
+              <div><div style="font-size:9.5px;font-weight:800;color:#A5A8BD">REVENUE</div><div style="font-size:14px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ a.rev }}</div></div>
+            </div>
+            <div style="display:flex;gap:7px;margin-top:14px">
+              <a href="AgentStudio.dc.html#playground" style="flex:1;text-align:center;border:1px solid #ECEDF4;border-radius:8px;padding:7px;font-size:11.5px;font-weight:800;color:#3C3F55;background:#fff" style-hover="border-color:#D9DBEA;color:#14152A">Test</a>
+              <a href="AgentStudio.dc.html#agents" style="flex:1;text-align:center;border:none;border-radius:8px;padding:8px;font-size:11.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#4F46E5,#8B5CF6)" style-hover="opacity:.92;color:#fff">Edit</a>
+            </div>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isAnalytics }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Conversation outcomes</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">How AI sales conversations end</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+              <sc-for list="{{ outcomes }}" as="o" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;font-size:12px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:3px;background:{{ o.color }}"></span>{{ o.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ o.value }}</span><span style="width:44px;text-align:right;color:{{ o.color }};font-weight:800">{{ o.pct }}</span></div>
+                  <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:{{ o.color }};width:{{ o.pct }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Top questions AI handled</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ topQ }}" as="q" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px">
+                  <span style="font-size:13px">{{ q.glyph }}</span>
+                  <span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ q.text }}</span>
+                  <span style="font-size:11px;font-weight:800;color:#8A8DA3">{{ q.count }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Sales performance by channel</div>
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;padding:12px 0 8px 0;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Channel</span><span>Conversations</span><span>Orders</span><span>Conv rate</span><span style="text-align:right">Revenue</span></div>
+          <sc-for list="{{ channelPerf }}" as="c" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid #F7F7FB">
+              <span style="display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:#14152A"><span style="font-size:14px">{{ c.glyph }}</span>{{ c.name }}</span>
+              <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.convos }}</span>
+              <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ c.orders }}</span>
+              <span style="font-size:12px;font-weight:800;color:#0E9F6E">{{ c.conv }}</span>
+              <span style="font-size:13px;font-weight:800;color:#14152A;text-align:right">{{ c.rev }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#dashboard').slice(1) };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#dashboard').slice(1) }); setTimeout(() => this.initChart(), 60); };
+    window.addEventListener('hashchange', this.hh);
+    this.initChart();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); this.rev && this.rev.destroy(); }
+  initChart() {
+    if (this.state.page !== 'dashboard' && (location.hash || '#dashboard').slice(1) !== 'dashboard') return;
+    if (!window.Chart || !this.revEl || !this.revEl.isConnected) { setTimeout(() => this.initChart(), 140); return; }
+    if (this.rev) return;
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    const days = Array.from({ length: 30 }, (_, i) => 'D' + (i + 1));
+    const data = days.map((_, i) => 900 + Math.sin(i / 3.5) * 300 + i * 22 + (i % 6 === 0 ? 300 : 0));
+    const g = this.revEl.getContext('2d').createLinearGradient(0, 0, 0, 220);
+    g.addColorStop(0, 'rgba(124,58,237,.2)'); g.addColorStop(1, 'rgba(124,58,237,0)');
+    this.rev = new Chart(this.revEl, { type: 'line', data: { labels: days, datasets: [{ data, borderColor: '#7C3AED', backgroundColor: g, fill: true, tension: .4, borderWidth: 2.6, pointRadius: 0, pointHoverRadius: 4 }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' $' + Math.round(c.raw).toLocaleString() } } },
+        scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 7, font: { size: 10, weight: 600 } } }, y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: v => '$' + (v / 1000).toFixed(1) + 'k' } } } } });
+  }
+  renderVals() {
+    const valid = ['dashboard', 'agents', 'analytics'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'dashboard';
+    const titles = { dashboard: ['AI Sales Center', 'Autonomous AI agents that sell across every channel'], agents: ['AI Sales Agents', '6 agents · 4 live'], analytics: ['Conversation Analytics', 'What your AI sales agents are doing'] };
+    const tabs = [['Dashboard', '#dashboard'], ['Sales Agents', '#agents'], ['Conversation Analytics', '#analytics']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isDashboard: page === 'dashboard', isAgents: page === 'agents', isAnalytics: page === 'analytics',
+      widgets: [
+        { label: 'CONVERSATIONS', value: '4,182', delta: '▲ 22%' }, { label: 'SALES GENERATED', value: '$38,410', delta: '▲ 31%' },
+        { label: 'ORDERS ASSISTED', value: '1,204', delta: '▲ 18%' }, { label: 'AI CONVERSION', value: '28.4%', delta: '▲ 3.1pt' },
+        { label: 'AI REVENUE', value: '$38.4k', delta: '▲ 31%' }, { label: 'ACTIVE VISITORS', value: '142', delta: 'live now' },
+        { label: 'AI RECS SERVED', value: '18,290', delta: '▲ 14%' }, { label: 'HUMAN HANDOVER', value: '6.2%', delta: '▼ 1.4pt' },
+        { label: 'AVG CONVO LENGTH', value: '4.8 msg', delta: '▼ 0.3' }, { label: 'SATISFACTION', value: '4.8/5', delta: '▲ 0.2' },
+      ].map(w => ({ ...w, deltaColor: w.delta.includes('▼') && w.label === 'HUMAN HANDOVER' ? '#0E9F6E' : w.delta.includes('▼') ? '#0E9F6E' : w.delta.includes('▲') ? '#0E9F6E' : '#8A8DA3' })),
+      liveConvos: [
+        { name: 'Maya Okafor', intent: 'Asking about duvet restock', score: '94', scoreColor: '#0E9F6E', initials: 'MO', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: 'David Chen', intent: 'Comparing kitchen kettles', score: '81', scoreColor: '#0E9F6E', initials: 'DC', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: 'Priya Raman', intent: 'Lamp price + shipping', score: '76', scoreColor: '#C2620A', initials: 'PR', tint: '#FFF3E8', fg: '#C2620A' },
+        { name: 'Hana Suzuki', intent: 'Bundle recommendation', score: '68', scoreColor: '#C2620A', initials: 'HS', tint: '#FDEDED', fg: '#E02424' },
+        { name: 'Marcus Webb', intent: 'Wholesale enquiry (B2B)', score: '62', scoreColor: '#8A8DA3', initials: 'MW', tint: '#EDF9F1', fg: '#0E9F6E' },
+      ],
+      agents: [
+        { name: 'Aria', role: 'Shopping Assistant', glyph: '🛍️', tint: '#F1EBFE', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', desc: 'Guides shoppers to the right products with comparisons and recommendations.', convos: '1,840', conv: '31%', rev: '$18.2k' },
+        { name: 'Max', role: 'Checkout Assistant', glyph: '💳', tint: '#EEF0FE', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', desc: 'Recovers hesitant carts and negotiates margin-safe dynamic coupons.', convos: '920', conv: '38%', rev: '$9.8k' },
+        { name: 'Nova', role: 'Upsell & Cross-sell', glyph: '🎁', tint: '#FFF3E8', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', desc: 'Suggests bundles and premium upgrades at the perfect moment.', convos: '610', conv: '24%', rev: '$6.1k' },
+        { name: 'Leo', role: 'B2B / Wholesale', glyph: '🏢', tint: '#EDF9F1', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', desc: 'Qualifies wholesale leads and quotes tiered pricing automatically.', convos: '214', conv: '19%', rev: '$3.4k' },
+        { name: 'Iris', role: 'Subscription Sales', glyph: '🔄', tint: '#F1EBFE', status: 'PAUSED', stColor: '#C2620A', stBg: '#FFF3E8', desc: 'Converts one-time buyers into subscribers with tailored plans.', convos: '412', conv: '22%', rev: '$0.9k' },
+        { name: 'Echo', role: 'Voice AI Sales', glyph: '🎙️', tint: '#EEF0FE', status: 'BETA', stColor: '#4F46E5', stBg: '#EEF0FE', desc: 'Multilingual voice agent for phone and voice-note sales.', convos: '86', conv: '17%', rev: '$0.6k' },
+      ],
+      outcomes: [
+        { label: 'Purchased', value: '1,204', pct: '29%', color: '#0E9F6E' },
+        { label: 'Added to cart', value: '892', pct: '21%', color: '#4F46E5' },
+        { label: 'Saved / wishlisted', value: '640', pct: '15%', color: '#8B5CF6' },
+        { label: 'Handed to human', value: '260', pct: '6%', color: '#C2620A' },
+        { label: 'No action', value: '1,186', pct: '29%', color: '#C4C6D4' },
+      ],
+      topQ: [
+        { glyph: '📦', text: 'Is this back in stock / when?', count: '1,420' },
+        { glyph: '🚚', text: 'Shipping cost & delivery time', count: '1,180' },
+        { glyph: '🔍', text: 'Which product should I pick?', count: '940' },
+        { glyph: '🎟️', text: 'Do you have a discount code?', count: '720' },
+        { glyph: '↔️', text: 'Compare two products', count: '510' },
+      ],
+      channelPerf: [
+        { glyph: '💬', name: 'Website chat', convos: '1,840', orders: '580', conv: '31.5%', rev: '$16.4k' },
+        { glyph: '🟢', name: 'WhatsApp', convos: '1,120', orders: '392', conv: '35.0%', rev: '$12.1k' },
+        { glyph: '💙', name: 'Messenger', convos: '620', orders: '148', conv: '23.9%', rev: '$5.2k' },
+        { glyph: '📸', name: 'Instagram', convos: '412', orders: '68', conv: '16.5%', rev: '$3.1k' },
+        { glyph: '📱', name: 'SMS', convos: '190', orders: '16', conv: '8.4%', rev: '$1.6k' },
+      ],
+      revRef: (el) => { if (el && el !== this.revEl) { this.revEl = el; this.initChart(); } },
+    };
+  }
+}
+</script>
+</body>
+</html>

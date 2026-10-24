@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="appcenter" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <input onInput="{{ onSearch }}" placeholder="Search apps &amp; connectors…" style="margin-left:auto;border:1px solid #ECEDF4;border-radius:9px;padding:8px 13px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:250px;background:#fff"></input>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="3">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isMarketplace }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="background:linear-gradient(120deg,#4F46E5,#7C3AED);border-radius:16px;padding:22px 26px;color:#fff;display:flex;align-items:center;gap:20px">
+          <span style="width:52px;height:52px;border-radius:13px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:24px">🧩</span>
+          <div style="flex:1"><div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;opacity:.8">WORDPRESS APP CENTER</div><div style="font-size:19px;font-weight:800;margin-top:5px">Connect any WordPress plugin in one click</div><div style="font-size:12.5px;font-weight:600;opacity:.85;margin-top:4px">34 connectors · auto-detects installed plugins · unified customer data</div></div>
+          <div style="display:flex;gap:14px">
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">9</div><div style="font-size:10px;font-weight:700;opacity:.8">INSTALLED</div></div>
+            <div style="text-align:center"><div style="font-size:20px;font-weight:800">34</div><div style="font-size:10px;font-weight:700;opacity:.8">AVAILABLE</div></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin:18px 0">
+          <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+            <button onClick="{{ c.onClick }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+          <sc-for list="{{ apps }}" as="a" hint-placeholder-count="9">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:15px;padding:18px;display:flex;flex-direction:column" style-hover="box-shadow:0 10px 28px rgba(20,21,42,.08);transform:translateY(-2px)">
+              <div style="display:flex;align-items:center;gap:11px">
+                <span style="width:40px;height:40px;border-radius:11px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:{{ a.fg }}">{{ a.mark }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:800;color:#14152A">{{ a.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:700">{{ a.cat }}</span></span>
+                <sc-if value="{{ a.detected }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 7px">DETECTED</span></sc-if>
+              </div>
+              <p style="margin:11px 0 0 0;font-size:12px;color:#8A8DA3;font-weight:600;line-height:1.5;flex:1">{{ a.desc }}</p>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:12px;font-size:10.5px;font-weight:800;color:#A5A8BD"><span style="color:#F59E0B">★ {{ a.rating }}</span><span>{{ a.installs }}</span></div>
+              <button onClick="{{ a.onToggle }}" style="margin-top:13px;border:none;border-radius:9px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;background:{{ a.btnBg }};color:{{ a.btnColor }}">{{ a.btn }}</button>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:60px 0;color:#8A8DA3"><div style="font-size:32px">🔍</div><div style="font-size:14px;font-weight:800;color:#14152A;margin-top:10px">No apps match</div></div></sc-if>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isInstalled }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:2fr 1fr .8fr 1fr 1fr .8fr;gap:8px;padding:12px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA">
+          <span>App</span><span>Category</span><span>Version</span><span>Health</span><span>Last sync</span><span>Status</span>
+        </div>
+        <sc-for list="{{ installed }}" as="a" hint-placeholder-count="9">
+          <div style="display:grid;grid-template-columns:2fr 1fr .8fr 1fr 1fr .8fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB" style-hover="background:#FAFAFE">
+            <span style="display:flex;align-items:center;gap:11px"><span style="width:34px;height:34px;border-radius:9px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ a.fg }}">{{ a.mark }}</span><span><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ a.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ a.events }} events</span></span></span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ a.cat }}</span>
+            <span style="font-size:11.5px;font-weight:700;color:{{ a.verColor }}">{{ a.version }}</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:32px;height:5px;border-radius:99px;background:#F3F3FA;display:inline-block"><span style="display:block;height:5px;border-radius:99px;background:{{ a.healthColor }};width:{{ a.health }}%"></span></span><span style="font-size:11px;font-weight:800;color:{{ a.healthColor }}">{{ a.health }}</span></span>
+            <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ a.sync }}</span>
+            <span><span style="font-size:10px;font-weight:800;color:{{ a.stColor }};background:{{ a.stBg }};border-radius:99px;padding:3px 8px">{{ a.status }}</span></span>
+          </div>
+        </sc-for>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isLicenses }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+          <sc-for list="{{ licKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div></div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr .8fr;gap:8px;padding:12px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Product</span><span>Plan</span><span>License key</span><span>Renews</span><span>Status</span></div>
+          <sc-for list="{{ licenses }}" as="l" hint-placeholder-count="5">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr .8fr;gap:8px;align-items:center;padding:13px 20px;border-bottom:1px solid #F7F7FB">
+              <span style="font-size:12.5px;font-weight:800;color:#14152A">{{ l.name }}</span>
+              <span style="font-size:11.5px;font-weight:700;color:#5B5E75">{{ l.plan }}</span>
+              <span style="font-family:'SF Mono',ui-monospace,monospace;font-size:11px;color:#5B5E75;background:#F8F8FC;border:1px solid #ECEDF4;border-radius:6px;padding:4px 9px">{{ l.key }}</span>
+              <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ l.renews }}</span>
+              <span><span style="font-size:10px;font-weight:800;color:{{ l.stColor }};background:{{ l.stBg }};border-radius:99px;padding:3px 8px">{{ l.status }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#marketplace').slice(1), cat: 'All', q: '', installed: {} };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#marketplace').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); }
+  data() {
+    const A = (name, cat, mark, tint, fg, rating, installs, on, detected, desc) => ({ name, cat, mark, tint, fg, rating, installs, on, detected, desc });
+    const B = '#EEF0FE', P = '#F1EBFE', G = '#EDF9F1', O = '#FFF3E8', R = '#FDEDED';
+    return [
+      A('WooCommerce', 'Ecommerce', 'W', P, '#7C3AED', '4.9', '5M+', true, true, 'Sync orders, products, customers and coupons into the platform.'),
+      A('Easy Digital Downloads', 'Ecommerce', 'ED', B, '#4F46E5', '4.7', '60k+', false, true, 'Sell digital products with full purchase-event tracking.'),
+      A('MemberPress', 'Membership', 'MP', O, '#C2620A', '4.8', '100k+', true, true, 'Membership signups, renewals and expiry events.'),
+      A('LearnDash', 'LMS', 'LD', G, '#0E9F6E', '4.6', '100k+', false, true, 'Course enrollments, lesson completion and certificates.'),
+      A('Tutor LMS', 'LMS', 'TL', G, '#0E9F6E', '4.7', '80k+', true, false, 'Full LMS events — enroll, complete, quiz and certify.'),
+      A('Amelia', 'Booking', 'AM', B, '#4F46E5', '4.8', '50k+', true, true, 'Appointment booking, rescheduling and completion events.'),
+      A('Fluent Forms', 'Forms', 'FF', P, '#7C3AED', '4.9', '500k+', true, true, 'Turn any form submission into a workflow trigger.'),
+      A('Dokan', 'Marketplace', 'DK', O, '#C2620A', '4.5', '60k+', false, false, 'Multi-vendor marketplace — vendor and sale events.'),
+      A('GiveWP', 'Donations', 'GW', R, '#E02424', '4.7', '100k+', false, false, 'Donation and recurring-gift events for nonprofits.'),
+      A('The Events Calendar', 'Events', 'EC', B, '#4F46E5', '4.6', '800k+', false, true, 'Event registration and attendance tracking.'),
+      A('Fluent Support', 'Support Desk', 'FS', G, '#0E9F6E', '4.8', '10k+', true, false, 'Ticket lifecycle events feed the AI support agent.'),
+      A('BuddyBoss', 'Community', 'BB', P, '#7C3AED', '4.4', '40k+', false, false, 'Community, group and messaging activity events.'),
+      A('WP Project Manager', 'Project Management', 'PM', O, '#C2620A', '4.3', '10k+', false, false, 'Project, task and milestone automation triggers.'),
+      A('WPForms', 'Forms', 'WP', B, '#4F46E5', '4.8', '6M+', false, true, 'Lead capture and quote requests as events.'),
+      A('SureCart', 'Payment', 'SC', G, '#0E9F6E', '4.6', '30k+', false, false, 'Modern checkout with subscription events.'),
+    ];
+  }
+  renderVals() {
+    const valid = ['marketplace', 'installed', 'licenses'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'marketplace';
+    const titles = { marketplace: ['App Marketplace', 'Connect any WordPress plugin — like Shopify Apps for WordPress'], installed: ['Installed Apps', '9 connectors active · auto-detected from your site'], licenses: ['License Manager', 'Your active product licenses'] };
+    const tabs = [['Marketplace', '#marketplace'], ['Installed', '#installed'], ['Licenses', '#licenses']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const catNames = ['All', 'Ecommerce', 'LMS', 'Membership', 'Booking', 'Forms', 'Marketplace', 'Support Desk', 'Donations', 'Community', 'Events', 'Payment'];
+    const cats = catNames.map(c => ({ label: c, onClick: () => this.setState({ cat: c }), border: this.state.cat === c ? '#4F46E5' : '#ECEDF4', bg: this.state.cat === c ? '#EEF0FE' : '#fff', color: this.state.cat === c ? '#4F46E5' : '#8A8DA3' }));
+    const q = this.state.q.toLowerCase();
+    const all = this.data();
+    const isOn = (a) => this.state.installed[a.name] !== undefined ? this.state.installed[a.name] : a.on;
+    let apps = all.filter(a => (this.state.cat === 'All' || a.cat === this.state.cat) && (!q || (a.name + ' ' + a.desc + ' ' + a.cat).toLowerCase().includes(q)));
+    apps = apps.map(a => { const on = isOn(a); return { ...a, installs: a.installs + ' installs',
+      btn: on ? 'Disable' : (a.detected ? 'Enable' : 'Install connector'), btnBg: on ? '#FDEDED' : 'linear-gradient(135deg,#4F46E5,#8B5CF6)', btnColor: on ? '#E02424' : '#fff',
+      onToggle: () => this.setState(s => ({ installed: { ...s.installed, [a.name]: !isOn(a) } })) }; });
+    const stt = { ACTIVE: ['#0E9F6E', '#EDF9F1'], SYNCING: ['#C2620A', '#FFF3E8'], ERROR: ['#E02424', '#FDEDED'] };
+    const installed = all.filter(a => isOn(a)).map((a, i) => ({ ...a, version: 'v' + (2 + i % 4) + '.' + (i % 9) + '.1', verColor: i % 5 === 0 ? '#C2620A' : '#0E9F6E',
+      events: [12, 8, 6, 14, 9, 7, 5][i % 7], health: [99, 98, 94, 100, 96, 91, 88][i % 7], healthColor: i % 6 === 5 ? '#C2620A' : '#0E9F6E',
+      sync: ['2 min ago', '5 min ago', '1 min ago', 'just now', '8 min ago'][i % 5], status: i % 6 === 5 ? 'SYNCING' : 'ACTIVE', stColor: stt[i % 6 === 5 ? 'SYNCING' : 'ACTIVE'][0], stBg: stt[i % 6 === 5 ? 'SYNCING' : 'ACTIVE'][1] }));
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isMarketplace: page === 'marketplace', isInstalled: page === 'installed', isLicenses: page === 'licenses',
+      cats, apps, empty: apps.length === 0, installed,
+      onSearch: (e) => this.setState({ q: e.target.value }),
+      licKpis: [
+        { label: 'ACTIVE LICENSES', value: '9', color: '#14152A' }, { label: 'PLAN', value: 'Agency', color: '#7C3AED' },
+        { label: 'SITES USED', value: '5 / ∞', color: '#14152A' }, { label: 'NEXT RENEWAL', value: 'Mar 2027', color: '#0E9F6E' },
+      ],
+      licenses: [
+        { name: 'Noonfy Platform', plan: 'Agency', key: 'nf_••••••••8f21', renews: 'Mar 12, 2027', status: 'ACTIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'WooCommerce Connector', plan: 'Included', key: 'wc_••••••••4c09', renews: 'Bundled', status: 'ACTIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'LMS Connector Pack', plan: 'Pro', key: 'lms_••••••••7ba3', renews: 'Mar 12, 2027', status: 'ACTIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'AI Agents Add-on', plan: 'Pro', key: 'ai_••••••••d510', renews: 'Mar 12, 2027', status: 'ACTIVE', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'WhatsApp Business API', plan: 'Metered', key: 'wa_••••••••2e88', renews: 'Jul 30, 2026', status: 'RENEWS SOON', stColor: '#C2620A', stBg: '#FFF3E8' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

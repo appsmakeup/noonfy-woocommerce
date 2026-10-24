@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes barGrow{from{width:0;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="{{ sidebarKey }}" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <a href="Contacts.dc.html#customers" style="margin-left:auto;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;color:#3C3F55" style-hover="border-color:#D9DBEA;color:#14152A">View all customers</a>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="2">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isImport }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+          <sc-for list="{{ importSources }}" as="s" hint-placeholder-count="4">
+            <button onClick="{{ s.onClick }}" style="text-align:left;background:#fff;border:1.5px solid {{ s.border }};border-radius:14px;padding:16px 18px;cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">
+              <div style="display:flex;align-items:center;gap:9px"><span style="width:34px;height:34px;border-radius:9px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ s.glyph }}</span><sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font-size:9.5px;font-weight:800;color:#4F46E5;background:#EEF0FE;border-radius:99px;padding:3px 8px">SELECTED</span></sc-if></div>
+              <div style="font-size:13px;font-weight:800;color:#14152A;margin-top:10px">{{ s.name }}</div>
+              <div style="font-size:11px;color:#8A8DA3;font-weight:600;margin-top:2px">{{ s.detail }}</div>
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">{{ uploadTitle }}</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ uploadSub }}</div>
+
+            <sc-if value="{{ isFileSource }}" hint-placeholder-val="{{ true }}">
+              <div ondragover="event.preventDefault()" style="border:1.5px dashed #C7C3F5;background:#FBFAFF;border-radius:13px;padding:30px 20px;text-align:center;margin-top:16px">
+                <div style="font-size:30px">📄</div>
+                <div style="font-size:13px;font-weight:800;color:#14152A;margin-top:8px">Drop a CSV or Excel file here</div>
+                <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:3px">or</div>
+                <button onClick="{{ pickFile }}" style="margin-top:8px;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 18px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit">Browse files</button>
+                <div style="font-size:10.5px;color:#A5A8BD;font-weight:600;margin-top:10px">Max 50MB · .csv, .xlsx · UTF-8</div>
+              </div>
+              <sc-if value="{{ hasFile }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:11px;border:1px solid #ECEDF4;border-radius:11px;padding:12px 14px;margin-top:12px;background:#FAFAFE">
+                  <span style="width:30px;height:30px;border-radius:8px;background:#EDF9F1;display:flex;align-items:center;justify-content:center;font-size:14px">📗</span>
+                  <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">subscribers_july.csv</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">3,412 rows · 5 columns detected</span></span>
+                  <span style="font-size:10.5px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 9px">READY</span>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ isPasteSource }}" hint-placeholder-val="{{ false }}">
+              <textarea placeholder="Paste emails — one per line, or comma-separated&#10;maya@example.com&#10;jonas@example.com, priya@example.com" style="width:100%;height:150px;border:1px solid #ECEDF4;border-radius:11px;padding:12px 14px;font-size:12.5px;font-family:'SF Mono',ui-monospace,monospace;color:#14152A;outline:none;background:#F8F8FC;resize:none;margin-top:16px"></textarea>
+            </sc-if>
+            <sc-if value="{{ isApiSource }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px">
+                <sc-for list="{{ apiConnectors }}" as="c" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:11px;border:1px solid #ECEDF4;border-radius:11px;padding:12px 14px">
+                    <span style="width:30px;height:30px;border-radius:8px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ c.fg }}">{{ c.mark }}</span>
+                    <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ c.detail }}</span></span>
+                    <button style="border:1px solid {{ c.btnBorder }};background:{{ c.btnBg }};color:{{ c.btnColor }};border-radius:8px;padding:6px 13px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.btn }}</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="display:flex;align-items:center;gap:10px;margin-top:18px;padding-top:16px;border-top:1px solid #F3F3FA">
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#3C3F55;cursor:pointer">
+                <span onClick="{{ toggleVerify }}" style="width:38px;height:22px;border-radius:99px;background:{{ verifyOnBg }};position:relative;flex-shrink:0"><span style="position:absolute;top:3px;left:{{ verifyOnLeft }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                Verify emails on import
+              </label>
+              <a href="#verify" style="font-size:11px;font-weight:800;color:#7C3AED">via {{ verifyProvider }} →</a>
+              <button style="margin-left:auto;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px 18px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Start import</button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+              <div style="font-size:13.5px;font-weight:800;color:#14152A">Field mapping</div>
+              <div style="font-size:11.5px;color:#8A8DA3;font-weight:600;margin-top:1px">Detected columns → Noonfy fields</div>
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:13px">
+                <sc-for list="{{ mapping }}" as="m" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <span style="flex:1;font-family:'SF Mono',ui-monospace,monospace;font-size:11px;color:#5B5E75;background:#F8F8FC;border:1px solid #ECEDF4;border-radius:7px;padding:6px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.col }}</span>
+                    <span style="color:#C4C6D4;font-size:12px">→</span>
+                    <span style="flex:1;font-size:11.5px;font-weight:800;color:{{ m.color }};background:{{ m.bg }};border-radius:7px;padding:6px 10px">{{ m.field }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+              <div style="font-size:13.5px;font-weight:800;color:#14152A">List &amp; consent</div>
+              <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:12px;margin-bottom:5px">Add to list</div>
+              <div style="border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;color:#14152A;background:#F8F8FC">Master Newsletter (31,840)</div>
+              <label style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;font-size:11.5px;font-weight:600;color:#5B5E75;line-height:1.45"><span style="width:16px;height:16px;border-radius:5px;background:#4F46E5;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;flex-shrink:0;margin-top:1px">✓</span>These contacts gave explicit consent to be emailed (GDPR/CCPA).</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+          <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">Recent imports</span><span style="margin-left:auto;font-size:11px;font-weight:700;color:#8A8DA3">Last 30 days</span></div>
+          <div style="display:grid;grid-template-columns:1.4fr .8fr .8fr .8fr .8fr 1fr;gap:8px;padding:11px 0 8px 0;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA">
+            <span>Source</span><span>Rows</span><span>Valid</span><span>Invalid</span><span>Duplicates</span><span>When</span>
+          </div>
+          <sc-for list="{{ recent }}" as="r" hint-placeholder-count="4">
+            <div style="display:grid;grid-template-columns:1.4fr .8fr .8fr .8fr .8fr 1fr;gap:8px;align-items:center;padding:11px 0;border-bottom:1px solid #F7F7FB">
+              <span style="display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:#14152A"><span style="font-size:14px">{{ r.glyph }}</span>{{ r.source }}</span>
+              <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ r.rows }}</span>
+              <span style="font-size:12px;font-weight:800;color:#0E9F6E">{{ r.valid }}</span>
+              <span style="font-size:12px;font-weight:800;color:#E02424">{{ r.invalid }}</span>
+              <span style="font-size:12px;font-weight:700;color:#C2620A">{{ r.dupes }}</span>
+              <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ r.when }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isVerify }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <sc-for list="{{ verifyKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:15px 18px">
+              <div style="font-size:11px;font-weight:800;color:#8A8DA3">{{ k.label }}</div>
+              <div style="font-size:22px;font-weight:800;color:{{ k.color }};margin-top:6px">{{ k.value }}</div>
+              <div style="font-size:11px;font-weight:700;color:#A5A8BD;margin-top:2px">{{ k.note }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1.15fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Verification provider</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Choose a 3rd-party API for real-time and bulk checks</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+              <sc-for list="{{ providers }}" as="p" hint-placeholder-count="4">
+                <div onClick="{{ p.onClick }}" style="display:flex;align-items:center;gap:11px;border:1.5px solid {{ p.border }};background:{{ p.bg }};border-radius:12px;padding:12px 14px;cursor:pointer">
+                  <span style="width:34px;height:34px;border-radius:9px;background:{{ p.tint }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ p.fg }}">{{ p.mark }}</span>
+                  <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">{{ p.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ p.detail }}</span></span>
+                  <span style="font-size:10.5px;font-weight:800;color:{{ p.stColor }};background:{{ p.stBg }};border-radius:99px;padding:3px 9px">{{ p.status }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border-top:1px solid #F3F3FA;margin-top:16px;padding-top:14px">
+              <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-bottom:5px">{{ activeProvider }} API key</div>
+              <div style="display:flex;gap:8px">
+                <input value="{{ apiKeyMask }}" style="flex:1;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input>
+                <button style="border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 14px;font-size:12px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Test</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;margin-top:9px;font-size:11px;font-weight:700;color:#0E9F6E"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E"></span>Connected · {{ credits }} credits remaining</div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Verify a list now</span><span style="margin-left:auto;font-size:11px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 10px">{{ activeProvider }}</span></div>
+            <div style="border:1px solid #ECEDF4;border-radius:11px;padding:13px 15px;margin-top:14px;display:flex;align-items:center;gap:11px;background:#FAFAFE">
+              <span style="width:30px;height:30px;border-radius:8px;background:#EEF0FE;display:flex;align-items:center;justify-content:center;font-size:14px">📋</span>
+              <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:800;color:#14152A">Master Newsletter</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">31,840 addresses · last verified 12 days ago</span></span>
+            </div>
+            <button onClick="{{ runVerify }}" style="width:100%;margin-top:12px;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">{{ verifyBtn }}</button>
+
+            <sc-if value="{{ verifying }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:16px">
+                <div style="display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;color:#7C3AED"><span style="width:15px;height:15px;border:2px solid #E0D7FE;border-top-color:#7C3AED;border-radius:99px;animation:spin .7s linear infinite;display:inline-block"></span>Checking {{ verifyProgress }} of 31,840…</div>
+                <div style="height:8px;border-radius:99px;background:#F3F3FA;margin-top:10px"><div style="height:8px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ verifyPct }};transition:width .3s ease"></div></div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ verifyDone }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+                <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
+                  <div>
+                    <div style="display:flex;align-items:center;font-size:11.5px;font-weight:700;color:#3C3F55"><span style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:3px;background:{{ r.color }}"></span>{{ r.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ r.count }}</span><span style="width:44px;text-align:right;font-weight:800;color:{{ r.color }}">{{ r.pct }}</span></div>
+                    <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:{{ r.color }};width:{{ r.pct }};animation:barGrow .6s ease"></div></div>
+                  </div>
+                </sc-for>
+                <div style="display:flex;gap:8px;margin-top:6px">
+                  <button style="flex:1;border:1px solid #FDE1E1;background:#fff;border-radius:9px;padding:8px;font-size:11.5px;font-weight:800;color:#E02424;cursor:pointer;font-family:inherit" style-hover="background:#FDEDED">Remove 1,284 invalid</button>
+                  <button style="flex:1;border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:8px;font-size:11.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Export report</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Real-time verification</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Validate at the point of capture — before a bad address ever enters your list</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px">
+            <sc-for list="{{ rtHooks }}" as="h" hint-placeholder-count="3">
+              <div style="border:1px solid #F3F3FA;border-radius:12px;padding:14px 16px">
+                <div style="display:flex;align-items:center;gap:9px"><span style="width:30px;height:30px;border-radius:8px;background:{{ h.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ h.glyph }}</span><span style="font-size:12.5px;font-weight:800;color:#14152A">{{ h.name }}</span></div>
+                <div style="font-size:11px;color:#8A8DA3;font-weight:600;margin-top:8px;line-height:1.45">{{ h.detail }}</div>
+                <div style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:10.5px;font-weight:800;color:#0E9F6E"><span style="width:6px;height:6px;border-radius:99px;background:#0E9F6E"></span>{{ h.status }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#import').slice(1), source: 'csv', verifyOn: true, provider: 'zerobounce', vstatus: 'done', vprogress: 0 };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#import').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearInterval(this.vi); }
+  runVerify() {
+    clearInterval(this.vi);
+    this.setState({ vstatus: 'running', vprogress: 0 });
+    this.vi = setInterval(() => {
+      this.setState(s => {
+        const next = s.vprogress + 3400 + Math.round(Math.random() * 1800);
+        if (next >= 31840) { clearInterval(this.vi); return { vprogress: 31840, vstatus: 'done' }; }
+        return { vprogress: next };
+      });
+    }, 260);
+  }
+  renderVals() {
+    const page = this.state.page === 'verify' ? 'verify' : 'import';
+    const tabs = [['Import Subscribers', '#import', 'import'], ['Email Verification', '#verify', 'verify']].map(t => ({
+      label: t[0], href: t[1], weight: page === t[2] ? 800 : 600, color: page === t[2] ? '#4F46E5' : '#8A8DA3', border: page === t[2] ? '#4F46E5' : 'transparent' }));
+    const src = this.state.source;
+    const sources = [
+      ['csv', 'CSV / Excel', 'Upload a spreadsheet', '📄', '#EDF9F1'],
+      ['paste', 'Paste list', 'Copy-paste emails', '📋', '#EEF0FE'],
+      ['api', 'From another tool', 'Mailchimp, Klaviyo…', '🔗', '#F1EBFE'],
+      ['woo', 'WooCommerce', 'Sync existing customers', '🛒', '#FFF3E8'],
+    ];
+    const importSources = sources.map(s => ({ id: s[0], name: s[1], detail: s[2], glyph: s[3], tint: s[4], active: src === s[0],
+      border: src === s[0] ? '#4F46E5' : '#ECEDF4', onClick: () => this.setState({ source: s[0] }) }));
+    const uploadCopy = {
+      csv: ['Upload a file', 'Map columns, verify, and add to a list'],
+      paste: ['Paste your list', 'One email per line or comma-separated'],
+      api: ['Connect a source', 'Import contacts directly from another platform'],
+      woo: ['Sync from WooCommerce', 'Pull existing store customers into a list'],
+    };
+    const providerNames = { zerobounce: 'ZeroBounce', neverbounce: 'NeverBounce', kickbox: 'Kickbox', emailable: 'Emailable' };
+    const providers = [
+      ['zerobounce', 'ZeroBounce', 'ZB', '#EEF0FE', '#4F46E5', 'Real-time + bulk · 98.5% accuracy', 'ACTIVE'],
+      ['neverbounce', 'NeverBounce', 'NB', '#EDF9F1', '#0E9F6E', 'Bulk cleaning · pay per check', 'CONNECT'],
+      ['kickbox', 'Kickbox', 'KB', '#FFF3E8', '#C2620A', 'Real-time API · Sendgrid-owned', 'CONNECT'],
+      ['emailable', 'Emailable', 'EM', '#F1EBFE', '#7C3AED', 'Fast bulk · deliverability score', 'CONNECT'],
+    ].map(p => ({ id: p[0], name: p[1], mark: p[2], tint: p[3], fg: p[4], detail: p[5], status: p[6],
+      stColor: p[6] === 'ACTIVE' ? '#0E9F6E' : '#8A8DA3', stBg: p[6] === 'ACTIVE' ? '#EDF9F1' : '#F3F3FA',
+      border: this.state.provider === p[0] ? '#4F46E5' : '#ECEDF4', bg: this.state.provider === p[0] ? '#F7F6FE' : '#fff',
+      onClick: () => this.setState({ provider: p[0] }) }));
+    const activeProvider = providerNames[this.state.provider];
+    const vstatus = this.state.vstatus;
+    const vpct = Math.min(100, (this.state.vprogress / 31840) * 100);
+    return {
+      sidebarKey: page === 'verify' ? 'verify' : 'import',
+      pageTitle: page === 'verify' ? 'Email Verification' : 'Import Subscribers',
+      pageSub: page === 'verify' ? 'Clean your lists with a 3rd-party verification API' : 'Bring contacts into Noonfy from a file, paste, or another tool',
+      tabs, isImport: page === 'import', isVerify: page === 'verify',
+      importSources,
+      uploadTitle: uploadCopy[src][0], uploadSub: uploadCopy[src][1],
+      isFileSource: src === 'csv' || src === 'woo', isPasteSource: src === 'paste', isApiSource: src === 'api',
+      hasFile: src === 'csv',
+      pickFile: () => {}, 
+      apiConnectors: [
+        { name: 'Mailchimp', mark: 'MC', tint: '#FFF3E8', fg: '#C2620A', detail: 'Import audiences and tags', btn: 'Connect', btnBorder: '#ECEDF4', btnBg: '#fff', btnColor: '#3C3F55' },
+        { name: 'Klaviyo', mark: 'KL', tint: '#EDF9F1', fg: '#0E9F6E', detail: 'Lists, profiles and consent', btn: 'Connect', btnBorder: '#ECEDF4', btnBg: '#fff', btnColor: '#3C3F55' },
+        { name: 'Shopify', mark: 'SH', tint: '#EDF9F1', fg: '#0E9F6E', detail: 'Customers from another store', btn: 'Connect', btnBorder: '#ECEDF4', btnBg: '#fff', btnColor: '#3C3F55' },
+        { name: 'Google Contacts', mark: 'G', tint: '#EEF0FE', fg: '#4F46E5', detail: 'CSV export via OAuth', btn: 'Connect', btnBorder: '#ECEDF4', btnBg: '#fff', btnColor: '#3C3F55' },
+      ],
+      toggleVerify: () => this.setState(s => ({ verifyOn: !s.verifyOn })),
+      verifyOnBg: this.state.verifyOn ? '#4F46E5' : '#D9DBEA', verifyOnLeft: this.state.verifyOn ? '19px' : '3px',
+      verifyProvider: activeProvider,
+      mapping: [
+        { col: 'email_address', field: 'Email ✓', color: '#0E9F6E', bg: '#EDF9F1' },
+        { col: 'first_name', field: 'First name', color: '#4F46E5', bg: '#EEF0FE' },
+        { col: 'last_name', field: 'Last name', color: '#4F46E5', bg: '#EEF0FE' },
+        { col: 'city', field: 'City', color: '#4F46E5', bg: '#EEF0FE' },
+        { col: 'signup_date', field: 'Subscribed at', color: '#4F46E5', bg: '#EEF0FE' },
+      ],
+      recent: [
+        { source: 'subscribers_july.csv', glyph: '📄', rows: '3,412', valid: '3,180', invalid: '142', dupes: '90', when: '2 days ago' },
+        { source: 'Mailchimp — Main', glyph: '🔗', rows: '12,840', valid: '11,920', invalid: '512', dupes: '408', when: 'Jun 28' },
+        { source: 'Pop-up Portland', glyph: '📋', rows: '412', valid: '398', invalid: '14', dupes: '0', when: 'Jun 18' },
+        { source: 'WooCommerce sync', glyph: '🛒', rows: '48,212', valid: '47,010', invalid: '702', dupes: '500', when: 'Jun 12' },
+      ],
+      verifyKpis: [
+        { label: 'LIST HEALTH', value: '94.2%', color: '#0E9F6E', note: 'deliverable' },
+        { label: 'VERIFIED · 30D', value: '52,410', color: '#14152A', note: 'across 4 lists' },
+        { label: 'INVALID CAUGHT', value: '3,120', color: '#E02424', note: 'before sending' },
+        { label: 'BOUNCE RATE', value: '0.8%', color: '#0E9F6E', note: 'down from 3.1%' },
+      ],
+      providers, activeProvider,
+      apiKeyMask: this.state.provider === 'zerobounce' ? 'zb_live_••••••••••••8f21' : this.state.provider === 'neverbounce' ? 'nb_••••••••••••4c09' : this.state.provider === 'kickbox' ? 'live_••••••••••7ba3' : 'em_••••••••••d510',
+      credits: this.state.provider === 'zerobounce' ? '18,400' : '—',
+      runVerify: () => this.runVerify(),
+      verifyBtn: vstatus === 'running' ? 'Verifying…' : 'Verify with ' + activeProvider,
+      verifying: vstatus === 'running', verifyDone: vstatus === 'done',
+      verifyProgress: this.state.vprogress.toLocaleString(), verifyPct: vpct.toFixed(1) + '%',
+      results: [
+        { label: 'Valid', count: '29,980', pct: '94%', color: '#0E9F6E' },
+        { label: 'Catch-all', count: '892', pct: '3%', color: '#4F46E5' },
+        { label: 'Unknown', count: '318', pct: '1%', color: '#C2620A' },
+        { label: 'Invalid', count: '1,284', pct: '4%', color: '#E02424' },
+        { label: 'Spam traps / abuse', count: '96', pct: '0.3%', color: '#7C3AED' },
+      ],
+      rtHooks: [
+        { name: 'Signup forms', glyph: '📝', tint: '#EEF0FE', detail: 'Reject invalid emails on the Noonfy popup and embedded forms.', status: 'Active on 3 forms' },
+        { name: 'Checkout', glyph: '🛒', tint: '#EDF9F1', detail: 'Validate the email field during WooCommerce checkout.', status: 'Active' },
+        { name: 'API endpoint', glyph: '🔗', tint: '#F1EBFE', detail: 'POST /v1/verify for your own forms and apps.', status: 'Live' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

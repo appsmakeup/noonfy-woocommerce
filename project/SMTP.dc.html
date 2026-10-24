@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+canvas{max-width:100%;}
+::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+@keyframes rowIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:none;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="{{ sidebarKey }}" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0;gap:12px;flex-wrap:wrap">
+      <div style="min-width:0">
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:9px;flex-shrink:0">
+        <span style="display:flex;align-items:center;gap:7px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;color:#0E9F6E;white-space:nowrap"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:blink 1.6s ease infinite"></span>6 providers healthy</span>
+        <button onClick="{{ sendTest }}" style="border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Send test email</button>
+      </div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px;flex-wrap:wrap">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="8">
+        <a href="{{ tb.href }}" style="padding:9px 13px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px;white-space:nowrap" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="12">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:13px 15px;min-width:0">
+              <div style="font-size:10px;font-weight:800;color:#8A8DA3;letter-spacing:.2px">{{ k.label }}</div>
+              <div style="font-size:19px;font-weight:800;color:{{ k.color }};margin-top:5px;letter-spacing:-.3px">{{ k.value }}</div>
+              <div style="font-size:10px;font-weight:800;color:{{ k.deltaColor }};margin-top:2px">{{ k.delta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;align-items:flex-start">
+          <div style="flex:1 1 440px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+              <div style="min-width:0"><div style="font-size:14px;font-weight:800;color:#14152A">Sending volume</div><div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Delivered vs. failed, last 14 days</div></div>
+              <div style="margin-left:auto;display:flex;gap:12px;font-size:11px;font-weight:700;color:#5B5E75;flex-shrink:0"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:3px;background:#4F46E5"></span>Delivered</span><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:3px;background:#DDD6FE"></span>Failed</span></div>
+            </div>
+            <div style="height:220px;margin-top:12px"><canvas id="smtpVolumeCanvas" ref="{{ volumeRef }}"></canvas></div>
+          </div>
+          <div style="flex:1 1 280px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Provider share</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Volume routed per provider</div>
+            <div style="height:150px;margin:14px auto 6px auto;position:relative;max-width:150px"><canvas id="smtpShareCanvas" ref="{{ shareRef }}"></canvas>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><span style="font-size:16px;font-weight:800;color:#14152A">412k</span><span style="font-size:10px;font-weight:800;color:#8A8DA3">this month</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">
+              <sc-for list="{{ shareLegend }}" as="s" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;color:#3C3F55;min-width:0"><span style="width:8px;height:8px;border-radius:3px;background:{{ s.color }};flex-shrink:0"></span><span style="flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.label }}</span><span style="font-weight:800;color:#14152A;flex-shrink:0">{{ s.value }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;align-items:flex-start">
+          <div style="flex:1 1 380px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Provider health</span><a href="#providers" style="margin-left:auto;font-size:12px;font-weight:800">Manage →</a></div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ healthRows }}" as="h" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                  <span style="width:30px;height:30px;border-radius:8px;background:{{ h.tint }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:{{ h.fg }};flex-shrink:0">{{ h.mark }}</span>
+                  <span style="display:block;flex:1 1 0;min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ h.sent }} sent · {{ h.latency }}</span></span>
+                  <span style="display:flex;align-items:center;gap:6px;flex-shrink:0"><span style="width:34px;height:5px;border-radius:99px;background:#F3F3FA;display:inline-block"><span style="display:block;height:5px;border-radius:99px;background:{{ h.color }};width:{{ h.score }}%"></span></span><span style="font-size:11px;font-weight:800;color:{{ h.color }}">{{ h.score }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex:1 1 320px;min-width:0;background:#0C0D1E;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#fff">Live queue</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#34D399;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:#34D399;animation:blink 1.4s ease infinite"></span>{{ eps }}/s</span></div>
+            <div style="margin-top:12px;font-family:'SF Mono',ui-monospace,monospace;font-size:11px">
+              <sc-for list="{{ liveLogs }}" as="l" hint-placeholder-count="8">
+                <div style="display:flex;gap:9px;padding:6px 0;border-bottom:1px solid #1E1F3D;animation:rowIn .3s ease;min-width:0">
+                  <span style="color:#5B5E88;flex-shrink:0">{{ l.time }}</span>
+                  <span style="font-weight:800;color:{{ l.color }};width:64px;flex-shrink:0">{{ l.status }}</span>
+                  <span style="display:block;color:#9EA0C8;flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.to }}</span>
+                  <span style="color:#5B5E88;flex-shrink:0">{{ l.provider }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isProviders }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <div style="display:flex;gap:4px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:3px">
+            <sc-for list="{{ provModes }}" as="m" hint-placeholder-count="2"><button onClick="{{ m.onClick }}" style="border:none;background:{{ m.bg }};color:{{ m.color }};border-radius:7px;padding:6px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap">{{ m.label }}</button></sc-for>
+          </div>
+          <input onInput="{{ onProvSearch }}" placeholder="Search providers…" style="border:1px solid #ECEDF4;border-radius:9px;padding:8px 12px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:220px;background:#fff"></input>
+          <button onClick="{{ addProvider }}" style="margin-left:auto;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap" style-hover="opacity:.92">+ Add connection</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(288px,1fr));gap:14px">
+          <sc-for list="{{ connections }}" as="c" hint-placeholder-count="6">
+            <div style="background:#fff;border:1.5px solid {{ c.cardBorder }};border-radius:14px;padding:16px 18px;min-width:0" style-hover="box-shadow:0 8px 22px rgba(20,21,42,.07)">
+              <div style="display:flex;align-items:center;gap:11px;min-width:0">
+                <span style="width:36px;height:36px;border-radius:10px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:{{ c.fg }};flex-shrink:0">{{ c.mark }}</span>
+                <span style="display:block;flex:1 1 0;min-width:0"><span style="display:block;font-size:13px;font-weight:800;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.host }}</span></span>
+                <span onClick="{{ c.onToggle }}" style="width:36px;height:20px;border-radius:99px;background:{{ c.tgBg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ c.tgLeft }};width:14px;height:14px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;margin-top:11px;flex-wrap:wrap">
+                <span style="font-size:9.5px;font-weight:800;color:{{ c.stColor }};background:{{ c.stBg }};border-radius:99px;padding:3px 8px">{{ c.status }}</span>
+                <span style="font-size:9.5px;font-weight:800;color:#5B5E75;background:#F3F3FA;border-radius:99px;padding:3px 8px">Priority {{ c.priority }}</span>
+                <span style="font-size:9.5px;font-weight:800;color:#5B5E75;background:#F3F3FA;border-radius:99px;padding:3px 8px">Weight {{ c.weight }}%</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px">
+                <div style="min-width:0"><div style="font-size:9.5px;font-weight:800;color:#A5A8BD">TODAY</div><div style="font-size:13px;font-weight:800;color:#14152A;margin-top:2px">{{ c.today }}</div></div>
+                <div style="min-width:0"><div style="font-size:9.5px;font-weight:800;color:#A5A8BD">LATENCY</div><div style="font-size:13px;font-weight:800;color:#14152A;margin-top:2px">{{ c.latency }}</div></div>
+                <div style="min-width:0"><div style="font-size:9.5px;font-weight:800;color:#A5A8BD">HEALTH</div><div style="font-size:13px;font-weight:800;color:{{ c.healthColor }};margin-top:2px">{{ c.health }}</div></div>
+              </div>
+              <div style="margin-top:11px"><div style="display:flex;font-size:10px;font-weight:700;color:#8A8DA3"><span>Daily limit</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ c.used }} / {{ c.limit }}</span></div><div style="height:5px;border-radius:99px;background:#F3F3FA;margin-top:4px"><div style="height:5px;border-radius:99px;background:{{ c.usageColor }};width:{{ c.usagePct }}"></div></div></div>
+              <div style="display:flex;gap:7px;margin-top:13px">
+                <button onClick="{{ c.onTest }}" style="flex:1;border:1px solid #ECEDF4;background:#fff;border-radius:8px;padding:7px;font-size:11px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">{{ c.testLabel }}</button>
+                <a href="#queue" style="flex:1;text-align:center;border:1px solid #ECEDF4;border-radius:8px;padding:7px;font-size:11px;font-weight:800;color:#3C3F55;background:#fff" style-hover="border-color:#C7C3F5;color:#14152A">Logs</a>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ provEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:56px 0;color:#8A8DA3"><div style="font-size:30px">🔍</div><div style="font-size:14px;font-weight:800;color:#14152A;margin-top:10px">No providers match</div></div></sc-if>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">Available integrations</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ catalogCount }} SMTP servers and email APIs ready to connect</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:13px">
+            <sc-for list="{{ catalog }}" as="p" hint-placeholder-count="24">
+              <span style="display:flex;align-items:center;gap:7px;border:1px solid #ECEDF4;background:#F8F8FC;border-radius:99px;padding:6px 12px;font-size:11px;font-weight:700;color:#3C3F55;cursor:pointer;white-space:nowrap" style-hover="border-color:#C7C3F5;background:#FBFAFF"><span style="width:6px;height:6px;border-radius:99px;background:{{ p.dot }}"></span>{{ p.name }}</span>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isRouting }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+        <div style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Rotation strategy</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">How outbound mail is distributed across providers</div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px">
+              <sc-for list="{{ strategies }}" as="s" hint-placeholder-count="8">
+                <div onClick="{{ s.onClick }}" style="display:flex;align-items:center;gap:10px;border:1.5px solid {{ s.border }};background:{{ s.bg }};border-radius:11px;padding:11px 13px;cursor:pointer;min-width:0">
+                  <span style="font-size:14px;flex-shrink:0">{{ s.glyph }}</span>
+                  <span style="display:block;flex:1 1 0;min-width:0"><span style="display:block;font-size:12px;font-weight:800;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span><span style="display:block;font-size:10px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.detail }}</span></span>
+                  <sc-if value="{{ s.active }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:#4F46E5;flex-shrink:0">✓</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+            <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Routing rules</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 10px">evaluated top-down</span></div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+              <sc-for list="{{ rules }}" as="r" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px;min-width:0">
+                  <span style="width:22px;height:22px;border-radius:7px;background:#F1EBFE;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#7C3AED;flex-shrink:0">{{ r.n }}</span>
+                  <span style="display:block;flex:1 1 0;min-width:0"><span style="display:block;font-size:11.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.condition }}</span><span style="display:block;font-size:10px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">→ {{ r.action }}</span></span>
+                  <span onClick="{{ r.onToggle }}" style="width:34px;height:19px;border-radius:99px;background:{{ r.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ r.left }};width:13px;height:13px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                </div>
+              </sc-for>
+            </div>
+            <button style="margin-top:12px;border:1px dashed #C7C3F5;background:#FBFAFF;border-radius:9px;padding:9px;font-size:11.5px;font-weight:800;color:#7C3AED;cursor:pointer;font-family:inherit;width:100%" style-hover="background:#F1EBFE">+ Add routing rule</button>
+          </div>
+        </div>
+        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Traffic split</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Live weights under “{{ strategyName }}”</div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+              <sc-for list="{{ splitRows }}" as="s" hint-placeholder-count="4">
+                <div style="min-width:0">
+                  <div style="display:flex;align-items:center;font-size:11.5px;font-weight:700;color:#3C3F55;min-width:0"><span style="flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.name }}</span><span style="font-weight:800;color:#14152A;flex-shrink:0">{{ s.pct }}</span></div>
+                  <div style="height:7px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:7px;border-radius:99px;background:{{ s.color }};width:{{ s.pct }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff">
+            <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">✨</span><span style="font-size:13px;font-weight:800">AI routing insight</span></div>
+            <div style="font-size:12px;font-weight:600;color:#E6E4F5;line-height:1.55;margin-top:9px">Postmark delivers transactional mail 340ms faster with a 0.2% lower bounce rate. Routing order confirmations there and keeping SES for bulk would lift inbox placement ~1.4pt.</div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Failover chain</div>
+            <div style="display:flex;flex-direction:column;align-items:center;margin-top:12px">
+              <sc-for list="{{ failover }}" as="f" hint-placeholder-count="3">
+                <div style="width:100%;display:flex;flex-direction:column;align-items:center">
+                  <div style="width:100%;border:1.5px solid {{ f.border }};background:{{ f.bg }};border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:9px;min-width:0">
+                    <span style="font-size:9.5px;font-weight:800;color:{{ f.tagColor }};background:{{ f.tagBg }};border-radius:6px;padding:3px 7px;flex-shrink:0">{{ f.tag }}</span>
+                    <span style="display:block;flex:1 1 0;min-width:0;font-size:11.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.name }}</span>
+                  </div>
+                  <sc-if value="{{ f.arrow }}" hint-placeholder-val="{{ true }}"><div style="height:14px;width:2px;background:#DDD6FE"></div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isQueue }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:11px;margin-bottom:14px">
+          <sc-for list="{{ queueStats }}" as="q" hint-placeholder-count="7">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:12px;padding:12px 14px;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:3px;background:{{ q.color }};flex-shrink:0"></span><span style="font-size:10px;font-weight:800;color:#8A8DA3">{{ q.label }}</span></div>
+              <div style="font-size:18px;font-weight:800;color:#14152A;margin-top:6px">{{ q.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid #F3F3FA;flex-wrap:wrap">
+            <span style="font-size:13.5px;font-weight:800;color:#14152A">Email logs</span>
+            <div style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap">
+              <sc-for list="{{ logFilters }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.onClick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:99px;padding:5px 11px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap">{{ f.label }}</button></sc-for>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <div style="min-width:780px">
+              <div style="display:grid;grid-template-columns:1.6fr 1.7fr 1fr .9fr .8fr .9fr;gap:8px;padding:11px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA"><span>Recipient</span><span>Subject</span><span>Provider</span><span>Status</span><span>Time</span><span>Latency</span></div>
+              <sc-for list="{{ emailLogs }}" as="l" hint-placeholder-count="10">
+                <div style="display:grid;grid-template-columns:1.6fr 1.7fr 1fr .9fr .8fr .9fr;gap:8px;align-items:center;padding:11px 20px;border-bottom:1px solid #F7F7FB" style-hover="background:#FAFAFE">
+                  <span style="display:block;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#14152A;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.to }}</span>
+                  <span style="display:block;font-size:12px;font-weight:600;color:#5B5E75;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.subject }}</span>
+                  <span style="display:block;font-size:11px;font-weight:800;color:#5B5E75;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ l.provider }}</span>
+                  <span><span style="font-size:10px;font-weight:800;color:{{ l.stColor }};background:{{ l.stBg }};border-radius:99px;padding:3px 8px;white-space:nowrap">{{ l.status }}</span></span>
+                  <span style="font-size:11px;font-weight:700;color:#8A8DA3;white-space:nowrap">{{ l.time }}</span>
+                  <span style="font-size:11px;font-weight:700;color:#8A8DA3;white-space:nowrap">{{ l.latency }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ logsEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:48px 0;color:#8A8DA3"><div style="font-size:28px">📭</div><div style="font-size:13.5px;font-weight:800;color:#14152A;margin-top:9px">No messages in this state</div></div></sc-if>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isDomains }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+        <div style="flex:1 1 420px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Sending domains</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Authentication status per domain</div>
+          <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+            <sc-for list="{{ domains }}" as="d" hint-placeholder-count="3">
+              <div style="border:1px solid #F3F3FA;border-radius:12px;padding:13px 15px;min-width:0">
+                <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                  <span style="font-size:13px;flex-shrink:0">🌐</span>
+                  <span style="font-size:12.5px;font-weight:800;color:#14152A;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.name }}</span>
+                  <span style="font-size:9.5px;font-weight:800;color:{{ d.stColor }};background:{{ d.stBg }};border-radius:99px;padding:3px 8px;flex-shrink:0">{{ d.status }}</span>
+                  <span style="margin-left:auto;font-size:10.5px;font-weight:700;color:#8A8DA3;flex-shrink:0">Rep {{ d.rep }}</span>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:11px;flex-wrap:wrap">
+                  <sc-for list="{{ d.checks }}" as="c" hint-placeholder-count="5"><span style="display:flex;align-items:center;gap:5px;border:1px solid {{ c.border }};background:{{ c.bg }};border-radius:99px;padding:4px 10px;font-size:10.5px;font-weight:800;color:{{ c.color }};white-space:nowrap">{{ c.icon }} {{ c.label }}</span></sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <button style="margin-top:12px;border:1px dashed #C7C3F5;background:#FBFAFF;border-radius:9px;padding:9px;font-size:11.5px;font-weight:800;color:#7C3AED;cursor:pointer;font-family:inherit;width:100%" style-hover="background:#F1EBFE">+ Add sending domain</button>
+        </div>
+        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Warmup progress</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">mail.brumahome.com · day 18 of 30</div>
+            <div style="height:130px;margin-top:12px"><canvas id="smtpWarmupCanvas" ref="{{ warmupRef }}"></canvas></div>
+            <div style="display:flex;align-items:center;gap:9px;margin-top:10px;font-size:11px;font-weight:700;color:#8A8DA3"><span>Today's cap</span><span style="margin-left:auto;font-weight:800;color:#14152A">24,000</span></div>
+            <div style="display:flex;align-items:center;gap:9px;margin-top:5px;font-size:11px;font-weight:700;color:#8A8DA3"><span>Recommended increase</span><span style="margin-left:auto;font-weight:800;color:#0E9F6E">+15% / day</span></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">DNS records</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+              <sc-for list="{{ dnsRecords }}" as="r" hint-placeholder-count="4">
+                <div style="border:1px solid #F3F3FA;border-radius:9px;padding:9px 11px;min-width:0">
+                  <div style="display:flex;align-items:center;gap:7px"><span style="font-size:9.5px;font-weight:800;color:#4F46E5;background:#EEF0FE;border-radius:6px;padding:2px 7px;flex-shrink:0">{{ r.type }}</span><span style="font-size:10.5px;font-weight:800;color:#5B5E75;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.host }}</span><span style="margin-left:auto;font-size:11px;color:{{ r.okColor }};flex-shrink:0">{{ r.ok }}</span></div>
+                  <div style="font-family:'SF Mono',ui-monospace,monospace;font-size:10px;color:#8A8DA3;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isDeliverability }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:stretch">
+          <div style="flex:1 1 240px;min-width:0;background:linear-gradient(135deg,#0E9F6E,#059669);border-radius:16px;padding:22px 24px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.7px;opacity:.85;text-align:center">AI DELIVERABILITY SCORE</div>
+            <div style="font-size:50px;font-weight:800;letter-spacing:-1px;margin-top:6px">94</div>
+            <div style="font-size:12px;font-weight:800;background:rgba(255,255,255,.2);border-radius:99px;padding:4px 14px;margin-top:4px">EXCELLENT</div>
+          </div>
+          <div style="flex:2 1 420px;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+            <sc-for list="{{ delivCards }}" as="d" hint-placeholder-count="6">
+              <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px;min-width:0">
+                <div style="display:flex;align-items:flex-start;gap:7px"><span style="font-size:13px;flex-shrink:0">{{ d.glyph }}</span><span style="font-size:10px;font-weight:800;color:#8A8DA3">{{ d.label }}</span></div>
+                <div style="font-size:19px;font-weight:800;color:{{ d.color }};margin-top:6px">{{ d.value }}</div>
+                <div style="font-size:10px;font-weight:700;color:#A5A8BD;margin-top:1px">{{ d.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;align-items:flex-start">
+          <div style="flex:1 1 360px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Blacklist monitor</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Checked hourly across 32 RBLs</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+              <sc-for list="{{ blacklists }}" as="b" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:10px;font-size:12px;font-weight:700;color:#5B5E75;min-width:0"><span style="width:8px;height:8px;border-radius:99px;background:{{ b.dot }};flex-shrink:0"></span><span style="flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.name }}</span><span style="font-size:10.5px;font-weight:800;color:{{ b.color }};flex-shrink:0">{{ b.status }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex:1 1 320px;min-width:0;background:linear-gradient(135deg,#141433,#2A2456);border-radius:14px;padding:18px 20px;color:#fff">
+            <div style="display:flex;align-items:center;gap:7px"><span style="font-size:13px">✨</span><span style="font-size:13px;font-weight:800">AI recommendations</span></div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+              <sc-for list="{{ delivRecs }}" as="r" hint-placeholder-count="4">
+                <div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;font-size:11.5px;font-weight:600;color:#E6E4F5;line-height:1.5">{{ r }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isSuppressions }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px">
+          <sc-for list="{{ bounceKpis }}" as="b" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px;min-width:0"><div style="font-size:10px;font-weight:800;color:#8A8DA3">{{ b.label }}</div><div style="font-size:20px;font-weight:800;color:{{ b.color }};margin-top:5px">{{ b.value }}</div><div style="font-size:10px;font-weight:800;color:#A5A8BD;margin-top:1px">{{ b.note }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+          <div style="flex:1 1 340px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Suppression list</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Addresses excluded from all sends</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ suppressions }}" as="s" hint-placeholder-count="8">
+                <div style="min-width:0">
+                  <div style="display:flex;align-items:center;font-size:11.5px;font-weight:700;color:#3C3F55;min-width:0"><span style="display:flex;align-items:center;gap:7px;flex:1 1 0;min-width:0"><span style="width:8px;height:8px;border-radius:3px;background:{{ s.color }};flex-shrink:0"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.label }}</span></span><span style="font-weight:800;color:#14152A;flex-shrink:0">{{ s.count }}</span></div>
+                  <div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:6px;border-radius:99px;background:{{ s.color }};width:{{ s.width }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="flex:1 1 340px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Bounce analysis</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Top reasons in the last 30 days</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:14px">
+              <sc-for list="{{ bounceReasons }}" as="b" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px;min-width:0">
+                  <span style="font-size:9.5px;font-weight:800;color:{{ b.tagColor }};background:{{ b.tagBg }};border-radius:6px;padding:3px 7px;flex-shrink:0">{{ b.type }}</span>
+                  <span style="display:block;flex:1 1 0;min-width:0;font-size:11.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ b.reason }}</span>
+                  <span style="font-size:11.5px;font-weight:800;color:#5B5E75;flex-shrink:0">{{ b.count }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isTools }}" hint-placeholder-val="{{ false }}">
+      <section style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start">
+        <div style="flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Testing tools</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Verify configuration before you send at scale</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px">
+              <sc-for list="{{ tests }}" as="t" hint-placeholder-count="6">
+                <button onClick="{{ t.onClick }}" style="text-align:left;border:1px solid #ECEDF4;background:#fff;border-radius:11px;padding:12px 14px;cursor:pointer;font-family:inherit;min-width:0" style-hover="border-color:#C7C3F5;background:#FBFAFF">
+                  <div style="font-size:15px">{{ t.glyph }}</div>
+                  <div style="font-size:11.5px;font-weight:800;color:#14152A;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.label }}</div>
+                  <div style="font-size:10px;color:#8A8DA3;font-weight:600;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.detail }}</div>
+                </button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ testRunning }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:9px;margin-top:14px;font-size:12px;font-weight:800;color:#7C3AED"><span style="width:14px;height:14px;border:2px solid #E0D7FE;border-top-color:#7C3AED;border-radius:99px;animation:spin .7s linear infinite;display:inline-block"></span>Running {{ testName }}…</div>
+            </sc-if>
+            <sc-if value="{{ testDone }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px">
+                <sc-for list="{{ testResults }}" as="r" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:9px;border:1px solid #F3F3FA;border-radius:9px;padding:9px 11px;min-width:0"><span style="font-size:9.5px;font-weight:800;color:{{ r.color }};background:{{ r.bg }};border-radius:6px;padding:3px 8px;flex-shrink:0">{{ r.status }}</span><span style="display:block;flex:1 1 0;min-width:0;font-size:11px;font-weight:600;color:#5B5E75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.text }}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Alert rules</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px;margin-top:14px">
+              <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:9px;border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px;min-width:0">
+                  <span style="font-size:12px;flex-shrink:0">{{ a.glyph }}</span>
+                  <span style="display:block;flex:1 1 0;min-width:0;font-size:11px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.label }}</span>
+                  <span onClick="{{ a.onClick }}" style="width:32px;height:18px;border-radius:99px;background:{{ a.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ a.left }};width:12px;height:12px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1 1 280px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#14152A">System monitoring</span><span style="margin-left:auto;font-size:10px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 9px">ALL GREEN</span></div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+              <sc-for list="{{ monitors }}" as="m" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:9px;font-size:11.5px;font-weight:700;color:#5B5E75;min-width:0"><span style="width:7px;height:7px;border-radius:99px;background:{{ m.dot }};flex-shrink:0"></span><span style="flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.label }}</span><span style="font-weight:800;color:#14152A;flex-shrink:0">{{ m.value }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:13.5px;font-weight:800;color:#14152A">Global defaults</div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:13px">
+              <div><div style="font-size:10.5px;font-weight:800;color:#5B5E75;margin-bottom:4px">Default from name</div><input value="Bruma Home" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:700;font-family:inherit;color:#14152A;outline:none;background:#F8F8FC"></input></div>
+              <div><div style="font-size:10.5px;font-weight:800;color:#5B5E75;margin-bottom:4px">Default from email</div><input value="hello@brumahome.com" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:8px 11px;font-size:11.5px;font-family:'SF Mono',ui-monospace,monospace;color:#5B5E75;outline:none;background:#F8F8FC"></input></div>
+              <div><div style="display:flex;font-size:10.5px;font-weight:800;color:#5B5E75"><span>Log retention</span><span style="margin-left:auto;color:#4F46E5">{{ retention }} days</span></div><input type="range" min="7" max="180" step="7" value="{{ retention }}" onInput="{{ onRetention }}" style="width:100%;margin-top:7px;accent-color:#4F46E5"></input></div>
+              <a href="Settings.dc.html#smtp" style="display:block;text-align:center;border:1px solid #ECEDF4;border-radius:9px;padding:8px;font-size:11.5px;font-weight:800;color:#3C3F55;background:#fff" style-hover="border-color:#C7C3F5;color:#14152A">Open workspace settings →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;align-items:center;gap:11px;background:#fff;border:1px solid {{ toastBorder }};border-radius:12px;padding:13px 17px;box-shadow:0 12px 32px rgba(20,21,42,.18);animation:toastIn .25s ease;max-width:340px">
+        <span style="width:26px;height:26px;border-radius:99px;background:{{ toastIconBg }};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">{{ toastGlyph }}</span>
+        <div style="min-width:0"><div style="font-size:12.5px;font-weight:800;color:#14152A">{{ toastTitle }}</div><div style="font-size:11px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ toastText }}</div></div>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#dashboard').slice(1), logs: [], tick: 0, provMode: 'smtp', provQ: '',
+    enabled: {}, testingId: null, strategy: 'weighted', ruleTg: {}, logFilter: 'all',
+    testRunning: false, testName: '', testDone: false, alertTg: {}, retention: 30, toast: null };
+  componentDidMount() {
+    this.hh = () => { this.setState({ page: (location.hash || '#dashboard').slice(1) }); setTimeout(() => this.build(), 60); };
+    window.addEventListener('hashchange', this.hh);
+    this.seed();
+    this.iv = setInterval(() => { if (this.pageKey() === 'dashboard') this.setState(s => ({ logs: this.next(s.logs), tick: s.tick + 1 })); }, 1500);
+    this.build();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearInterval(this.iv); clearTimeout(this.bt); clearTimeout(this.tt); clearTimeout(this.rt); this.destroy(); }
+  pageKey() { const v = ['dashboard', 'providers', 'routing', 'queue', 'domains', 'deliverability', 'suppressions', 'tools']; const p = (location.hash || '#dashboard').slice(1); return v.includes(p) ? p : 'dashboard'; }
+  destroy() { [this.vol, this.share, this.warm].forEach(c => c && c.destroy()); this.vol = null; this.share = null; this.warm = null; }
+  build() {
+    clearTimeout(this.bt);
+    if (!window.Chart) { this.bt = setTimeout(() => this.build(), 140); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif"; Chart.defaults.color = '#A5A8BD';
+    const page = this.pageKey();
+    if (page === 'dashboard') {
+      const vEl = document.getElementById('smtpVolumeCanvas');
+      const sEl = document.getElementById('smtpShareCanvas');
+      this.vol = vEl ? (Chart.getChart(vEl) || null) : null;
+      this.share = sEl ? (Chart.getChart(sEl) || null) : null;
+      if (vEl && vEl.isConnected && !this.vol) {
+        try {
+          const days = Array.from({ length: 14 }, (_, i) => 'D' + (i + 1));
+          this.vol = new Chart(vEl, { type: 'bar', data: { labels: days, datasets: [
+            { label: 'Delivered', data: days.map((_, i) => 22000 + Math.round(Math.sin(i / 2.2) * 4200) + i * 320), backgroundColor: '#4F46E5', borderRadius: 5, stack: 's' },
+            { label: 'Failed', data: days.map(() => 420 + Math.round(Math.random() * 380)), backgroundColor: '#DDD6FE', borderRadius: 5, stack: 's' } ] },
+            options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } },
+              scales: { x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10, weight: 600 } } },
+                y: { stacked: true, border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: v => (v / 1000) + 'k' } } } } });
+          this.vol.resize();
+        } catch (e) { this.vol = null; }
+      }
+      if (sEl && sEl.isConnected && !this.share) {
+        try {
+          this.share = new Chart(sEl, { type: 'doughnut', data: { labels: ['Amazon SES', 'Postmark', 'Mailgun', 'Brevo', 'Other'],
+            datasets: [{ data: [48, 22, 16, 9, 5], backgroundColor: ['#4F46E5', '#8B5CF6', '#C4B5FD', '#E0D7FE', '#EFEFF7'], borderWidth: 0, cutout: '72%' }] },
+            options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } } });
+          this.share.resize();
+        } catch (e) { this.share = null; }
+      }
+      const ok = vEl && vEl.isConnected && Chart.getChart(vEl) && sEl && sEl.isConnected && Chart.getChart(sEl);
+      if (!ok) { this.bt = setTimeout(() => this.build(), 200); return; }
+    }
+    if (page === 'domains') {
+      const wEl = document.getElementById('smtpWarmupCanvas');
+      this.warm = wEl ? (Chart.getChart(wEl) || null) : null;
+      if (wEl && wEl.isConnected && !this.warm) {
+        try {
+          const d = Array.from({ length: 18 }, (_, i) => 'D' + (i + 1));
+          this.warm = new Chart(wEl, { type: 'line', data: { labels: d, datasets: [
+            { data: d.map((_, i) => Math.round(400 * Math.pow(1.15, i))), borderColor: '#0E9F6E', backgroundColor: 'rgba(14,159,110,.14)', fill: true, tension: .4, borderWidth: 2.4, pointRadius: 0 } ] },
+            options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } },
+              scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 5, font: { size: 9, weight: 600 } } }, y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 4, font: { size: 9, weight: 600 }, callback: v => v >= 1000 ? (v / 1000) + 'k' : v } } } } });
+          this.warm.resize();
+        } catch (e) { this.warm = null; }
+      }
+      if (!(wEl && wEl.isConnected && Chart.getChart(wEl))) { this.bt = setTimeout(() => this.build(), 200); return; }
+    }
+  }
+  mkLog() {
+    const names = ['maya.okafor', 'j.lindqvist', 'priya.raman', 't.becker', 'a.fontaine', 's.ricci', 'd.chen', 'h.suzuki'];
+    const doms = ['gmail.com', 'outlook.com', 'icloud.com', 'proton.me', 'gmx.de', 'libero.it'];
+    const provs = ['ses-1', 'postmark', 'mailgun', 'brevo'];
+    const r = Math.random();
+    const st = r < 0.82 ? ['SENT', '#34D399'] : r < 0.92 ? ['QUEUED', '#FBBF24'] : r < 0.97 ? ['RETRY', '#F87171'] : ['BOUNCE', '#EF4444'];
+    return { time: new Date().toLocaleTimeString([], { hour12: false }), status: st[0], color: st[1],
+      to: names[Math.floor(Math.random() * names.length)] + '@' + doms[Math.floor(Math.random() * doms.length)],
+      provider: provs[Math.floor(Math.random() * provs.length)] };
+  }
+  seed() { const logs = []; for (let i = 0; i < 9; i++) logs.push(this.mkLog()); this.setState({ logs }); }
+  next(prev) { return [this.mkLog(), this.mkLog()].concat(prev).slice(0, 10); }
+  showToast(kind, title, text) { clearTimeout(this.tt); this.setState({ toast: { kind, title, text } }); this.tt = setTimeout(() => this.setState({ toast: null }), 3000); }
+  renderVals() {
+    const page = this.pageKey();
+    const titles = {
+      dashboard: ['SMTP & Email Delivery', 'Multi-provider sending, routing and deliverability'],
+      providers: ['Connections', 'SMTP servers and email API providers'],
+      routing: ['Smart Routing', 'Rotation strategy, rules and failover'],
+      queue: ['Email Queue & Logs', 'Every message, every state'],
+      domains: ['Domains & Authentication', 'SPF, DKIM, DMARC, BIMI and warmup'],
+      deliverability: ['Deliverability Center', 'Inbox placement, reputation and blacklists'],
+      suppressions: ['Bounces & Suppressions', 'Bounce handling and excluded addresses'],
+      tools: ['Monitoring & Tools', 'Health checks, alerts, tests and defaults'],
+    };
+    const keyMap = { dashboard: 'smtpdash', providers: 'smtpconn', routing: 'smtprouting', queue: 'smtpqueue', domains: 'smtpdomains', deliverability: 'smtpdeliver', suppressions: 'smtpsuppress', tools: 'smtptools' };
+    const tabs = [['Dashboard', '#dashboard'], ['Connections', '#providers'], ['Routing', '#routing'], ['Queue & Logs', '#queue'], ['Domains', '#domains'], ['Deliverability', '#deliverability'], ['Suppressions', '#suppressions'], ['Monitoring', '#tools']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const C = (id, name, host, mark, tint, fg, priority, weight, today, latency, health, used, limit, api) => {
+      const on = this.state.enabled[id] === undefined ? true : this.state.enabled[id];
+      const pct = Math.round(used / limit * 100);
+      return { id, name, host, mark, tint, fg, priority, weight, today, latency, health, api,
+        healthColor: health >= 90 ? '#0E9F6E' : health >= 75 ? '#C2620A' : '#E02424',
+        used: used.toLocaleString(), limit: limit.toLocaleString(), usagePct: pct + '%',
+        usageColor: pct >= 85 ? '#E02424' : pct >= 60 ? '#C2620A' : '#0E9F6E',
+        status: on ? 'ACTIVE' : 'DISABLED', stColor: on ? '#0E9F6E' : '#8A8DA3', stBg: on ? '#EDF9F1' : '#F3F3FA',
+        cardBorder: on ? '#ECEDF4' : '#E6E7F0',
+        tgBg: on ? '#4F46E5' : '#D9DBEA', tgLeft: on ? '19px' : '3px',
+        onToggle: () => this.setState(s => ({ enabled: { ...s.enabled, [id]: !on } })),
+        testLabel: this.state.testingId === id ? 'Testing…' : 'Test',
+        onTest: () => { this.setState({ testingId: id }); clearTimeout(this.rt); this.rt = setTimeout(() => { this.setState({ testingId: null }); this.showToast('ok', name + ' reachable', 'Handshake completed in ' + latency + '.'); }, 900); } };
+    };
+    const allConns = [
+      C('ses', 'Amazon SES', 'email-smtp.us-east-1.amazonaws.com', 'SES', '#FFF3E8', '#C2620A', 1, 48, '18,420', '112ms', 99, 198420, 250000, false),
+      C('postmark', 'Postmark', 'smtp.postmarkapp.com', 'PM', '#FDF3D7', '#B45309', 2, 22, '8,640', '86ms', 98, 88640, 150000, false),
+      C('mailgun', 'Mailgun API', 'api.mailgun.net/v3', 'MG', '#FDEDED', '#E02424', 3, 16, '6,210', '148ms', 94, 66210, 100000, true),
+      C('brevo', 'Brevo API', 'api.brevo.com/v3', 'BR', '#EDF9F1', '#0E9F6E', 4, 9, '3,480', '164ms', 92, 43480, 80000, true),
+      C('sendgrid', 'SendGrid API', 'api.sendgrid.com/v3', 'SG', '#EEF0FE', '#4F46E5', 5, 3, '1,240', '196ms', 88, 21240, 60000, true),
+      C('gsuite', 'Google Workspace', 'smtp.gmail.com', 'GW', '#F1EBFE', '#7C3AED', 6, 2, '640', '242ms', 76, 1640, 2000, false),
+    ];
+    const q = this.state.provQ.toLowerCase();
+    const connections = allConns.filter(c => (this.state.provMode === 'all' || (this.state.provMode === 'api' ? c.api : !c.api)) && (!q || (c.name + ' ' + c.host).toLowerCase().includes(q)));
+    const provModes = [['SMTP servers', 'smtp'], ['Email APIs', 'api'], ['All', 'all']].map(m => ({ label: m[0], onClick: () => this.setState({ provMode: m[1] }), bg: this.state.provMode === m[1] ? '#4F46E5' : 'transparent', color: this.state.provMode === m[1] ? '#fff' : '#8A8DA3' }));
+    const catalogNames = ['Generic SMTP', 'Amazon SES', 'Mailgun', 'Brevo', 'Postmark', 'SparkPost', 'SMTP2GO', 'Elastic Email', 'SocketLabs', 'TurboSMTP', 'Mailjet', 'Mailtrap', 'MailerSend', 'Resend', 'Maileroo', 'Scaleway', 'Google Workspace', 'Microsoft 365', 'Zoho Mail', 'Yandex', 'Cloudflare Routing', 'SendGrid', 'ZeptoMail', 'Mandrill', 'MailPace', 'Courier', 'Azure ACS', 'Gmail API', 'Graph Mail API', 'Custom REST API', 'Sendmail', 'PHP Mail'];
+    const connected = ['Amazon SES', 'Postmark', 'Mailgun', 'Brevo', 'SendGrid', 'Google Workspace'];
+    const catalog = catalogNames.map(n => ({ name: n, dot: connected.includes(n) ? '#0E9F6E' : '#C4C6D4' }));
+    const stratDefs = [['weighted', 'Weighted', 'Distribute by weight %', '⚖️'], ['roundrobin', 'Round robin', 'Even, sequential rotation', '🔄'], ['priority', 'Priority', 'Highest priority first', '🥇'], ['leastused', 'Least used', 'Balance remaining quota', '📉'], ['fastest', 'Fastest provider', 'Lowest observed latency', '⚡'], ['cost', 'Lowest cost', 'Cheapest per thousand', '💰'], ['deliverability', 'Best deliverability', 'Highest inbox placement', '📬'], ['health', 'Health based', 'Skip degraded providers', '🩺']];
+    const strategies = stratDefs.map(s => ({ name: s[1], detail: s[2], glyph: s[3], active: this.state.strategy === s[0],
+      border: this.state.strategy === s[0] ? '#4F46E5' : '#ECEDF4', bg: this.state.strategy === s[0] ? '#F7F6FE' : '#fff',
+      onClick: () => this.setState({ strategy: s[0] }) }));
+    const strategyName = (stratDefs.find(s => s[0] === this.state.strategy) || stratDefs[0])[1];
+    const R = (id, n, condition, action, def) => { const on = this.state.ruleTg[id] === undefined ? def : this.state.ruleTg[id];
+      return { n, condition, action, onToggle: () => this.setState(s => ({ ruleTg: { ...s.ruleTg, [id]: !on } })), bg: on ? '#4F46E5' : '#D9DBEA', left: on ? '19px' : '3px' }; };
+    const rules = [
+      R('r1', '1', 'Transactional (order, receipt, password)', 'Postmark · priority route', true),
+      R('r2', '2', 'Bulk campaigns over 10,000 recipients', 'Amazon SES · batched', true),
+      R('r3', '3', 'Recipient domain is gmail.com', 'Amazon SES · warmed IP pool', true),
+      R('r4', '4', 'Recipient country in EU', 'Brevo · EU region', true),
+      R('r5', '5', 'Primary fails twice within 60s', 'Failover to Mailgun', true),
+    ];
+    const splitBase = { weighted: [48, 22, 16, 9, 5], roundrobin: [20, 20, 20, 20, 20], priority: [70, 18, 8, 3, 1], leastused: [26, 24, 22, 16, 12], fastest: [30, 44, 14, 8, 4], cost: [62, 8, 18, 10, 2], deliverability: [34, 40, 14, 8, 4], health: [40, 26, 18, 10, 6] };
+    const splitNames = ['Amazon SES', 'Postmark', 'Mailgun', 'Brevo', 'SendGrid'];
+    const splitColors = ['#4F46E5', '#8B5CF6', '#C4B5FD', '#E0D7FE', '#EFEFF7'];
+    const splitRows = splitNames.map((n, i) => ({ name: n, pct: (splitBase[this.state.strategy] || splitBase.weighted)[i] + '%', color: splitColors[i] }));
+    const stt = { DELIVERED: ['#0E9F6E', '#EDF9F1'], SENT: ['#4F46E5', '#EEF0FE'], QUEUED: ['#C2620A', '#FFF3E8'], FAILED: ['#E02424', '#FDEDED'], BOUNCED: ['#E02424', '#FDEDED'], OPENED: ['#7C3AED', '#F1EBFE'] };
+    const L = (to, subject, provider, status, time, latency) => ({ to, subject, provider, status, stColor: stt[status][0], stBg: stt[status][1], time, latency });
+    const allLogs = [
+      L('maya.okafor@gmail.com', 'Your order #28471 is confirmed', 'Postmark', 'DELIVERED', '09:41', '86ms'),
+      L('j.lindqvist@proton.me', 'The Summer Linen Drop is here ☀️', 'Amazon SES', 'OPENED', '09:38', '112ms'),
+      L('priya.raman@gmail.com', 'Welcome to Bruma Home', 'Postmark', 'DELIVERED', '09:34', '92ms'),
+      L('t.becker@gmx.de', 'You left something behind', 'Amazon SES', 'QUEUED', '09:33', '—'),
+      L('old.addr@gmx.de', 'Back in stock: Linen Duvet', 'Mailgun', 'BOUNCED', '09:31', '148ms'),
+      L('s.ricci@libero.it', 'Your VIP early access starts now', 'Brevo', 'DELIVERED', '09:28', '164ms'),
+      L('d.chen@outlook.com', 'Order shipped — tracking inside', 'Postmark', 'OPENED', '09:24', '88ms'),
+      L('h.suzuki@icloud.com', 'Flash sale: 25% off everything', 'Amazon SES', 'SENT', '09:21', '118ms'),
+      L('noreply@invalid.tld', 'Password reset request', 'Postmark', 'FAILED', '09:18', '—'),
+      L('a.fontaine@orange.fr', 'We miss you — 20% off', 'Brevo', 'DELIVERED', '09:14', '158ms'),
+    ];
+    const lf = this.state.logFilter;
+    const emailLogs = lf === 'all' ? allLogs : allLogs.filter(l => (lf === 'delivered' && (l.status === 'DELIVERED' || l.status === 'OPENED')) || (lf === 'queued' && l.status === 'QUEUED') || (lf === 'failed' && (l.status === 'FAILED' || l.status === 'BOUNCED')) || (lf === 'opened' && l.status === 'OPENED'));
+    const logFilters = [['All', 'all'], ['Delivered', 'delivered'], ['Queued', 'queued'], ['Opened', 'opened'], ['Failed', 'failed']].map(f => ({ label: f[0], onClick: () => this.setState({ logFilter: f[1] }), border: lf === f[1] ? '#4F46E5' : '#ECEDF4', bg: lf === f[1] ? '#EEF0FE' : '#fff', color: lf === f[1] ? '#4F46E5' : '#8A8DA3' }));
+    const chk = (label, state) => ({ label, icon: state === 'ok' ? '✓' : state === 'wait' ? '…' : '—',
+      color: state === 'ok' ? '#0E9F6E' : state === 'wait' ? '#C2620A' : '#8A8DA3',
+      bg: state === 'ok' ? '#EDF9F1' : state === 'wait' ? '#FFF3E8' : '#F3F3FA',
+      border: state === 'ok' ? '#C4E9D3' : state === 'wait' ? '#F8DFC5' : '#ECEDF4' });
+    const T = (id, label, glyph, detail) => ({ label, glyph, detail, onClick: () => { this.setState({ testRunning: true, testName: label, testDone: false }); clearTimeout(this.rt); this.rt = setTimeout(() => { this.setState({ testRunning: false, testDone: true }); this.showToast('ok', label + ' passed', 'All checks completed successfully.'); }, 1100); } });
+    const A = (id, label, glyph, def) => { const on = this.state.alertTg[id] === undefined ? def : this.state.alertTg[id];
+      return { label, glyph, onClick: () => this.setState(s => ({ alertTg: { ...s.alertTg, [id]: !on } })), bg: on ? '#4F46E5' : '#D9DBEA', left: on ? '17px' : '3px' }; };
+    const toast = this.state.toast;
+    return {
+      sidebarKey: keyMap[page], pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isDashboard: page === 'dashboard', isProviders: page === 'providers', isRouting: page === 'routing', isQueue: page === 'queue',
+      isDomains: page === 'domains', isDeliverability: page === 'deliverability', isSuppressions: page === 'suppressions', isTools: page === 'tools',
+      sendTest: () => this.showToast('ok', 'Test email sent', 'Delivered to sam@brumahome.com in 92ms.'),
+      kpis: [
+        { label: 'PROVIDERS', value: '6', color: '#14152A', delta: '6 active', deltaColor: '#0E9F6E' },
+        { label: 'SENT TODAY', value: '38,630', color: '#14152A', delta: '▲ 12%', deltaColor: '#0E9F6E' },
+        { label: 'THIS MONTH', value: '412k', color: '#14152A', delta: '▲ 8.4%', deltaColor: '#0E9F6E' },
+        { label: 'QUEUED', value: '1,284', color: '#4F46E5', delta: 'draining', deltaColor: '#8A8DA3' },
+        { label: 'DELIVERED', value: '99.2%', color: '#0E9F6E', delta: '▲ 0.3pt', deltaColor: '#0E9F6E' },
+        { label: 'FAILED', value: '0.8%', color: '#C2620A', delta: '▼ 0.2pt', deltaColor: '#0E9F6E' },
+        { label: 'OPEN RATE', value: '38.4%', color: '#14152A', delta: '▲ 2.1pt', deltaColor: '#0E9F6E' },
+        { label: 'CLICK RATE', value: '4.9%', color: '#14152A', delta: '▲ 0.6pt', deltaColor: '#0E9F6E' },
+        { label: 'BOUNCE RATE', value: '0.8%', color: '#0E9F6E', delta: 'healthy', deltaColor: '#0E9F6E' },
+        { label: 'SPAM RATE', value: '0.02%', color: '#0E9F6E', delta: 'below limit', deltaColor: '#0E9F6E' },
+        { label: 'AVG DELIVERY', value: '118ms', color: '#14152A', delta: 'p95 240ms', deltaColor: '#8A8DA3' },
+        { label: 'DOMAIN REP', value: '94', color: '#0E9F6E', delta: 'excellent', deltaColor: '#0E9F6E' },
+      ],
+      volumeRef: (el) => { if (el) this.build(); }, shareRef: (el) => { if (el) this.build(); }, warmupRef: (el) => { if (el) this.build(); },
+      shareLegend: [
+        { label: 'Amazon SES', value: '48%', color: '#4F46E5' }, { label: 'Postmark', value: '22%', color: '#8B5CF6' },
+        { label: 'Mailgun', value: '16%', color: '#C4B5FD' }, { label: 'Brevo', value: '9%', color: '#E0D7FE' },
+      ],
+      healthRows: allConns.map(c => ({ name: c.name, mark: c.mark, tint: c.tint, fg: c.fg, sent: c.today, latency: c.latency, score: c.health, color: c.healthColor })),
+      eps: 214 + (this.state.tick % 40), liveLogs: this.state.logs,
+      provModes, connections, provEmpty: connections.length === 0,
+      onProvSearch: (e) => this.setState({ provQ: e.target.value }),
+      addProvider: () => this.showToast('info', 'Add connection', 'Pick a provider from the catalog below.'),
+      catalog, catalogCount: String(catalogNames.length),
+      strategies, strategyName, rules, splitRows,
+      failover: [
+        { tag: 'PRIMARY', name: 'Amazon SES', tagColor: '#0E9F6E', tagBg: '#EDF9F1', border: '#BEE9D2', bg: '#F7FCF9', arrow: true },
+        { tag: 'SECONDARY', name: 'Postmark', tagColor: '#4F46E5', tagBg: '#EEF0FE', border: '#ECEDF4', bg: '#fff', arrow: true },
+        { tag: 'FAILOVER', name: 'Mailgun', tagColor: '#C2620A', tagBg: '#FFF3E8', border: '#ECEDF4', bg: '#fff', arrow: false },
+      ],
+      queueStats: [
+        { label: 'QUEUED', value: '1,284', color: '#6366F1' }, { label: 'SENDING', value: '214', color: '#8B5CF6' },
+        { label: 'WAITING', value: '96', color: '#C4B5FD' }, { label: 'RETRY', value: '38', color: '#FBBF24' },
+        { label: 'DELIVERED', value: '38,630', color: '#34D399' }, { label: 'FAILED', value: '112', color: '#F87171' },
+        { label: 'PAUSED', value: '0', color: '#94A3B8' },
+      ],
+      logFilters, emailLogs, logsEmpty: emailLogs.length === 0,
+      domains: [
+        { name: 'mail.brumahome.com', status: 'VERIFIED', stColor: '#0E9F6E', stBg: '#EDF9F1', rep: '94',
+          checks: [chk('SPF', 'ok'), chk('DKIM', 'ok'), chk('DMARC', 'ok'), chk('BIMI', 'ok'), chk('MX', 'ok'), chk('SSL', 'ok')] },
+        { name: 'send.brumahome.com', status: 'VERIFIED', stColor: '#0E9F6E', stBg: '#EDF9F1', rep: '91',
+          checks: [chk('SPF', 'ok'), chk('DKIM', 'ok'), chk('DMARC', 'ok'), chk('BIMI', 'off'), chk('MX', 'ok'), chk('SSL', 'ok')] },
+        { name: 'news.brumahome.com', status: 'PENDING', stColor: '#C2620A', stBg: '#FFF3E8', rep: '—',
+          checks: [chk('SPF', 'ok'), chk('DKIM', 'wait'), chk('DMARC', 'wait'), chk('BIMI', 'off'), chk('MX', 'ok'), chk('SSL', 'ok')] },
+      ],
+      dnsRecords: [
+        { type: 'TXT', host: '@', value: 'v=spf1 include:amazonses.com ~all', ok: '✓', okColor: '#0E9F6E' },
+        { type: 'CNAME', host: 'noonfy1._domainkey', value: 'noonfy1.dkim.brumahome.com', ok: '✓', okColor: '#0E9F6E' },
+        { type: 'TXT', host: '_dmarc', value: 'v=DMARC1; p=quarantine; rua=mailto:dmarc@…', ok: '✓', okColor: '#0E9F6E' },
+        { type: 'CNAME', host: 'bounce', value: 'feedback-smtp.us-east-1.amazonses.com', ok: '✓', okColor: '#0E9F6E' },
+      ],
+      delivCards: [
+        { glyph: '📬', label: 'INBOX PLACEMENT', value: '96.4%', color: '#0E9F6E', note: 'primary inbox' },
+        { glyph: '🛡️', label: 'SPAM SCORE', value: '0.4 / 10', color: '#0E9F6E', note: 'low risk' },
+        { glyph: '🔥', label: 'DOMAIN REPUTATION', value: '94', color: '#0E9F6E', note: 'Google Postmaster' },
+        { glyph: '🌐', label: 'IP REPUTATION', value: '97', color: '#0E9F6E', note: 'dedicated pool' },
+        { glyph: '↩️', label: 'BOUNCE RATE', value: '0.8%', color: '#0E9F6E', note: 'below 2% target' },
+        { glyph: '🚩', label: 'COMPLAINT RATE', value: '0.02%', color: '#0E9F6E', note: 'below 0.1% limit' },
+      ],
+      blacklists: [
+        { name: 'Spamhaus (SBL/XBL)', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'Barracuda', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'SpamCop', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'SORBS', status: 'CLEAR', dot: '#0E9F6E', color: '#0E9F6E' },
+        { name: 'Microsoft SNDS', status: 'GREEN', dot: '#0E9F6E', color: '#0E9F6E' },
+      ],
+      delivRecs: [
+        'Warm news.brumahome.com over 14 days before moving campaign volume — it is a fresh subdomain.',
+        'Suppress the 412 addresses with no opens in 180 days to protect sender score.',
+        'Route password resets and receipts to Postmark; its transactional reputation is 1.4pt higher.',
+        'Gmail placement dips on Tuesday sends — shift bulk to Thursday morning.',
+      ],
+      bounceKpis: [
+        { label: 'HARD BOUNCES', value: '284', color: '#E02424', note: 'auto-suppressed' },
+        { label: 'SOFT BOUNCES', value: '1,120', color: '#C2620A', note: 'retrying' },
+        { label: 'COMPLAINTS', value: '38', color: '#E02424', note: '0.02% rate' },
+        { label: 'SUPPRESSED', value: '4,918', color: '#14152A', note: 'total list' },
+      ],
+      suppressions: [
+        { label: 'Unsubscribed', count: '2,410', width: '100%', color: '#4F46E5' },
+        { label: 'Hard bounce', count: '1,284', width: '53%', color: '#E02424' },
+        { label: 'Complaints', count: '412', width: '17%', color: '#C2620A' },
+        { label: 'Blocked', count: '318', width: '13%', color: '#7C3AED' },
+        { label: 'Invalid email', count: '284', width: '12%', color: '#8A8DA3' },
+        { label: 'Disposable email', count: '142', width: '6%', color: '#8A8DA3' },
+        { label: 'Role-based', count: '68', width: '3%', color: '#8A8DA3' },
+        { label: 'Manual blacklist', count: '20', width: '1%', color: '#14152A' },
+      ],
+      bounceReasons: [
+        { type: 'HARD', reason: 'Mailbox does not exist (550 5.1.1)', count: '148', tagColor: '#E02424', tagBg: '#FDEDED' },
+        { type: 'HARD', reason: 'Domain not found (550 5.4.4)', count: '86', tagColor: '#E02424', tagBg: '#FDEDED' },
+        { type: 'SOFT', reason: 'Mailbox full (452 4.2.2)', count: '410', tagColor: '#C2620A', tagBg: '#FFF3E8' },
+        { type: 'SOFT', reason: 'Temporary greylisting (451 4.7.1)', count: '380', tagColor: '#C2620A', tagBg: '#FFF3E8' },
+        { type: 'BLOCK', reason: 'Policy rejection — content flagged', count: '92', tagColor: '#7C3AED', tagBg: '#F1EBFE' },
+        { type: 'BLOCK', reason: 'Rate limited by receiving server', count: '54', tagColor: '#7C3AED', tagBg: '#F1EBFE' },
+      ],
+      tests: [
+        T('t1', 'Send test email', '✉️', 'To any inbox'), T('t2', 'SMTP connection', '🔌', 'Handshake + auth'),
+        T('t3', 'API credentials', '🔑', 'Token validity'), T('t4', 'DNS records', '🌐', 'SPF/DKIM/DMARC'),
+        T('t5', 'Spam score', '🛡️', 'Content analysis'), T('t6', 'Webhook delivery', '📡', 'Callback round-trip'),
+      ],
+      testRunning: this.state.testRunning, testName: this.state.testName, testDone: this.state.testDone && !this.state.testRunning,
+      testResults: [
+        { status: 'PASS', color: '#0E9F6E', bg: '#EDF9F1', text: 'Connection established · TLS 1.3 · 92ms' },
+        { status: 'PASS', color: '#0E9F6E', bg: '#EDF9F1', text: 'Authentication accepted for hello@brumahome.com' },
+        { status: 'PASS', color: '#0E9F6E', bg: '#EDF9F1', text: 'Message queued and delivered to primary inbox' },
+      ],
+      alerts: [
+        A('a1', 'Provider down', '🔴', true), A('a2', 'Queue stopped', '⏸️', true),
+        A('a3', 'High bounce rate', '↩️', true), A('a4', 'Spam complaints spike', '🚩', true),
+        A('a5', 'Authentication failure', '🔐', true), A('a6', 'DNS record failure', '🌐', true),
+        A('a7', 'Rate limit reached', '🚦', true), A('a8', 'SSL / domain expiring', '📅', false),
+      ],
+      monitors: [
+        { label: 'SMTP endpoints', value: '6 / 6', dot: '#0E9F6E' }, { label: 'API endpoints', value: '4 / 4', dot: '#0E9F6E' },
+        { label: 'Queue workers', value: '8 active', dot: '#0E9F6E' }, { label: 'Webhooks', value: 'Healthy', dot: '#0E9F6E' },
+        { label: 'DNS resolution', value: 'Pass', dot: '#0E9F6E' }, { label: 'SSL certificates', value: '84 days', dot: '#0E9F6E' },
+        { label: 'Retry backlog', value: '38', dot: '#C2620A' }, { label: 'Uptime · 90d', value: '99.98%', dot: '#0E9F6E' },
+      ],
+      retention: this.state.retention, onRetention: (e) => this.setState({ retention: +e.target.value }),
+      toastOpen: !!toast, toastTitle: toast ? toast.title : '', toastText: toast ? toast.text : '',
+      toastGlyph: toast ? (toast.kind === 'ok' ? '✓' : toast.kind === 'warn' ? '!' : 'i') : '',
+      toastBorder: toast ? (toast.kind === 'warn' ? '#F8DFC5' : toast.kind === 'info' ? '#D8DCFB' : '#C4E9D3') : '#ECEDF4',
+      toastIconBg: toast ? (toast.kind === 'ok' ? '#EDF9F1' : toast.kind === 'warn' ? '#FFF3E8' : '#EEF0FE') : '#F3F3FA',
+    };
+  }
+}
+</script>
+</body>
+</html>

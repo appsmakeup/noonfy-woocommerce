@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes nodeIn{from{opacity:0;transform:translateY(10px) scale(.97);}to{opacity:1;transform:none;}}
+@keyframes shimmer{0%{background-position:-400px 0;}100%{background-position:400px 0;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.4;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="aibuilder" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="padding:20px 0 16px 0">
+      <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px;display:flex;align-items:center;gap:9px">AI Automation Builder<span style="font-size:10px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 9px;letter-spacing:.5px">BETA</span></h1>
+      <p style="margin:3px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Describe the flow in plain English — Noonfy builds the triggers, conditions, delays and emails.</p>
+    </header>
+
+    <section style="background:linear-gradient(120deg,#1E1B4B,#4C1D95);border-radius:16px;padding:22px 24px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.7px;color:#C4B5FD">✨ DESCRIBE YOUR AUTOMATION</div>
+      <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 16px;margin-top:11px">
+        <textarea ref="{{ promptRef }}" onInput="{{ onPrompt }}" placeholder="e.g. Recover abandoned carts with 3 reminder emails and offer 10% off after 48 hours." style="width:100%;height:56px;border:none;outline:none;background:transparent;color:#fff;font-size:14.5px;font-weight:600;font-family:'Manrope',sans-serif;resize:none;line-height:1.5">Recover abandoned carts with 3 reminder emails and offer 10% off after 48 hours.</textarea>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <span style="font-size:11px;font-weight:700;color:#A78BFA">Try:</span>
+        <sc-for list="{{ examples }}" as="e" hint-placeholder-count="3">
+          <button onClick="{{ e.onClick }}" style="border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#E9E5FB;border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit" style-hover="background:rgba(255,255,255,.14)">{{ e.label }}</button>
+        </sc-for>
+        <button onClick="{{ generate }}" style="margin-left:auto;border:none;background:#fff;color:#4C1D95;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 6px 18px rgba(0,0,0,.25)" style-hover="opacity:.92">{{ genLabel }}</button>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;min-height:420px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Generated workflow</span><sc-if value="{{ hasFlow }}" hint-placeholder-val="{{ false }}"><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:3px 10px">{{ nodeCount }} STEPS · READY</span></sc-if></div>
+
+        <sc-if value="{{ generating }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:20px">
+            <div style="font-size:12.5px;font-weight:700;color:#7C3AED;display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:99px;background:#7C3AED;animation:blink 1s ease infinite"></span>{{ genStatus }}</div>
+            <sc-for list="{{ skeletons }}" as="s" hint-placeholder-count="4">
+              <div style="width:300px;height:56px;border-radius:12px;background:linear-gradient(90deg,#F3F3FA 25%,#ECECF6 37%,#F3F3FA 63%);background-size:800px 100%;animation:shimmer 1.3s linear infinite"></div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasFlow }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;align-items:center;margin-top:16px">
+            <sc-for list="{{ nodes }}" as="n" hint-placeholder-count="6">
+              <div style="width:100%;display:flex;flex-direction:column;align-items:center">
+                <div style="width:330px;max-width:100%;border:1.5px solid {{ n.border }};background:{{ n.bg }};border-radius:13px;padding:12px 15px;display:flex;align-items:center;gap:11px;box-shadow:0 2px 8px rgba(20,21,42,.05);animation:nodeIn .35s ease {{ n.delay }}s both">
+                  <span style="width:30px;height:30px;border-radius:9px;background:{{ n.iconBg }};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">{{ n.glyph }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:9.5px;font-weight:800;letter-spacing:.6px;color:{{ n.kindColor }}">{{ n.kind }}</span><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ n.label }}</span></span>
+                  <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="font-size:9.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:2px 8px">{{ n.badge }}</span></sc-if>
+                </div>
+                <sc-if value="{{ n.arrow }}" hint-placeholder-val="{{ true }}"><div style="height:18px;width:2px;background:#DDD6FE;animation:nodeIn .3s ease {{ n.delay }}s both"></div></sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:9px;margin-top:18px;justify-content:center">
+            <a href="Builder.dc.html" style="border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 16px;font-size:12.5px;font-weight:800;color:#3C3F55" style-hover="border-color:#D9DBEA;color:#14152A">Edit in builder</a>
+            <button style="border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:9px 16px;font-size:12.5px;font-weight:800;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Save draft</button>
+            <button style="border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px 18px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Publish workflow</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;padding:70px 20px;color:#A5A8BD">
+            <div style="font-size:36px">🪄</div>
+            <div style="font-size:14px;font-weight:800;color:#14152A;margin-top:12px">Your workflow will appear here</div>
+            <div style="font-size:12.5px;font-weight:600;margin-top:4px;max-width:320px;margin-left:auto;margin-right:auto;line-height:1.55">Type a description above or pick an example, then hit Generate. Noonfy maps it to triggers, conditions, delays and emails.</div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">What the AI understood</div>
+          <sc-if value="{{ hasFlow }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <sc-for list="{{ parsed }}" as="p" hint-placeholder-count="5">
+                <div style="display:flex;align-items:flex-start;gap:9px">
+                  <span style="font-size:9.5px;font-weight:800;color:{{ p.color }};background:{{ p.bg }};border-radius:6px;padding:3px 8px;flex-shrink:0;min-width:70px;text-align:center">{{ p.tag }}</span>
+                  <span style="font-size:12px;font-weight:600;color:#3C3F55;line-height:1.45">{{ p.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ notParsed }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;font-weight:600;color:#8A8DA3;margin-top:10px;line-height:1.55">Triggers, conditions, delays, actions, coupons, segments and exit rules will be extracted from your prompt.</div>
+          </sc-if>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+          <div style="font-size:13.5px;font-weight:800;color:#14152A">AI optimization suggestions</div>
+          <sc-if value="{{ hasFlow }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <sc-for list="{{ suggestions }}" as="s" hint-placeholder-count="3">
+                <div style="border:1px solid #F0EFFB;background:#FBFAFF;border-radius:11px;padding:11px 13px">
+                  <div style="display:flex;align-items:center;gap:7px"><span style="font-size:12px">{{ s.glyph }}</span><span style="font-size:12px;font-weight:800;color:#14152A">{{ s.title }}</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#0E9F6E">{{ s.gain }}</span></div>
+                  <div style="font-size:11.5px;font-weight:600;color:#8A8DA3;margin-top:5px;line-height:1.45">{{ s.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ notParsed }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;font-weight:600;color:#8A8DA3;margin-top:10px;line-height:1.55">Once a workflow is generated, Noonfy suggests ways to lift open rate, conversion and revenue.</div>
+          </sc-if>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { prompt: 'Recover abandoned carts with 3 reminder emails and offer 10% off after 48 hours.', phase: 'empty', preset: 'cart' };
+  componentWillUnmount() { clearTimeout(this.t1); clearTimeout(this.t2); }
+  presets() {
+    const K = {
+      TRIGGER: ['⚡', '#F1EBFE', '#7C3AED', '#DDD6FE'], CONDITION: ['🔀', '#EDF9F1', '#0E9F6E', '#BEE9D2'],
+      DELAY: ['⏱️', '#FFF3E8', '#C2620A', '#F8DFC5'], EMAIL: ['✉️', '#EEF0FE', '#4F46E5', '#D8DCFB'],
+      COUPON: ['🎟️', '#F1EBFE', '#7C3AED', '#DDD6FE'], GOAL: ['🏁', '#EDF9F1', '#0E9F6E', '#BEE9D2'], EXIT: ['🚪', '#F3F3FA', '#8A8DA3', '#E2E4EE'],
+    };
+    return {
+      cart: {
+        prompt: 'Recover abandoned carts with 3 reminder emails and offer 10% off after 48 hours.',
+        nodes: [
+          ['TRIGGER', 'Cart abandoned', ''], ['DELAY', 'Wait 2 hours', ''],
+          ['EMAIL', '“You left something behind”', ''], ['CONDITION', 'Purchased? → exit if yes', ''],
+          ['DELAY', 'Wait 46 hours', ''], ['COUPON', 'Generate 10% code · 3-day expiry', 'AUTO'],
+          ['EMAIL', 'Reminder + your 10% off', ''], ['DELAY', 'Wait 1 day', ''],
+          ['EMAIL', 'Last chance — cart expiring', ''], ['GOAL', 'Purchase completed', ''],
+        ],
+        parsed: [
+          ['TRIGGER', 'Cart abandoned (WooCommerce)'], ['ACTIONS', '3 reminder emails'],
+          ['DELAY', 'First at 2h, coupon after 48h'], ['COUPON', '10% off, unique per customer, 3-day expiry'],
+          ['EXIT', 'Leave flow on purchase'], ['SEGMENT', 'Has items in cart, not purchased'],
+        ],
+        suggestions: [
+          ['📈', 'Add SMS at step 2', 'Cart recovery lifts ~14% with an SMS reminder for opted-in contacts.', '+14%'],
+          ['⏰', 'Send email 1 at 1h not 2h', 'Your data shows recovery peaks in the first 90 minutes.', '+6% conv'],
+          ['🎯', 'Skip coupon for AOV > $150', 'High-value carts recover without a discount — protects margin.', '+$1.2k/mo'],
+        ],
+      },
+      churn: {
+        prompt: 'Find customers likely to churn and win them back with a personal note and 20% off.',
+        nodes: [
+          ['TRIGGER', 'AI churn score crosses 70', 'AI'], ['CONDITION', 'LTV over $200?', ''],
+          ['EMAIL', 'Personal “we miss you” note', ''], ['DELAY', 'Wait 3 days', ''],
+          ['CONDITION', 'Opened but no order?', ''], ['COUPON', 'Generate 20% code COMEBACK20', 'AUTO'],
+          ['EMAIL', 'Here\u2019s 20% to come back', ''], ['GOAL', 'Order placed', ''], ['EXIT', 'Suppress if unsubscribed', ''],
+        ],
+        parsed: [
+          ['TRIGGER', 'Predictive churn score > 70 (AI, daily)'], ['SEGMENT', 'Lapsing customers, LTV > $200'],
+          ['ACTIONS', 'Personal note, then discount offer'], ['COUPON', '20% off COMEBACK20'],
+          ['EXIT', 'Remove on order or unsubscribe'],
+        ],
+        suggestions: [
+          ['🧠', 'Personalize with last category', 'Reference their most-viewed category for 2.1× engagement.', '+2.1×'],
+          ['⏰', 'Send Thursday 10am', 'Lapsed users re-open best mid-morning midweek.', '+21% opens'],
+          ['💎', 'Exclude coupon-independent VIPs', '164 VIPs return without a discount — save margin.', '+$1.9k/mo'],
+        ],
+      },
+      welcome: {
+        prompt: 'Welcome new subscribers with a 3-email story series and a first-order discount.',
+        nodes: [
+          ['TRIGGER', 'Subscriber joins list', ''], ['EMAIL', 'Welcome + brand story', ''],
+          ['DELAY', 'Wait 2 days', ''], ['COUPON', 'Generate 15% code WELCOME15', 'AUTO'],
+          ['EMAIL', 'Best sellers + your 15% off', ''], ['CONDITION', 'Ordered yet?', ''],
+          ['DELAY', 'Wait 3 days', ''], ['EMAIL', 'Social proof + reviews', ''], ['GOAL', 'First order placed', ''],
+        ],
+        parsed: [
+          ['TRIGGER', 'New subscriber (form or checkout)'], ['ACTIONS', '3-email story sequence'],
+          ['COUPON', '15% first-order code WELCOME15'], ['DELAY', 'Spread over ~5 days'],
+          ['EXIT', 'Exit on first purchase'], ['SEGMENT', 'New subscribers, no order'],
+        ],
+        suggestions: [
+          ['🛍️', 'Insert AI product picks', 'Personalized recommendations in email 2 lift clicks 34%.', '+34% CTR'],
+          ['📱', 'Add SMS opt-in ask', 'Capture phone in email 1 to unlock SMS flows later.', '+9% list'],
+          ['⭐', 'Lead email 3 with reviews', 'Social proof converts first-timers 1.6× better.', '+1.6×'],
+        ],
+      },
+    };
+  }
+  detectPreset(text) {
+    const t = (text || '').toLowerCase();
+    if (t.includes('churn') || t.includes('win') || t.includes('lapse')) return 'churn';
+    if (t.includes('welcome') || t.includes('new subscriber') || t.includes('story')) return 'welcome';
+    return 'cart';
+  }
+  renderVals() {
+    const K = {
+      TRIGGER: ['⚡', '#FBFAFF', '#7C3AED', '#DDD6FE', '#F1EBFE'], CONDITION: ['🔀', '#F7FCF9', '#0E9F6E', '#BEE9D2', '#EDF9F1'],
+      DELAY: ['⏱️', '#fff', '#C2620A', '#ECEDF4', '#FFF3E8'], EMAIL: ['✉️', '#fff', '#4F46E5', '#ECEDF4', '#EEF0FE'],
+      COUPON: ['🎟️', '#FBFAFF', '#7C3AED', '#DDD6FE', '#F1EBFE'], GOAL: ['🏁', '#F7FCF9', '#0E9F6E', '#BEE9D2', '#EDF9F1'], EXIT: ['🚪', '#fff', '#8A8DA3', '#ECEDF4', '#F3F3FA'],
+    };
+    const preset = this.presets()[this.state.preset];
+    const flowNodes = this.state.phase === 'done' ? preset.nodes.map((n, i) => {
+      const k = K[n[0]] || K.EMAIL;
+      return { kind: n[0], label: n[1], badge: n[2] || '', glyph: k[0], bg: k[1], kindColor: k[2], border: k[3], iconBg: k[4],
+        arrow: i < preset.nodes.length - 1, delay: (i * 0.08).toFixed(2) };
+    }) : [];
+    const tagColors = {
+      TRIGGER: ['#7C3AED', '#F1EBFE'], ACTIONS: ['#4F46E5', '#EEF0FE'], DELAY: ['#C2620A', '#FFF3E8'],
+      COUPON: ['#7C3AED', '#F1EBFE'], EXIT: ['#8A8DA3', '#F3F3FA'], SEGMENT: ['#0E9F6E', '#EDF9F1'],
+    };
+    const parsed = this.state.phase === 'done' ? preset.parsed.map(p => ({ tag: p[0], value: p[1], color: (tagColors[p[0]] || tagColors.ACTIONS)[0], bg: (tagColors[p[0]] || tagColors.ACTIONS)[1] })) : [];
+    const suggestions = this.state.phase === 'done' ? preset.suggestions.map(s => ({ glyph: s[0], title: s[1], text: s[2], gain: s[3] })) : [];
+    const examples = [
+      ['Cart recovery + coupon', 'cart'], ['Win back churners', 'churn'], ['Welcome series', 'welcome'],
+    ].map(e => ({ label: e[0], onClick: () => { const p = this.presets()[e[1]].prompt; this.state.prompt = p; if (this.promptEl) this.promptEl.value = p; this.setState({ preset: e[1], phase: 'empty' }); } }));
+    return {
+      promptRef: (el) => { this.promptEl = el; },
+      onPrompt: (e) => { this.state.prompt = e.target.value; },
+      examples,
+      generate: () => {
+        if (this.promptEl) this.state.prompt = this.promptEl.value;
+        const preset = this.detectPreset(this.state.prompt);
+        clearTimeout(this.t1); clearTimeout(this.t2);
+        this.setState({ phase: 'generating', preset });
+        this.t1 = setTimeout(() => this.setState({ phase: 'done' }), 1400);
+      },
+      genLabel: this.state.phase === 'generating' ? 'Generating…' : this.state.phase === 'done' ? '✨ Regenerate' : '✨ Generate workflow',
+      genStatus: 'Mapping your prompt to triggers, conditions and actions…',
+      generating: this.state.phase === 'generating',
+      hasFlow: this.state.phase === 'done',
+      empty: this.state.phase === 'empty',
+      notParsed: this.state.phase !== 'done',
+      skeletons: [1, 2, 3, 4],
+      nodes: flowNodes, nodeCount: preset.nodes.length,
+      parsed, suggestions,
+    };
+  }
+}
+</script>
+</body>
+</html>

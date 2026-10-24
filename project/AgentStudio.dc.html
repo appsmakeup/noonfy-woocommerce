@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="agentstudio" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <button style="margin-left:auto;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border:none;border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">+ Create AI agent</button>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isAgents }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <sc-for list="{{ agents }}" as="a" hint-placeholder-count="6">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:15px;padding:18px 20px" style-hover="box-shadow:0 8px 22px rgba(20,21,42,.07)">
+              <div style="display:flex;align-items:center;gap:11px">
+                <span style="width:42px;height:42px;border-radius:12px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:19px">{{ a.glyph }}</span>
+                <span style="flex:1"><span style="display:block;font-size:14px;font-weight:800;color:#14152A">{{ a.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ a.model }}</span></span>
+                <span style="font-size:9.5px;font-weight:800;color:{{ a.stColor }};background:{{ a.stBg }};border-radius:99px;padding:3px 8px">{{ a.status }}</span>
+              </div>
+              <p style="margin:11px 0 0 0;font-size:12px;color:#8A8DA3;font-weight:600;line-height:1.5">{{ a.desc }}</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+                <sc-for list="{{ a.skills }}" as="s" hint-placeholder-count="3"><span style="font-size:10px;font-weight:800;color:#5B5E75;background:#F3F3FA;border-radius:99px;padding:3px 8px">{{ s }}</span></sc-for>
+              </div>
+              <div style="display:flex;gap:7px;margin-top:14px">
+                <a href="#playground" style="flex:1;text-align:center;border:1px solid #ECEDF4;border-radius:8px;padding:7px;font-size:11.5px;font-weight:800;color:#3C3F55;background:#fff" style-hover="border-color:#D9DBEA;color:#14152A">Test</a>
+                <a href="#prompt" style="flex:1;text-align:center;border:none;border-radius:8px;padding:8px;font-size:11.5px;font-weight:800;color:#fff;background:linear-gradient(135deg,#4F46E5,#8B5CF6)" style-hover="opacity:.92;color:#fff">Edit</a>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;margin-top:14px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Supported AI models</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:14px">
+            <sc-for list="{{ models }}" as="m" hint-placeholder-count="7">
+              <div style="display:flex;align-items:center;gap:9px;border:1px solid {{ m.border }};background:{{ m.bg }};border-radius:11px;padding:10px 14px">
+                <span style="width:28px;height:28px;border-radius:8px;background:{{ m.tint }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:{{ m.fg }}">{{ m.mark }}</span>
+                <span><span style="display:block;font-size:12px;font-weight:800;color:#14152A">{{ m.name }}</span><span style="display:block;font-size:10px;color:#8A8DA3;font-weight:600">{{ m.detail }}</span></span>
+                <sc-if value="{{ m.active }}" hint-placeholder-val="{{ false }}"><span style="font-size:9px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:2px 7px;margin-left:4px">DEFAULT</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isPrompt }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Prompt builder — Aria (Shopping Assistant)</div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:6px">System prompt</div>
+          <textarea style="width:100%;height:130px;border:1px solid #ECEDF4;border-radius:10px;padding:11px 13px;font-size:12.5px;font-weight:600;font-family:'Manrope',sans-serif;color:#14152A;outline:none;background:#F8F8FC;resize:none;line-height:1.5">You are Aria, Bruma Home's friendly shopping assistant. Help customers find the perfect home goods. Always check live inventory before recommending. Offer comparisons and bundles. Never invent products. Escalate to a human for complaints or refunds over $200.</textarea>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:6px">Variables</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ vars }}" as="v" hint-placeholder-count="5"><span style="font-family:'SF Mono',ui-monospace,monospace;font-size:11px;font-weight:700;color:#7C3AED;background:#F1EBFE;border-radius:7px;padding:4px 9px">{{ v }}</span></sc-for>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:6px">Brand voice</div>
+          <div style="display:flex;gap:6px">
+            <sc-for list="{{ voices }}" as="vo" hint-placeholder-count="4"><button onClick="{{ vo.onClick }}" style="border:1px solid {{ vo.border }};background:{{ vo.bg }};color:{{ vo.color }};border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ vo.label }}</button></sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Rules &amp; behavior</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+            <sc-for list="{{ rules }}" as="r" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:10px;border:1px solid #F3F3FA;border-radius:10px;padding:11px 13px">
+                <span style="font-size:14px">{{ r.glyph }}</span>
+                <span style="flex:1"><span style="display:block;font-size:12px;font-weight:700;color:#14152A">{{ r.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ r.detail }}</span></span>
+                <span onClick="{{ r.onClick }}" style="width:36px;height:20px;border-radius:99px;background:{{ r.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ r.left }};width:14px;height:14px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isKb }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Training sources</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+            <sc-for list="{{ sources }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+                <span style="width:30px;height:30px;border-radius:8px;background:{{ s.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ s.glyph }}</span>
+                <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ s.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ s.detail }}</span></span>
+                <span style="font-size:10px;font-weight:800;color:{{ s.stColor }};background:{{ s.stBg }};border-radius:99px;padding:3px 8px">{{ s.status }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Add knowledge</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+            <sc-for list="{{ importTypes }}" as="i" hint-placeholder-count="6">
+              <button style="text-align:left;border:1.5px dashed #C7C3F5;background:#FBFAFF;border-radius:12px;padding:14px;cursor:pointer;font-family:inherit" style-hover="border-color:#8B5CF6">
+                <div style="font-size:18px">{{ i.glyph }}</div>
+                <div style="font-size:12px;font-weight:800;color:#14152A;margin-top:6px">{{ i.name }}</div>
+                <div style="font-size:10.5px;color:#8A8DA3;font-weight:600;margin-top:1px">{{ i.detail }}</div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isPlayground }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 300px;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;display:flex;flex-direction:column;height:560px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid #ECEDF4">
+            <span style="width:32px;height:32px;border-radius:9px;background:#F1EBFE;display:flex;align-items:center;justify-content:center;font-size:15px">🛍️</span>
+            <div><div style="font-size:13px;font-weight:800;color:#14152A">Testing: Aria</div><div style="font-size:10.5px;color:#8A8DA3;font-weight:600">Claude · Shopping Assistant · draft v4</div></div>
+            <span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 10px;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:#7C3AED;animation:blink 1.4s ease infinite"></span>SIMULATOR</span>
+          </div>
+          <div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;background:#F8F8FC">
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="4">
+              <div style="display:flex;justify-content:{{ m.justify }};animation:msgIn .3s ease">
+                <div style="max-width:76%;background:{{ m.bg }};border:1px solid {{ m.border }};border-radius:14px;padding:10px 14px;font-size:13px;font-weight:500;color:{{ m.color }};line-height:1.5">{{ m.text }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ thinking }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;justify-content:flex-start"><div style="background:#F1EBFE;border:1px solid #E0D7FE;border-radius:14px;padding:11px 15px;display:flex;gap:5px"><span style="width:6px;height:6px;border-radius:99px;background:#8B5CF6;animation:blink 1s ease infinite"></span><span style="width:6px;height:6px;border-radius:99px;background:#8B5CF6;animation:blink 1s ease .2s infinite"></span><span style="width:6px;height:6px;border-radius:99px;background:#8B5CF6;animation:blink 1s ease .4s infinite"></span></div></div>
+            </sc-if>
+          </div>
+          <div style="padding:14px 18px;border-top:1px solid #ECEDF4">
+            <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap">
+              <sc-for list="{{ testPrompts }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.onClick }}" style="border:1px solid #ECEDF4;background:#F8F8FC;color:#5B5E75;border-radius:99px;padding:5px 11px;font-size:10.5px;font-weight:700;cursor:pointer;font-family:inherit" style-hover="border-color:#C7C3F5">{{ p.label }}</button></sc-for>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;background:#F8F8FC;border:1px solid #ECEDF4;border-radius:12px;padding:6px 6px 6px 15px">
+              <input ref="{{ inputRef }}" onKeyDown="{{ onKey }}" placeholder="Message Aria…" style="flex:1;border:none;outline:none;background:transparent;color:#14152A;font-size:13.5px;font-weight:600;font-family:'Manrope',sans-serif"></input>
+              <button onClick="{{ send }}" style="border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px 16px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit">Send</button>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px">
+            <div style="font-size:12.5px;font-weight:800;color:#14152A">Model settings</div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:12px">
+              <sc-for list="{{ settings }}" as="s" hint-placeholder-count="3">
+                <div><div style="display:flex;font-size:11px;font-weight:700;color:#5B5E75"><span>{{ s.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ s.value }}</span></div><div style="height:5px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:5px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ s.width }}"></div></div></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px;flex:1">
+            <div style="font-size:12.5px;font-weight:800;color:#14152A">Version history</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+              <sc-for list="{{ versions }}" as="v" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:9px"><span style="width:8px;height:8px;border-radius:99px;background:{{ v.dot }}"></span><span style="flex:1"><span style="display:block;font-size:11.5px;font-weight:700;color:#14152A">{{ v.name }}</span><span style="display:block;font-size:10px;color:#8A8DA3;font-weight:600">{{ v.detail }}</span></span></div>
+              </sc-for>
+            </div>
+            <button style="width:100%;margin-top:14px;border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit" style-hover="opacity:.92">Publish v4</button>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#agents').slice(1), voice: 'Warm', rules: {}, messages: [], thinking: false };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#agents').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+    this.seed();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); clearTimeout(this.t); }
+  seed() {
+    this.setState({ messages: [
+      { role: 'them', text: 'Hi! I\u2019m looking for soft bedding in a neutral color.' },
+      { role: 'ai', text: 'Great choice! Our Linen Duvet Set in Sage or Oat is a customer favorite — breathable and stone-washed soft. Sage is back in stock today. Want a quick comparison?' },
+    ] });
+  }
+  reply(q) {
+    const query = q.toLowerCase();
+    if (/price|cost|how much/.test(query)) return 'The Linen Duvet Set is $189 (queen). With code LINEN10 that\u2019s $170.10, and shipping is free this week. Shall I add it to your cart?';
+    if (/compare|difference|vs/.test(query)) return 'Sage is a soft muted green — calming, pairs with wood tones. Oat is a warm cream — brighter, hides wrinkles better. Both are 100% European flax. Most bedroom buyers pick Sage.';
+    if (/ship|deliver/.test(query)) return 'Standard shipping is 3–5 business days and free over $120. Your duvet would qualify for free shipping!';
+    if (/stock|available/.test(query)) return 'Sage restocked this morning — 86 in stock. Oat and Terracotta are also available. Want me to reserve one?';
+    return 'Happy to help with that! Based on what you\u2019ve told me, I\u2019d suggest the Linen Duvet in Sage plus the matching Waffle Towel Set — customers who buy both save ~$18. Want the bundle link?';
+  }
+  ask(text) {
+    if (!text || !text.trim()) return;
+    this.setState(s => ({ messages: [...s.messages, { role: 'them', text: text.trim() }], thinking: true }));
+    this.scrollSoon();
+    clearTimeout(this.t);
+    this.t = setTimeout(() => { this.setState(s => ({ messages: [...s.messages, { role: 'ai', text: this.reply(text) }], thinking: false })); this.scrollSoon(); }, 950);
+  }
+  scrollSoon() { setTimeout(() => { if (this.scrollEl) this.scrollEl.scrollTop = this.scrollEl.scrollHeight; }, 50); }
+  renderVals() {
+    const valid = ['agents', 'prompt', 'kb', 'playground'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'agents';
+    const titles = { agents: ['AI Agent Studio', 'Build, train and publish AI agents for sales and support'], prompt: ['Prompt Builder', 'Shape how your agent thinks and talks'], kb: ['Knowledge Base', 'Train agents on your store\u2019s knowledge'], playground: ['AI Playground', 'Chat with your agent before you publish'] };
+    const tabs = [['Agents', '#agents'], ['Prompt Builder', '#prompt'], ['Knowledge Base', '#kb'], ['Playground', '#playground']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const stt = { LIVE: ['#0E9F6E', '#EDF9F1'], DRAFT: ['#8A8DA3', '#F3F3FA'], BETA: ['#4F46E5', '#EEF0FE'] };
+    const A = (name, model, glyph, tint, status, desc, skills) => ({ name, model, glyph, tint, status, stColor: stt[status][0], stBg: stt[status][1], desc, skills });
+    const rule = (key, name, detail, glyph, def) => { const on = this.state.rules[key] === undefined ? def : this.state.rules[key]; return { name, detail, glyph, onClick: () => this.setState(s => ({ rules: { ...s.rules, [key]: !(s.rules[key] === undefined ? def : s.rules[key]) } })), bg: on ? '#4F46E5' : '#D9DBEA', left: on ? '19px' : '3px' }; };
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isAgents: page === 'agents', isPrompt: page === 'prompt', isKb: page === 'kb', isPlayground: page === 'playground',
+      agents: [
+        A('Aria', 'Claude · Sonnet', '🛍️', '#F1EBFE', 'LIVE', 'Shopping assistant that finds products, compares and recommends bundles.', ['Product discovery', 'Recommendations', 'Comparison']),
+        A('Max', 'Claude · Sonnet', '💳', '#EEF0FE', 'LIVE', 'Checkout assistant recovering carts with margin-safe dynamic coupons.', ['Cart recovery', 'Coupon negotiation']),
+        A('Sage', 'GPT-4o', '🎧', '#EDF9F1', 'LIVE', 'Support agent handling orders, returns, tracking and FAQs.', ['Order lookup', 'Returns', 'FAQ']),
+        A('Leo', 'Claude · Opus', '🏢', '#FFF3E8', 'LIVE', 'B2B sales agent qualifying wholesale leads and quoting tiers.', ['Lead qualification', 'B2B pricing']),
+        A('Echo', 'Gemini · Flash', '🎙️', '#F1EBFE', 'BETA', 'Multilingual voice agent for phone and voice-note sales.', ['Voice AI', 'Multilingual']),
+        A('Nova', 'DeepSeek', '🎁', '#EEF0FE', 'DRAFT', 'Upsell & cross-sell specialist suggesting bundles at the right moment.', ['Upsell', 'Bundles']),
+      ],
+      models: [
+        ['OpenAI', 'GPT-4o · GPT-4o mini', 'AI', '#EDF9F1', '#0E9F6E', false],
+        ['Claude', 'Opus · Sonnet · Haiku', 'CL', '#FFF3E8', '#C2620A', true],
+        ['Gemini', '1.5 Pro · Flash', 'GM', '#EEF0FE', '#4F46E5', false],
+        ['DeepSeek', 'V3 · R1', 'DS', '#F1EBFE', '#7C3AED', false],
+        ['OpenRouter', '100+ models', 'OR', '#EDF9F1', '#0E9F6E', false],
+        ['Ollama', 'Self-hosted local', 'OL', '#F3F3FA', '#5B5E75', false],
+        ['Custom API', 'Your own endpoint', '⚙︎', '#F3F3FA', '#5B5E75', false],
+      ].map(m => ({ name: m[0], detail: m[1], mark: m[2], tint: m[3], fg: m[4], active: m[5], border: m[5] ? '#BEE9D2' : '#ECEDF4', bg: m[5] ? '#F7FCF9' : '#fff' })),
+      vars: ['{{customer_name}}', '{{cart_items}}', '{{last_order}}', '{{loyalty_tier}}', '{{live_inventory}}'],
+      voices: ['Warm', 'Playful', 'Professional', 'Concise'].map(v => ({ label: v, onClick: () => this.setState({ voice: v }), border: this.state.voice === v ? '#4F46E5' : '#ECEDF4', bg: this.state.voice === v ? '#EEF0FE' : '#fff', color: this.state.voice === v ? '#4F46E5' : '#8A8DA3' })),
+      rules: [
+        rule('r1', 'Check live inventory', 'Never recommend out-of-stock items', '📦', true),
+        rule('r2', 'Conversation memory', 'Remember context across the session', '🧠', true),
+        rule('r3', 'Human handover', 'Escalate complaints & refunds > $200', '🙋', true),
+        rule('r4', 'Dynamic coupons', 'Allow margin-safe discount negotiation', '🎟️', true),
+        rule('r5', 'Multilingual', 'Auto-detect and reply in visitor language', '🌍', false),
+      ],
+      sources: [
+        { name: 'WooCommerce products', glyph: '🛒', tint: '#EDF9F1', detail: '148 products · live sync', status: 'SYNCED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Website crawl', glyph: '🌐', tint: '#EEF0FE', detail: '86 pages · brumahome.com', status: 'TRAINED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'FAQ document', glyph: '❓', tint: '#F1EBFE', detail: '42 Q&As', status: 'TRAINED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Shipping policy PDF', glyph: '📄', tint: '#FFF3E8', detail: 'Uploaded Jun 28', status: 'TRAINED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Product catalog CSV', glyph: '📊', tint: '#EDF9F1', detail: 'Attributes & specs', status: 'SYNCED', stColor: '#0E9F6E', stBg: '#EDF9F1' },
+        { name: 'Returns policy DOCX', glyph: '📝', tint: '#FDEDED', detail: 'Needs re-sync', status: 'STALE', stColor: '#C2620A', stBg: '#FFF3E8' },
+      ],
+      importTypes: [
+        { name: 'Website crawl', detail: 'Enter a URL', glyph: '🌐' }, { name: 'PDF upload', detail: 'Policies, guides', glyph: '📄' },
+        { name: 'DOCX upload', detail: 'Word documents', glyph: '📝' }, { name: 'CSV import', detail: 'Structured data', glyph: '📊' },
+        { name: 'Product sync', detail: 'From WooCommerce', glyph: '🛒' }, { name: 'FAQ builder', detail: 'Manual Q&A', glyph: '❓' },
+      ],
+      messages: this.state.messages.map(m => ({
+        justify: m.role === 'them' ? 'flex-start' : 'flex-end',
+        bg: m.role === 'them' ? '#fff' : 'linear-gradient(135deg,#4F46E5,#8B5CF6)',
+        border: m.role === 'them' ? '#ECEDF4' : 'transparent', color: m.role === 'them' ? '#14152A' : '#fff',
+        text: (m.role === 'ai' ? '' : '') + m.text })),
+      thinking: this.state.thinking,
+      testPrompts: [
+        { label: 'What\u2019s the price?', onClick: () => this.ask('What\u2019s the price?') },
+        { label: 'Compare sage vs oat', onClick: () => this.ask('Compare sage vs oat') },
+        { label: 'Do you ship fast?', onClick: () => this.ask('Do you ship fast?') },
+      ],
+      scrollRef: (el) => { this.scrollEl = el; if (el) setTimeout(() => el.scrollTop = el.scrollHeight, 40); },
+      inputRef: (el) => { this.inputEl = el; },
+      onKey: (e) => { if (e.key === 'Enter' && e.target.value.trim()) { this.ask(e.target.value.trim()); e.target.value = ''; } },
+      send: () => { if (this.inputEl && this.inputEl.value.trim()) { this.ask(this.inputEl.value.trim()); this.inputEl.value = ''; } },
+      settings: [
+        { label: 'Temperature', value: '0.7', width: '70%' }, { label: 'Max tokens', value: '1,024', width: '50%' }, { label: 'Top P', value: '0.9', width: '90%' },
+      ],
+      versions: [
+        { name: 'v4 · draft', detail: 'Added bundle logic · now', dot: '#7C3AED' },
+        { name: 'v3 · published', detail: 'Live · 2 days ago', dot: '#0E9F6E' },
+        { name: 'v2', detail: 'Coupon rules · Jun 30', dot: '#C4C6D4' },
+        { name: 'v1', detail: 'Initial · Jun 12', dot: '#C4C6D4' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

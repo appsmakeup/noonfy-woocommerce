@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="livechat" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;color:#0E9F6E"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:blink 1.6s ease infinite"></span>9 live chats</div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="3">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:#14152A;margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:{{ k.deltaColor }};margin-top:2px">{{ k.delta }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Active conversations</div>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+              <sc-for list="{{ activeChats }}" as="c" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+                  <span style="width:32px;height:32px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+                  <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.msg }}</span></span>
+                  <span style="text-align:right"><span style="display:block;font-size:10px;font-weight:800;color:{{ c.agColor }}">{{ c.agent }}</span><span style="display:block;font-size:10px;font-weight:700;color:#A5A8BD">{{ c.wait }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+            <a href="Inbox.dc.html" style="display:block;text-align:center;margin-top:14px;border:1px solid #C7C3F5;background:#FBFAFF;border-radius:9px;padding:8px;font-size:12px;font-weight:800;color:#7C3AED" style-hover="background:#F1EBFE;color:#7C3AED">Open team inbox →</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Agents online</div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
+                <sc-for list="{{ agents }}" as="a" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:10px"><span style="position:relative"><span style="width:28px;height:28px;border-radius:99px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ a.fg }}">{{ a.initials }}</span><span style="position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:99px;background:{{ a.dot }};border:2px solid #fff"></span></span><span style="flex:1;font-size:12px;font-weight:700;color:#14152A">{{ a.name }}</span><span style="font-size:11px;font-weight:800;color:#8A8DA3">{{ a.load }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Departments</div>
+              <div style="display:flex;flex-direction:column;gap:9px;margin-top:13px">
+                <sc-for list="{{ depts }}" as="d" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;color:#5B5E75"><span style="font-size:13px">{{ d.glyph }}</span>{{ d.name }}<span style="margin-left:auto;font-weight:800;color:#14152A">{{ d.count }} open</span></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{ isWidget }}" hint-placeholder-val="{{ false }}">
+      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">Widget designer</div>
+          <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Customize how the chat widget looks on your store</div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:7px">Accent color</div>
+          <div style="display:flex;gap:9px">
+            <sc-for list="{{ colors }}" as="c" hint-placeholder-count="5">
+              <button onClick="{{ c.onClick }}" style="width:36px;height:36px;border-radius:10px;background:{{ c.value }};border:2px solid {{ c.border }};cursor:pointer;box-shadow:0 0 0 {{ c.ring }} {{ c.value }}"></button>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:7px">Position</div>
+          <div style="display:flex;gap:7px">
+            <sc-for list="{{ positions }}" as="p" hint-placeholder-count="2">
+              <button onClick="{{ p.onClick }}" style="border:1px solid {{ p.border }};background:{{ p.bg }};color:{{ p.color }};border-radius:9px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">{{ p.label }}</button>
+            </sc-for>
+          </div>
+          <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:16px;margin-bottom:7px">Greeting message</div>
+          <input ref="{{ greetRef }}" onInput="{{ onGreet }}" value="{{ greetVal }}" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;font-family:inherit;color:#14152A;outline:none;background:#F8F8FC"></input>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+            <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:9px"><span onClick="{{ t.onClick }}" style="width:38px;height:22px;border-radius:99px;background:{{ t.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ t.left }};width:16px;height:16px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></span></span><span style="font-size:12px;font-weight:700;color:#3C3F55">{{ t.label }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:linear-gradient(135deg,#EEF0FE,#F4EFFE);border:1px solid #ECEDF4;border-radius:14px;padding:20px 22px;position:relative;min-height:440px">
+          <div style="font-size:11px;font-weight:800;color:#8A8DA3;letter-spacing:.4px">LIVE PREVIEW</div>
+          <div style="position:absolute;{{ widgetPos }}:24px;bottom:24px;width:300px">
+            <div style="background:#fff;border-radius:16px;box-shadow:0 16px 40px rgba(20,21,42,.18);overflow:hidden">
+              <div style="background:{{ accent }};padding:16px 18px;color:#fff">
+                <div style="display:flex;align-items:center;gap:9px"><span style="width:32px;height:32px;border-radius:99px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:15px">💬</span><div><div style="font-size:13.5px;font-weight:800">Bruma Home</div><div style="font-size:10.5px;opacity:.85;font-weight:600">Typically replies instantly</div></div></div>
+              </div>
+              <div style="padding:16px;display:flex;flex-direction:column;gap:10px;background:#F8F8FC;min-height:150px">
+                <div style="align-self:flex-start;max-width:80%;background:#fff;border:1px solid #ECEDF4;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:500;color:#14152A;line-height:1.45">{{ greetVal }}</div>
+                <sc-if value="{{ showAiBadge }}" hint-placeholder-val="{{ true }}"><div style="align-self:flex-start;font-size:9.5px;font-weight:800;color:#7C3AED">✨ AI-powered</div></sc-if>
+              </div>
+              <div style="padding:12px 14px;border-top:1px solid #ECEDF4;display:flex;gap:8px;align-items:center"><span style="flex:1;font-size:12px;color:#A5A8BD;font-weight:600">Type your message…</span><span style="width:30px;height:30px;border-radius:8px;background:{{ accent }};display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px">➤</span></div>
+            </div>
+            <div style="{{ bubbleAlign }};margin-top:12px;width:56px;height:56px;border-radius:99px;background:{{ accent }};display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 8px 20px rgba(20,21,42,.25)">💬</div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#dashboard').slice(1), accent: '#4F46E5', pos: 'right', greet: 'Hi! 👋 Looking for something? I can help you find it.', tg: { ai: true, typing: true, files: true, rating: false } };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#dashboard').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); }
+  renderVals() {
+    const valid = ['dashboard', 'widget'];
+    const page = valid.includes(this.state.page) ? this.state.page : 'dashboard';
+    const titles = { dashboard: ['Live Chat Center', 'Real-time website chat with AI + human handover'], widget: ['Chat Widget Designer', 'Design your on-site chat widget'] };
+    const tabs = [['Dashboard', '#dashboard'], ['Widget Designer', '#widget']].map(t => {
+      const k = t[1].slice(1);
+      return { label: t[0], href: t[1], weight: page === k ? 800 : 600, color: page === k ? '#4F46E5' : '#8A8DA3', border: page === k ? '#4F46E5' : 'transparent' };
+    });
+    const palette = ['#4F46E5', '#7C3AED', '#0E9F6E', '#EC4899', '#F59E0B'];
+    const colors = palette.map(c => ({ value: c, onClick: () => this.setState({ accent: c }), border: this.state.accent === c ? '#14152A' : 'transparent', ring: this.state.accent === c ? '2px' : '0' }));
+    const positions = [['Bottom right', 'right'], ['Bottom left', 'left']].map(p => ({ label: p[0], onClick: () => this.setState({ pos: p[1] }), border: this.state.pos === p[1] ? '#4F46E5' : '#ECEDF4', bg: this.state.pos === p[1] ? '#EEF0FE' : '#fff', color: this.state.pos === p[1] ? '#4F46E5' : '#8A8DA3' }));
+    const tg = this.state.tg;
+    const toggle = (key, label) => ({ label, onClick: () => this.setState(s => ({ tg: { ...s.tg, [key]: !s.tg[key] } })), bg: tg[key] ? this.state.accent : '#D9DBEA', left: tg[key] ? '19px' : '3px' });
+    return {
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isDashboard: page === 'dashboard', isWidget: page === 'widget',
+      kpis: [
+        { label: 'LIVE CHATS', value: '9', delta: 'now', deltaColor: '#8A8DA3' },
+        { label: 'IN QUEUE', value: '2', delta: '▼ short', deltaColor: '#0E9F6E' },
+        { label: 'AVG WAIT', value: '11 sec', delta: '▼ 40%', deltaColor: '#0E9F6E' },
+        { label: 'CHATS TODAY', value: '312', delta: '▲ 18%', deltaColor: '#0E9F6E' },
+        { label: 'CHAT RATING', value: '4.8/5', delta: '▲ 0.2', deltaColor: '#0E9F6E' },
+      ],
+      activeChats: [
+        { name: 'Maya Okafor', msg: 'Is the sage duvet back in stock?', agent: '🤖 AI', agColor: '#7C3AED', wait: '0:12', initials: 'MO', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: 'Visitor #8842', msg: 'typing…', agent: 'Lena O.', agColor: '#4F46E5', wait: '1:04', initials: 'V8', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: 'David Chen', msg: 'Which kettle is bigger?', agent: '🤖 AI', agColor: '#7C3AED', wait: '0:34', initials: 'DC', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { name: 'Priya Raman', msg: 'Thanks, ordering now!', agent: 'Noah P.', agColor: '#4F46E5', wait: '2:18', initials: 'PR', tint: '#FFF3E8', fg: '#C2620A' },
+        { name: 'Visitor #9021', msg: 'Do you ship to Canada?', agent: '🤖 AI', agColor: '#7C3AED', wait: '0:08', initials: 'V9', tint: '#FDEDED', fg: '#E02424' },
+        { name: 'Hana Suzuki', msg: 'Waiting for an agent…', agent: 'Queue', agColor: '#C2620A', wait: '0:45', initials: 'HS', tint: '#EEF0FE', fg: '#4F46E5' },
+      ],
+      agents: [
+        { name: 'Lena Ortiz', load: '3 chats', initials: 'LO', tint: '#F1EBFE', fg: '#7C3AED', dot: '#0E9F6E' },
+        { name: 'Noah Park', load: '2 chats', initials: 'NP', tint: '#EEF0FE', fg: '#4F46E5', dot: '#0E9F6E' },
+        { name: 'Ava Kimura', load: '1 chat', initials: 'AK', tint: '#EDF9F1', fg: '#0E9F6E', dot: '#0E9F6E' },
+        { name: 'Aria (AI)', load: '9 chats', initials: 'AI', tint: '#F1EBFE', fg: '#7C3AED', dot: '#7C3AED' },
+      ],
+      depts: [
+        { glyph: '🛍️', name: 'Sales', count: '5' }, { glyph: '🎧', name: 'Support', count: '3' }, { glyph: '💳', name: 'Billing', count: '1' },
+      ],
+      colors, positions,
+      greetRef: () => {}, greetVal: this.state.greet, onGreet: (e) => this.setState({ greet: e.target.value }),
+      toggles: [toggle('ai', 'AI chatbot answers first'), toggle('typing', 'Show typing indicator'), toggle('files', 'Allow file uploads'), toggle('rating', 'Ask for a rating after chat')],
+      accent: this.state.accent, widgetPos: this.state.pos,
+      bubbleAlign: this.state.pos === 'right' ? 'margin-left:auto' : 'margin-right:auto',
+      showAiBadge: this.state.tg.ai,
+    };
+  }
+}
+</script>
+</body>
+</html>

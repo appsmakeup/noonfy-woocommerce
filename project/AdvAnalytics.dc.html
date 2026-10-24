@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="advanalytics" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 16px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Advanced Analytics</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Click maps, scroll depth and audience breakdowns</p>
+      </div>
+      <button style="margin-left:auto;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Export report</button>
+    </header>
+
+    <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Email click map</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">“Summer Linen Drop” · where taps land</div>
+        <div style="border:1px solid #ECEDF4;border-radius:12px;overflow:hidden;margin-top:14px;background:#FAFAFE">
+          <div style="background:linear-gradient(135deg,#4F46E5,#8B5CF6);padding:16px;text-align:center;position:relative"><div style="font-size:15px;font-weight:800;color:#fff">The Summer Linen Drop</div><span style="position:absolute;top:10px;right:14px;font-size:10px;font-weight:800;color:#fff;background:rgba(255,255,255,.25);border-radius:99px;padding:2px 8px">6% taps</span></div>
+          <div style="height:70px;background:#EEF0FE;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative">🖼️<span style="position:absolute;top:8px;right:14px;font-size:10px;font-weight:800;color:#fff;background:rgba(20,21,42,.6);border-radius:99px;padding:2px 8px">18% taps</span></div>
+          <div style="padding:14px;position:relative"><div style="font-size:11.5px;color:#8A8DA3;font-weight:600;line-height:1.5">Breathable European flax in six new colors, stone-washed soft…</div></div>
+          <div style="padding:0 14px 16px;text-align:center;position:relative"><span style="display:inline-block;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:10px 30px;font-size:13px;font-weight:800;position:relative">Shop the drop<span style="position:absolute;top:-9px;right:-14px;font-size:10px;font-weight:800;color:#fff;background:#EF4444;border-radius:99px;padding:2px 8px">54% taps</span></span></div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Scroll depth</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">How far readers get before dropping</div>
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px">
+          <sc-for list="{{ scroll }}" as="s" hint-placeholder-count="5">
+            <div>
+              <div style="display:flex;font-size:12px;font-weight:700;color:#3C3F55"><span>{{ s.label }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ s.pct }}</span></div>
+              <div style="height:8px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:8px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ s.pct }}"></div></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#8A8DA3;margin-top:14px;line-height:1.5">💡 62% never reach the second product row — move the CTA higher for mobile readers.</div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Device &amp; OS</div>
+        <div style="display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:center;margin-top:14px">
+          <div style="height:150px"><canvas ref="{{ deviceRef }}"></canvas></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ os }}" as="o" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;color:#5B5E75"><span style="font-size:13px">{{ o.glyph }}</span><span>{{ o.name }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ o.pct }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Browser</div>
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:16px">
+          <sc-for list="{{ browsers }}" as="b" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:9px"><span style="font-size:13px">{{ b.glyph }}</span><span style="font-size:12px;font-weight:700;color:#3C3F55;width:80px">{{ b.name }}</span><span style="flex:1;height:6px;border-radius:99px;background:#F3F3FA"><span style="display:block;height:6px;border-radius:99px;background:{{ b.color }};width:{{ b.width }}"></span></span><span style="font-size:11.5px;font-weight:800;color:#14152A;width:34px;text-align:right">{{ b.pct }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">Top countries</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+          <sc-for list="{{ countries }}" as="c" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:9px"><span style="font-size:14px">{{ c.flag }}</span><span style="font-size:12px;font-weight:700;color:#3C3F55;flex:1">{{ c.name }}</span><span style="font-size:11.5px;font-weight:800;color:#14152A">{{ c.pct }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">Top cities</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+          <sc-for list="{{ cities }}" as="c" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:9px"><span style="font-size:12px;font-weight:700;color:#3C3F55;flex:1">{{ c.name }}</span><span style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ c.count }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#14152A">Language</div>
+        <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+          <sc-for list="{{ langs }}" as="l" hint-placeholder-count="5">
+            <div><div style="display:flex;font-size:12px;font-weight:700;color:#3C3F55"><span>{{ l.name }}</span><span style="margin-left:auto;font-weight:800;color:#14152A">{{ l.pct }}</span></div><div style="height:6px;border-radius:99px;background:#F3F3FA;margin-top:4px"><div style="height:6px;border-radius:99px;background:#8B5CF6;width:{{ l.pct }}"></div></div></div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { this.initChart(); }
+  componentWillUnmount() { this.dc && this.dc.destroy(); }
+  initChart() {
+    if (!window.Chart || !this.deviceEl) { setTimeout(() => this.initChart(), 120); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif";
+    if (this.dc) this.dc.destroy();
+    this.dc = new Chart(this.deviceEl, { type: 'doughnut',
+      data: { labels: ['Mobile', 'Desktop', 'Tablet'], datasets: [{ data: [62, 31, 7], backgroundColor: ['#4F46E5', '#8B5CF6', '#DDD6FE'], borderWidth: 2, borderColor: '#fff', cutout: '64%' }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 8, boxHeight: 8, font: { size: 10, weight: 700 }, padding: 8 } } } } });
+  }
+  renderVals() {
+    return {
+      deviceRef: (el) => { if (el && el !== this.deviceEl) { this.deviceEl = el; this.initChart(); } },
+      scroll: [
+        { label: 'Reached header', pct: '100%' }, { label: 'Saw hero image', pct: '91%' },
+        { label: 'Read body copy', pct: '74%' }, { label: 'Saw product row', pct: '38%' }, { label: 'Reached CTA', pct: '29%' },
+      ],
+      os: [
+        { glyph: '🍎', name: 'iOS', pct: '54%' }, { glyph: '🤖', name: 'Android', pct: '21%' },
+        { glyph: '🖥️', name: 'macOS', pct: '15%' }, { glyph: '🪟', name: 'Windows', pct: '9%' }, { glyph: '🐧', name: 'Other', pct: '1%' },
+      ],
+      browsers: [
+        { glyph: '🧭', name: 'Safari', pct: '46%', width: '92%', color: '#4F46E5' },
+        { glyph: '🌐', name: 'Chrome', pct: '38%', width: '76%', color: '#8B5CF6' },
+        { glyph: '🦊', name: 'Firefox', pct: '8%', width: '16%', color: '#C4B5FD' },
+        { glyph: '📨', name: 'Edge', pct: '6%', width: '12%', color: '#DDD6FE' },
+        { glyph: '❓', name: 'Other', pct: '2%', width: '4%', color: '#EFEFF7' },
+      ],
+      countries: [
+        { flag: '🇺🇸', name: 'United States', pct: '48%' }, { flag: '🇬🇧', name: 'United Kingdom', pct: '16%' },
+        { flag: '🇨🇦', name: 'Canada', pct: '12%' }, { flag: '🇦🇺', name: 'Australia', pct: '9%' },
+        { flag: '🇩🇪', name: 'Germany', pct: '6%' }, { flag: '🇫🇷', name: 'France', pct: '5%' },
+      ],
+      cities: [
+        { name: 'New York', count: '4,210' }, { name: 'London', count: '3,180' }, { name: 'Los Angeles', count: '2,640' },
+        { name: 'Toronto', count: '1,920' }, { name: 'Sydney', count: '1,540' }, { name: 'Portland', count: '1,280' },
+      ],
+      langs: [
+        { name: 'English', pct: '82%' }, { name: 'French', pct: '7%' }, { name: 'German', pct: '5%' },
+        { name: 'Spanish', pct: '4%' }, { name: 'Other', pct: '2%' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="dashboard" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;gap:14px;padding:20px 0 18px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Good morning, Sam</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Here's what's happening at Bruma Home this week.</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:7px 12px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer" style-hover="border-color:#D9DBEA">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8A8DA3" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"></rect><path d="M8 2v4M16 2v4M3 9h18"></path></svg>
+          Last 30 days
+        </div>
+        <div style="position:relative;width:36px;height:36px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="border-color:#D9DBEA">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3C3F55" stroke-width="2" stroke-linecap="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M10.3 21a2 2 0 0 0 3.4 0"></path></svg>
+          <span style="position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:99px;background:#EF4444;border:1.5px solid #fff"></span>
+        </div>
+        <a href="Campaigns.dc.html#builder" style="display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92;color:#fff">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          New campaign
+        </a>
+      </div>
+    </header>
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;animation:fadeUp .35s ease">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="8">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(20,21,42,.03)">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:11.5px;font-weight:700;color:#8A8DA3;letter-spacing:.2px">{{ k.label }}</span>
+            <span style="margin-left:auto;font-size:11px;font-weight:800;color:{{ k.deltaColor }};background:{{ k.deltaBg }};border-radius:99px;padding:2px 7px">{{ k.delta }}</span>
+          </div>
+          <div style="font-size:24px;font-weight:800;color:#14152A;margin-top:8px;letter-spacing:-.5px;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+          <div style="font-size:11px;color:#A5A8BD;margin-top:3px;font-weight:600">{{ k.sub }}</div>
+        </div>
+      </sc-for>
+    </section>
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center">
+          <div>
+            <div style="font-size:14px;font-weight:800;color:#14152A">Revenue attribution</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Campaigns vs. automations, daily</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:14px;font-size:11.5px;font-weight:700;color:#5B5E75">
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#4F46E5"></span>Automations</span>
+            <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#C4B5FD"></span>Campaigns</span>
+          </div>
+        </div>
+        <div style="height:240px;margin-top:12px"><canvas ref="{{ lineRef }}"></canvas></div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Automation revenue</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">By workflow · 30 days</div>
+        <div style="height:150px;margin:14px auto 6px auto;position:relative;width:150px">
+          <canvas ref="{{ donutRef }}"></canvas>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none">
+            <span style="font-size:17px;font-weight:800;color:#14152A">$52.7k</span>
+            <span style="font-size:10px;color:#8A8DA3;font-weight:700">41% of total</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-top:6px">
+          <sc-for list="{{ donutLegend }}" as="d" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#3C3F55">
+              <span style="width:8px;height:8px;border-radius:3px;background:{{ d.color }}"></span>{{ d.label }}
+              <span style="margin-left:auto;font-weight:800;color:#14152A">{{ d.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Email funnel</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Last 30 days</div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:16px">
+          <sc-for list="{{ funnel }}" as="f" hint-placeholder-count="4">
+            <div>
+              <div style="display:flex;font-size:11.5px;font-weight:700;color:#5B5E75;margin-bottom:4px"><span>{{ f.label }}</span><span style="margin-left:auto;color:#14152A;font-weight:800">{{ f.value }}</span></div>
+              <div style="height:22px;border-radius:6px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ f.width }};display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:10.5px;font-weight:800;min-width:52px;opacity:{{ f.opacity }}">{{ f.pct }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:baseline"><div style="font-size:14px;font-weight:800;color:#14152A">Open-rate heatmap</div><div style="margin-left:auto;font-size:11px;color:#8A8DA3;font-weight:700">Best: Thu 10am · 52%</div></div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">By weekday and send hour</div>
+        <div style="display:grid;grid-template-columns:34px repeat(12,1fr);gap:3px;margin-top:14px">
+          <sc-for list="{{ heatCells }}" as="c" hint-placeholder-count="20">
+            <div style="height:20px;border-radius:4px;background:{{ c.bg }};display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:{{ c.color }}" title="{{ c.tip }}">{{ c.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="font-size:14px;font-weight:800;color:#14152A">Sends by type</div>
+        <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Weekly volume</div>
+        <div style="height:190px;margin-top:12px"><canvas ref="{{ barRef }}"></canvas></div>
+      </div>
+    </section>
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:14px">
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Top products</span><a href="Woo.dc.html#products" style="margin-left:auto;font-size:12px;font-weight:700">View all</a></div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+          <sc-for list="{{ topProducts }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div style="width:36px;height:36px;border-radius:9px;background:{{ p.tint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ p.glyph }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+                <div style="font-size:11px;color:#8A8DA3;font-weight:600">{{ p.orders }} orders</div>
+              </div>
+              <div style="font-size:12.5px;font-weight:800;color:#14152A">{{ p.rev }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Recent orders</span><a href="Woo.dc.html#orders" style="margin-left:auto;font-size:12px;font-weight:700">View all</a></div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+          <sc-for list="{{ recentOrders }}" as="o" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div style="width:30px;height:30px;border-radius:99px;background:{{ o.tint }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:{{ o.fg }}">{{ o.initials }}</div>
+              <div style="flex:1 1 0;min-width:0;overflow:hidden">
+                <div style="font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.name }}</div>
+                <div style="font-size:11px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ o.id }} · {{ o.time }}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:12.5px;font-weight:800;color:#14152A">{{ o.total }}</div>
+                <div style="font-size:10px;font-weight:800;color:{{ o.srcColor }}">{{ o.source }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Top customers</span><a href="Contacts.dc.html#customers" style="margin-left:auto;font-size:12px;font-weight:700">View all</a></div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+          <sc-for list="{{ topCustomers }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:11px">
+              <div style="width:30px;height:30px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</div>
+              <div style="flex:1 1 0;min-width:0;overflow:hidden">
+                <div style="font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</div>
+                <div style="font-size:11px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.orders }} orders · LTV {{ c.ltv }}</div>
+              </div>
+              <span style="font-size:10px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 8px">{{ c.tier }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+    <section style="display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;align-items:flex-start">
+      <div style="flex:1 1 380px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Active automations</span><a href="Automations.dc.html#workflows" style="margin-left:auto;font-size:12px;font-weight:700">All workflows</a></div>
+        <div style="display:grid;grid-template-columns:minmax(0,2fr) repeat(4,minmax(0,1fr));gap:8px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;margin-top:14px;padding:0 4px">
+          <span>Workflow</span><span>Status</span><span>Enrolled</span><span>Open rate</span><span style="text-align:right">Revenue</span>
+        </div>
+        <sc-for list="{{ automations }}" as="a" hint-placeholder-count="4">
+          <a href="Automations.dc.html#detail" style="display:grid;grid-template-columns:minmax(0,2fr) repeat(4,minmax(0,1fr));gap:8px;align-items:center;padding:10px 4px;border-top:1px solid #F3F3FA;color:#14152A" style-hover="background:#FAFAFE;color:#14152A">
+            <span style="display:flex;align-items:center;gap:9px;min-width:0;font-size:12.5px;font-weight:700"><span style="width:26px;height:26px;border-radius:7px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">{{ a.glyph }}</span><span style="display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.name }}</span></span>
+            <span><span style="font-size:10.5px;font-weight:800;color:{{ a.stColor }};background:{{ a.stBg }};border-radius:99px;padding:3px 8px">{{ a.status }}</span></span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ a.enrolled }}</span>
+            <span style="font-size:12px;font-weight:700;color:#5B5E75">{{ a.open }}</span>
+            <span style="font-size:12.5px;font-weight:800;text-align:right">{{ a.rev }}</span>
+          </a>
+        </sc-for>
+      </div>
+      <div style="flex:1 1 260px;min-width:0;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+        <span style="font-size:14px;font-weight:800;color:#14152A">Recent activity</span>
+        <div style="display:flex;flex-direction:column;margin-top:14px">
+          <sc-for list="{{ activity }}" as="ev" hint-placeholder-count="6">
+            <div style="display:flex;gap:11px;padding-bottom:14px;position:relative">
+              <div style="display:flex;flex-direction:column;align-items:center">
+                <span style="width:8px;height:8px;border-radius:99px;background:{{ ev.dot }};margin-top:4px;flex-shrink:0"></span>
+                <span style="width:1.5px;flex:1;background:#EFEFF7;margin-top:4px"></span>
+              </div>
+              <div>
+                <div style="font-size:12.5px;font-weight:600;color:#3C3F55;line-height:1.45">{{ ev.text }}</div>
+                <div style="font-size:11px;color:#A5A8BD;font-weight:600;margin-top:1px">{{ ev.time }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { t: 0 };
+  componentDidMount() {
+    const start = performance.now();
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / 1100);
+      this.setState({ t: 1 - Math.pow(1 - t, 3) });
+      if (t < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    this.initCharts();
+  }
+  initCharts() {
+    if (!window.Chart) { setTimeout(() => this.initCharts(), 120); return; }
+    Chart.defaults.font.family = "'Manrope',sans-serif";
+    Chart.defaults.color = '#A5A8BD';
+    const days = Array.from({length: 30}, (_, i) => i + 1);
+    const auto = days.map(i => 900 + Math.sin(i / 3.2) * 320 + i * 28 + (i % 7 === 0 ? 400 : 0));
+    const camp = days.map(i => 600 + Math.cos(i / 4) * 260 + i * 14 + (i % 9 === 0 ? 500 : 0));
+    if (this.lineEl && !this.lineChart) {
+      const g1 = this.lineEl.getContext('2d').createLinearGradient(0, 0, 0, 240);
+      g1.addColorStop(0, 'rgba(79,70,229,.18)'); g1.addColorStop(1, 'rgba(79,70,229,0)');
+      this.lineChart = new Chart(this.lineEl, { type: 'line', data: { labels: days.map(d => 'Jun ' + d),
+        datasets: [
+          { data: auto, borderColor: '#4F46E5', backgroundColor: g1, fill: true, tension: .4, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4 },
+          { data: camp, borderColor: '#C4B5FD', tension: .4, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 4 }
+        ]},
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' $' + Math.round(c.raw).toLocaleString() } } },
+          scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 6, font: { size: 10, weight: 600 } } },
+            y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, callback: v => '$' + (v / 1000).toFixed(1) + 'k' } } } } });
+    }
+    if (this.donutEl && !this.donutChart) {
+      this.donutChart = new Chart(this.donutEl, { type: 'doughnut',
+        data: { labels: ['Cart Recovery', 'Welcome Series', 'Win Back', 'Browse Abandon', 'Other'],
+          datasets: [{ data: [18400, 12800, 9300, 7600, 4600], backgroundColor: ['#4F46E5', '#8B5CF6', '#C4B5FD', '#E0D7FE', '#EFEFF7'], borderWidth: 0, cutout: '72%' }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' $' + c.raw.toLocaleString() } } } } });
+    }
+    if (this.barEl && !this.barChart) {
+      this.barChart = new Chart(this.barEl, { type: 'bar',
+        data: { labels: ['W1', 'W2', 'W3', 'W4'],
+          datasets: [
+            { label: 'Automations', data: [21400, 24800, 23100, 28900], backgroundColor: '#4F46E5', borderRadius: 5, barPercentage: .55 },
+            { label: 'Campaigns', data: [16200, 12400, 19800, 15600], backgroundColor: '#DDD6FE', borderRadius: 5, barPercentage: .55 }
+          ]},
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false }, ticks: { font: { size: 10, weight: 700 } } },
+            y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 4, font: { size: 10, weight: 600 }, callback: v => (v / 1000) + 'k' } } } } });
+    }
+  }
+  componentWillUnmount() { [this.lineChart, this.donutChart, this.barChart].forEach(c => c && c.destroy()); }
+  renderVals() {
+    const t = this.state.t;
+    const n = (v) => Math.round(v * t).toLocaleString();
+    const f1 = (v) => (v * t).toFixed(1);
+    const kpis = [
+      { label: 'REVENUE', value: '$' + n(128460), delta: '+18.2%', sub: '$52.7k from automations', up: 1 },
+      { label: 'EMAILS SENT', value: n(342180), delta: '+6.4%', sub: '99.2% delivered', up: 1 },
+      { label: 'OPEN RATE', value: f1(38.4) + '%', delta: '+2.1pt', sub: 'Industry avg 24.8%', up: 1 },
+      { label: 'CLICK RATE', value: f1(4.9) + '%', delta: '+0.6pt', sub: '12.8% click-to-open', up: 1 },
+      { label: 'ORDERS', value: n(2847), delta: '+11.9%', sub: '1,120 email-attributed', up: 1 },
+      { label: 'CONVERSION', value: f1(3.2) + '%', delta: '-0.2pt', sub: 'From email clicks', up: 0 },
+      { label: 'SUBSCRIBERS', value: n(48212), delta: '+1,204', sub: '2.1% churn this month', up: 1 },
+      { label: 'RETURNING CUSTOMERS', value: f1(31.4) + '%', delta: '+3.8pt', sub: 'Of monthly orders', up: 1 },
+    ].map(k => ({ ...k, deltaColor: k.up ? '#0E9F6E' : '#E02424', deltaBg: k.up ? '#EDF9F1' : '#FDEDED' }));
+    const funnel = [
+      { label: 'Delivered', value: '339,441', pct: '100%', width: '100%', opacity: 1 },
+      { label: 'Opened', value: '130,346', pct: '38.4%', width: '62%', opacity: .85 },
+      { label: 'Clicked', value: '16,633', pct: '4.9%', width: '34%', opacity: .7 },
+      { label: 'Ordered', value: '4,172', pct: '1.2%', width: '18%', opacity: .55 },
+    ];
+    const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const heat = [[22,28,35,42,38,33,30,29,31,34,30,24],[24,30,38,44,40,35,31,30,33,36,32,25],[23,29,37,45,41,36,32,31,34,37,33,26],[26,33,42,52,46,39,35,34,37,41,36,28],[24,30,38,43,39,34,31,30,32,35,31,25],[18,22,27,31,29,26,24,25,27,29,26,21],[16,20,25,29,27,25,23,24,26,28,25,20]];
+    const heatCells = [];
+    heatCells.push({ label: '', bg: 'transparent', color: 'transparent', tip: '' });
+    for (let h = 0; h < 12; h++) heatCells.push({ label: h % 2 === 0 ? (6 + h) + '' : '', bg: 'transparent', color: '#A5A8BD', tip: '' });
+    heat.forEach((row, d) => {
+      heatCells.push({ label: dayNames[d], bg: 'transparent', color: '#A5A8BD', tip: '' });
+      row.forEach((v, h) => {
+        const a = (v - 15) / 40;
+        heatCells.push({ label: '', bg: `rgba(99,82,229,${(0.06 + a * 0.9).toFixed(2)})`, color: 'transparent', tip: `${dayNames[d]} ${6 + h}:00 — ${v}% open` });
+      });
+    });
+    const donutLegend = [
+      { label: 'Cart Recovery', value: '$18.4k', color: '#4F46E5' },
+      { label: 'Welcome Series', value: '$12.8k', color: '#8B5CF6' },
+      { label: 'Win Back', value: '$9.3k', color: '#C4B5FD' },
+      { label: 'Browse Abandonment', value: '$7.6k', color: '#E0D7FE' },
+    ];
+    const topProducts = [
+      { name: 'Linen Duvet Set — Sage', orders: 312, rev: '$28,080', glyph: '🛏️', tint: '#EDF9F1' },
+      { name: 'Stoneware Pour-Over Kettle', orders: 289, rev: '$21,675', glyph: '☕', tint: '#FFF3E8' },
+      { name: 'Oak Serving Board, Large', orders: 244, rev: '$14,640', glyph: '🪵', tint: '#F8F1E7' },
+      { name: 'Alpaca Throw — Oat', orders: 198, rev: '$23,760', glyph: '🧶', tint: '#F1EBFE' },
+      { name: 'Ceramic Table Lamp', orders: 176, rev: '$19,360', glyph: '💡', tint: '#EEF0FE' },
+    ];
+    const recentOrders = [
+      { name: 'Maya Okafor', id: '#28471', time: '4 min ago', total: '$186.00', source: 'CART RECOVERY', srcColor: '#7C3AED', initials: 'MO', tint: '#F1EBFE', fg: '#7C3AED' },
+      { name: 'Jonas Lindqvist', id: '#28470', time: '19 min ago', total: '$92.50', source: 'CAMPAIGN', srcColor: '#4F46E5', initials: 'JL', tint: '#EEF0FE', fg: '#4F46E5' },
+      { name: 'Priya Raman', id: '#28469', time: '32 min ago', total: '$248.00', source: 'WELCOME FLOW', srcColor: '#7C3AED', initials: 'PR', tint: '#FFF3E8', fg: '#C2620A' },
+      { name: 'Tom Becker', id: '#28468', time: '1 hr ago', total: '$64.00', source: 'ORGANIC', srcColor: '#8A8DA3', initials: 'TB', tint: '#EDF9F1', fg: '#0E9F6E' },
+      { name: 'Alice Fontaine', id: '#28467', time: '2 hr ago', total: '$312.00', source: 'WIN BACK', srcColor: '#7C3AED', initials: 'AF', tint: '#FDEDED', fg: '#E02424' },
+    ];
+    const topCustomers = [
+      { name: 'Elena Moreau', orders: 24, ltv: '$3,840', tier: 'VIP', initials: 'EM', tint: '#F1EBFE', fg: '#7C3AED' },
+      { name: 'David Chen', orders: 19, ltv: '$2,910', tier: 'VIP', initials: 'DC', tint: '#EEF0FE', fg: '#4F46E5' },
+      { name: 'Sofia Ricci', orders: 17, ltv: '$2,480', tier: 'Loyal', initials: 'SR', tint: '#EDF9F1', fg: '#0E9F6E' },
+      { name: 'Marcus Webb', orders: 14, ltv: '$2,120', tier: 'Loyal', initials: 'MW', tint: '#FFF3E8', fg: '#C2620A' },
+      { name: 'Hana Suzuki', orders: 12, ltv: '$1,960', tier: 'Loyal', initials: 'HS', tint: '#FDEDED', fg: '#E02424' },
+    ];
+    const automations = [
+      { name: 'Abandoned Cart Recovery', glyph: '🛒', tint: '#EEF0FE', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', enrolled: '1,284', open: '46.2%', rev: '$18,420' },
+      { name: 'Welcome Series', glyph: '👋', tint: '#F1EBFE', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', enrolled: '3,092', open: '58.1%', rev: '$12,800' },
+      { name: 'Win Back — 90 days', glyph: '💫', tint: '#FFF3E8', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', enrolled: '842', open: '31.4%', rev: '$9,310' },
+      { name: 'Browse Abandonment', glyph: '👀', tint: '#EDF9F1', status: 'LIVE', stColor: '#0E9F6E', stBg: '#EDF9F1', enrolled: '2,156', open: '38.9%', rev: '$7,640' },
+      { name: 'Post-Purchase Cross Sell', glyph: '🎁', tint: '#FDEDED', status: 'PAUSED', stColor: '#C2620A', stBg: '#FFF3E8', enrolled: '640', open: '42.3%', rev: '$4,120' },
+    ];
+    const activity = [
+      { text: 'Cart Recovery email #2 sent to 148 customers', time: '6 minutes ago', dot: '#4F46E5' },
+      { text: 'Maya Okafor converted from Cart Recovery — $186.00', time: '14 minutes ago', dot: '#0E9F6E' },
+      { text: 'A/B test "June Sale subject" reached significance — Variant B wins', time: '1 hour ago', dot: '#8B5CF6' },
+      { text: '“Summer Linen Drop” campaign scheduled for Thu 10:00', time: '2 hours ago', dot: '#C2620A' },
+      { text: '412 new subscribers from the June popup', time: '5 hours ago', dot: '#4F46E5' },
+      { text: 'Win Back flow enrolled 96 lapsed customers', time: 'Yesterday', dot: '#8A8DA3' },
+    ];
+    return { kpis, funnel, heatCells, donutLegend, topProducts, recentOrders, topCustomers, automations, activity,
+      lineRef: (el) => { this.lineEl = el; }, donutRef: (el) => { this.donutEl = el; }, barRef: (el) => { this.barEl = el; } };
+  }
+}
+</script>
+</body>
+</html>

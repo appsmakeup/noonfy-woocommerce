@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;overflow:hidden;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="builder" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <header style="display:flex;align-items:center;gap:12px;padding:14px 22px;background:#fff;border-bottom:1px solid #ECEDF4">
+      <a href="Automations.dc.html#workflows" style="width:30px;height:30px;border:1px solid #ECEDF4;border-radius:8px;display:flex;align-items:center;justify-content:center" style-hover="border-color:#D9DBEA">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3C3F55" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+      </a>
+      <div>
+        <div style="font-size:14.5px;font-weight:800;color:#14152A">Browse Abandonment Recovery</div>
+        <div style="font-size:11.5px;color:#8A8DA3;font-weight:600">Draft · Auto-saved just now</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <span style="font-size:11.5px;font-weight:700;color:#8A8DA3">Drag nodes to arrange · click to inspect</span>
+        <button style="border:1px solid #ECEDF4;background:#fff;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;cursor:pointer;font-family:inherit" style-hover="border-color:#D9DBEA">Test run</button>
+        <button style="border:none;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92">Activate workflow</button>
+      </div>
+    </header>
+    <div style="flex:1;display:flex;min-height:0">
+      <div style="width:200px;background:#fff;border-right:1px solid #ECEDF4;padding:14px;overflow-y:auto">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#A5A8BD;padding:0 2px 8px 2px">Blocks</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <sc-for list="{{ palette }}" as="p" hint-placeholder-count="9">
+            <button onClick="{{ p.add }}" style="display:flex;align-items:center;gap:9px;border:1px solid #ECEDF4;background:#fff;border-radius:10px;padding:9px 10px;cursor:pointer;font-family:inherit;text-align:left" style-hover="border-color:#C7C3F5;background:#FBFAFF">
+              <span style="width:26px;height:26px;border-radius:7px;background:{{ p.tint }};display:flex;align-items:center;justify-content:center;font-size:12px">{{ p.glyph }}</span>
+              <span><span style="display:block;font-size:12px;font-weight:800;color:#14152A">{{ p.label }}</span><span style="display:block;font-size:10px;font-weight:600;color:#A5A8BD">{{ p.hint }}</span></span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+      <div ref="{{ canvasRef }}" onMouseMove="{{ onMove }}" onMouseUp="{{ onUp }}" onMouseLeave="{{ onUp }}" style="flex:1;position:relative;overflow:auto;background-image:radial-gradient(#DFE1EC 1px,transparent 1px);background-size:22px 22px;background-color:#F8F8FC">
+        <svg style="position:absolute;inset:0;width:1400px;height:1400px;pointer-events:none">
+          <sc-for list="{{ edges }}" as="e" hint-placeholder-count="8">
+            <g><path d="{{ e.d }}" fill="none" stroke="#B9B3F0" stroke-width="2"></path><circle cx="{{ e.cx }}" cy="{{ e.cy }}" r="3.5" fill="#8B5CF6"></circle></g>
+          </sc-for>
+        </svg>
+        <sc-for list="{{ nodes }}" as="nd" hint-placeholder-count="8">
+          <div onMouseDown="{{ nd.down }}" style="position:absolute;left:{{ nd.x }}px;top:{{ nd.y }}px;width:230px;background:#fff;border:1.5px solid {{ nd.border }};border-radius:13px;padding:11px 13px;cursor:grab;box-shadow:{{ nd.shadow }};user-select:none">
+            <div style="display:flex;align-items:center;gap:9px">
+              <span style="width:28px;height:28px;border-radius:8px;background:{{ nd.tint }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ nd.glyph }}</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:9.5px;font-weight:800;letter-spacing:.7px;color:{{ nd.kindColor }}">{{ nd.kind }}</span><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ nd.label }}</span></span>
+            </div>
+            <sc-if value="{{ nd.stat }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:8px;border-top:1px solid #F3F3FA;padding-top:7px;font-size:10.5px;font-weight:700;color:#8A8DA3">{{ nd.stat }}</div>
+            </sc-if>
+            <span style="position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:9px;height:9px;border-radius:99px;background:#fff;border:2px solid #8B5CF6"></span>
+            <span style="position:absolute;left:50%;top:-5px;transform:translateX(-50%);width:9px;height:9px;border-radius:99px;background:#fff;border:2px solid #C4B5FD"></span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="width:250px;background:#fff;border-left:1px solid #ECEDF4;padding:16px;overflow-y:auto">
+        <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#A5A8BD">Inspector</div>
+            <div style="display:flex;align-items:center;gap:9px;margin-top:12px">
+              <span style="width:32px;height:32px;border-radius:9px;background:{{ selTint }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ selGlyph }}</span>
+              <span style="font-size:10px;font-weight:800;letter-spacing:.7px;color:#7C3AED">{{ selKind }}</span>
+            </div>
+            <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">Step name</div>
+            <input value="{{ selLabel }}" onInput="{{ renameSel }}" style="width:100%;border:1px solid #ECEDF4;border-radius:9px;padding:8px 11px;font-size:12.5px;font-weight:700;font-family:inherit;color:#14152A;outline:none;background:#F8F8FC"></input>
+            <div style="font-size:11px;font-weight:800;color:#5B5E75;margin-top:14px;margin-bottom:5px">Settings</div>
+            <div style="border:1px solid #F3F3FA;border-radius:10px;padding:11px 12px;font-size:11.5px;font-weight:600;color:#8A8DA3;line-height:1.6">Timing, audience and content settings for this step appear here in the full product.</div>
+            <button onClick="{{ deleteSel }}" style="width:100%;margin-top:14px;border:1px solid #FDE1E1;background:#fff;color:#E02424;border-radius:9px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit" style-hover="background:#FDEDED">Delete step</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ noSelection }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:10.5px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#A5A8BD">Workflow</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+              <sc-for list="{{ wfStats }}" as="s" hint-placeholder-count="4">
+                <div style="border:1px solid #F3F3FA;border-radius:10px;padding:10px 12px"><div style="font-size:10px;font-weight:800;color:#A5A8BD">{{ s.label }}</div><div style="font-size:16px;font-weight:800;color:#14152A;margin-top:2px">{{ s.value }}</div></div>
+              </sc-for>
+            </div>
+            <div style="font-size:11.5px;font-weight:600;color:#8A8DA3;margin-top:14px;line-height:1.6">Select a node to edit it, or add blocks from the left panel.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    const N = (id, kind, label, x, y, stat) => ({ id, kind, label, x, y, stat: stat || '' });
+    this.state = {
+      sel: null, dragId: null,
+      nodes: [
+        N(1, 'TRIGGER', 'Customer views product', 420, 30, '4,820 entered'),
+        N(2, 'DELAY', 'Wait 2 hours', 420, 140),
+        N(3, 'CONDITION', 'Did purchase?', 420, 240, '23% yes · 77% no'),
+        N(4, 'EXIT', 'Exit workflow', 710, 350),
+        N(5, 'EMAIL', 'Product recommendation', 420, 350, '42% open'),
+        N(6, 'DELAY', 'Wait 1 day', 420, 470),
+        N(7, 'EMAIL', 'Send 10% coupon', 420, 570, '38% open'),
+        N(8, 'GOAL', 'Purchase completed', 420, 690, '1,130 converted'),
+        N(9, 'EMAIL', 'Thank you', 130, 690, '61% open'),
+        N(10, 'EMAIL', 'Cross-sell picks', 130, 810, '44% open'),
+      ],
+      edges: [[1,2],[2,3],[3,5],[3,4],[5,6],[6,7],[7,8],[8,9],[9,10]],
+      nextId: 11,
+    };
+  }
+  kinds() {
+    return {
+      TRIGGER: ['⚡', '#F1EBFE', '#7C3AED'], CONDITION: ['🔀', '#EDF9F1', '#0E9F6E'],
+      DELAY: ['⏱️', '#FFF3E8', '#C2620A'], EMAIL: ['✉️', '#EEF0FE', '#4F46E5'],
+      SMS: ['💬', '#EDF9F1', '#0E9F6E'], WAIT: ['⏳', '#FFF3E8', '#C2620A'],
+      SPLIT: ['🧪', '#F1EBFE', '#7C3AED'], GOAL: ['🏁', '#EDF9F1', '#0E9F6E'], EXIT: ['🚪', '#F3F3FA', '#8A8DA3'],
+    };
+  }
+  renderVals() {
+    const K = this.kinds();
+    const byId = {}; this.state.nodes.forEach(n => byId[n.id] = n);
+    const nodes = this.state.nodes.map(n => {
+      const k = K[n.kind] || K.EMAIL;
+      const selected = this.state.sel === n.id;
+      return { ...n, glyph: k[0], tint: k[1], kindColor: k[2],
+        border: selected ? '#8B5CF6' : '#E4E5EF',
+        shadow: selected ? '0 8px 24px rgba(99,82,229,.22)' : '0 2px 6px rgba(20,21,42,.06)',
+        down: (e) => {
+          e.preventDefault();
+          const rect = this.canvasEl.getBoundingClientRect();
+          this.dragOff = { x: e.clientX - rect.left + this.canvasEl.scrollLeft - n.x, y: e.clientY - rect.top + this.canvasEl.scrollTop - n.y };
+          this.setState({ dragId: n.id, sel: n.id });
+        } };
+    });
+    const edges = this.state.edges.filter(e => byId[e[0]] && byId[e[1]]).map(e => {
+      const a = byId[e[0]], b = byId[e[1]];
+      const x1 = a.x + 115, y1 = a.y + (a.stat ? 78 : 56), x2 = b.x + 115, y2 = b.y;
+      const my = (y1 + y2) / 2;
+      return { d: `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2 - 4}`, cx: x2, cy: y2 - 4 };
+    });
+    const palette = ['TRIGGER', 'CONDITION', 'DELAY', 'EMAIL', 'SMS', 'WAIT', 'SPLIT', 'GOAL', 'EXIT'].map(kind => {
+      const k = K[kind];
+      const hints = { TRIGGER: 'Starts the flow', CONDITION: 'Branch on behavior', DELAY: 'Pause for a time', EMAIL: 'Send an email', SMS: 'Send a text', WAIT: 'Wait for event', SPLIT: 'A/B split', GOAL: 'Conversion target', EXIT: 'Leave workflow' };
+      return { label: kind.charAt(0) + kind.slice(1).toLowerCase(), glyph: k[0], tint: k[1], hint: hints[kind],
+        add: () => this.setState(s => ({
+          nodes: [...s.nodes, { id: s.nextId, kind, label: 'New ' + kind.toLowerCase() + ' step', x: 720 + (s.nextId % 3) * 20, y: 60 + (s.nextId % 5) * 40, stat: '' }],
+          nextId: s.nextId + 1, sel: s.nextId })) };
+    });
+    const sel = byId[this.state.sel];
+    const selK = sel ? (K[sel.kind] || K.EMAIL) : null;
+    return {
+      nodes, edges, palette,
+      canvasRef: (el) => { this.canvasEl = el; },
+      onMove: (e) => {
+        if (this.state.dragId == null) return;
+        const rect = this.canvasEl.getBoundingClientRect();
+        const x = Math.max(0, e.clientX - rect.left + this.canvasEl.scrollLeft - this.dragOff.x);
+        const y = Math.max(0, e.clientY - rect.top + this.canvasEl.scrollTop - this.dragOff.y);
+        this.setState(s => ({ nodes: s.nodes.map(n => n.id === s.dragId ? { ...n, x, y } : n) }));
+      },
+      onUp: () => { if (this.state.dragId != null) this.setState({ dragId: null }); },
+      hasSelection: !!sel, noSelection: !sel,
+      selLabel: sel ? sel.label : '', selKind: sel ? sel.kind : '', selGlyph: selK ? selK[0] : '', selTint: selK ? selK[1] : '#F3F3FA',
+      renameSel: (e) => this.setState(s => ({ nodes: s.nodes.map(n => n.id === s.sel ? { ...n, label: e.target.value } : n) })),
+      deleteSel: () => this.setState(s => ({ nodes: s.nodes.filter(n => n.id !== s.sel), edges: s.edges.filter(e => e[0] !== s.sel && e[1] !== s.sel), sel: null })),
+      wfStats: [
+        { label: 'STEPS', value: String(this.state.nodes.length) },
+        { label: 'ENROLLED', value: '4,820' },
+        { label: 'CONVERSION', value: '23.4%' },
+        { label: 'REVENUE', value: '$7,640' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

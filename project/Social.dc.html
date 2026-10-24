@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.35;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="social" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px;display:flex;align-items:center;gap:9px"><span style="width:30px;height:30px;border-radius:8px;background:{{ brandBg }};display:flex;align-items:center;justify-content:center;font-size:15px">{{ brandGlyph }}</span>{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:#EDF9F1;border:1px solid #C4E9D3;border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;color:#0E9F6E"><span style="width:7px;height:7px;border-radius:99px;background:#0E9F6E;animation:blink 1.6s ease infinite"></span>Connected</div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="2">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+
+    <section>
+      <div style="background:linear-gradient(120deg,{{ heroA }},{{ heroB }});border-radius:16px;padding:22px 26px;color:#fff;display:flex;align-items:center;gap:24px">
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.7px;opacity:.8">{{ heroTag }}</div>
+          <div style="font-size:24px;font-weight:800;margin-top:7px;letter-spacing:-.4px">{{ heroValue }}</div>
+          <div style="font-size:13px;font-weight:600;opacity:.85;margin-top:5px">{{ heroSub }}</div>
+        </div>
+        <div style="display:flex;gap:16px">
+          <sc-for list="{{ heroStats }}" as="s" hint-placeholder-count="3">
+            <div style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.24);border-radius:13px;padding:14px 18px;text-align:center"><div style="font-size:20px;font-weight:800">{{ s.value }}</div><div style="font-size:10px;font-weight:700;opacity:.8;margin-top:2px">{{ s.label }}</div></div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:14px 16px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:#14152A;margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.delta }}</div></div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+          <div style="font-size:14px;font-weight:800;color:#14152A">{{ inboxTitle }}</div>
+          <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+            <sc-for list="{{ conversations }}" as="c" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:11px;border:1px solid #F3F3FA;border-radius:11px;padding:11px 13px">
+                <span style="width:32px;height:32px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+                <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.msg }}</span></span>
+                <span style="text-align:right"><span style="display:block;font-size:9.5px;font-weight:800;color:{{ c.tagColor }};background:{{ c.tagBg }};border-radius:99px;padding:2px 7px">{{ c.tag }}</span><span style="display:block;font-size:10px;font-weight:700;color:#A5A8BD;margin-top:3px">{{ c.time }}</span></span>
+              </div>
+            </sc-for>
+          </div>
+          <a href="Inbox.dc.html" style="display:block;text-align:center;margin-top:14px;border:1px solid #C7C3F5;background:#FBFAFF;border-radius:9px;padding:8px;font-size:12px;font-weight:800;color:#7C3AED" style-hover="background:#F1EBFE;color:#7C3AED">Open in unified inbox →</a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Automations</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:13px">
+              <sc-for list="{{ automations }}" as="a" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span style="width:30px;height:30px;border-radius:8px;background:{{ a.tint }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ a.glyph }}</span>
+                  <span style="flex:1"><span style="display:block;font-size:12px;font-weight:700;color:#14152A">{{ a.name }}</span><span style="display:block;font-size:10.5px;color:#8A8DA3;font-weight:600">{{ a.detail }}</span></span>
+                  <span onClick="{{ a.onClick }}" style="width:36px;height:20px;border-radius:99px;background:{{ a.bg }};position:relative;flex-shrink:0;cursor:pointer"><span style="position:absolute;top:3px;left:{{ a.left }};width:14px;height:14px;border-radius:99px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:left .2s"></span></span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+            <div style="font-size:14px;font-weight:800;color:#14152A">{{ featureTitle }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:12px">
+              <sc-for list="{{ features }}" as="f" hint-placeholder-count="6">
+                <span style="display:flex;align-items:center;gap:6px;border:1px solid #ECEDF4;background:#F8F8FC;border-radius:99px;padding:6px 12px;font-size:11px;font-weight:700;color:#3C3F55">{{ f.glyph }} {{ f.label }}</span>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#messenger').slice(1), tg: {} };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#messenger').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); }
+  renderVals() {
+    const page = this.state.page === 'instagram' ? 'instagram' : 'messenger';
+    const tabs = [['Facebook Messenger', '#messenger', 'messenger'], ['Instagram', '#instagram', 'instagram']].map(t => ({
+      label: t[0], href: t[1], weight: page === t[2] ? 800 : 600, color: page === t[2] ? '#4F46E5' : '#8A8DA3', border: page === t[2] ? '#4F46E5' : 'transparent' }));
+    const tg = this.state.tg;
+    const toggle = (key, def) => (tg[key] === undefined ? def : tg[key]);
+    const mkAuto = (key, name, detail, glyph, tint, def) => ({ name, detail, glyph, tint, onClick: () => this.setState(s => ({ tg: { ...s.tg, [key]: !toggle(key, def) } })), bg: toggle(key, def) ? '#4F46E5' : '#D9DBEA', left: toggle(key, def) ? '19px' : '3px' });
+    if (page === 'messenger') {
+      return {
+        page, tabs, brandGlyph: '💙', brandBg: '#EEF0FE', pageTitle: 'Facebook Messenger AI', pageSub: 'AI Messenger agent · product catalog, cart recovery & broadcasts',
+        heroA: '#1877F2', heroB: '#3B82F6', heroTag: 'MESSENGER · AI AGENT LIVE', heroValue: '$5,240 sold via Messenger this month', heroSub: '620 conversations · 148 orders · 23.9% conversion',
+        heroStats: [{ value: '3', label: 'IN QUEUE' }, { value: '92%', label: 'AI HANDLED' }, { value: '4.7', label: 'RATING' }],
+        kpis: [
+          { label: 'CONVERSATIONS', value: '620', delta: '▲ 16%' }, { label: 'ORDERS', value: '148', delta: '▲ 22%' },
+          { label: 'REVENUE', value: '$5,240', delta: '▲ 19%' }, { label: 'BROADCAST REACH', value: '12,480', delta: '▲ 8%' },
+        ],
+        inboxTitle: 'Messenger inbox',
+        conversations: [
+          { name: 'Alice Fontaine', msg: 'Do you ship to France? 🇫🇷', tag: 'AI', tagColor: '#7C3AED', tagBg: '#F1EBFE', time: '2m', initials: 'AF', tint: '#EEF0FE', fg: '#4F46E5' },
+          { name: 'Ben Carter', msg: 'Is the throw still on sale?', tag: 'AI', tagColor: '#7C3AED', tagBg: '#F1EBFE', time: '9m', initials: 'BC', tint: '#EDF9F1', fg: '#0E9F6E' },
+          { name: 'Chloe Dubois', msg: 'Ordered, thanks!', tag: 'WON', tagColor: '#0E9F6E', tagBg: '#EDF9F1', time: '18m', initials: 'CD', tint: '#F1EBFE', fg: '#7C3AED' },
+          { name: 'Owen Reid', msg: 'Can I get a bigger size?', tag: 'HUMAN', tagColor: '#C2620A', tagBg: '#FFF3E8', time: '31m', initials: 'OR', tint: '#FFF3E8', fg: '#C2620A' },
+          { name: 'Grace Lin', msg: 'Where is my order?', tag: 'AI', tagColor: '#7C3AED', tagBg: '#F1EBFE', time: '1h', initials: 'GL', tint: '#FDEDED', fg: '#E02424' },
+        ],
+        automations: [
+          mkAuto('m1', 'Cart recovery', 'Abandoned cart → Messenger reminder', '🛒', '#EEF0FE', true),
+          mkAuto('m2', 'Order updates', 'Shipping & delivery notifications', '📦', '#EDF9F1', true),
+          mkAuto('m3', 'Coupon delivery', 'Send dynamic codes on request', '🎟️', '#F1EBFE', true),
+          mkAuto('m4', 'Broadcast campaigns', 'Segmented product announcements', '📢', '#FFF3E8', false),
+        ],
+        featureTitle: 'Enabled features',
+        features: [
+          { glyph: '🤖', label: 'AI agent' }, { glyph: '🛍️', label: 'Product catalog' }, { glyph: '🎯', label: 'Recommendations' }, { glyph: '💳', label: 'Checkout links' },
+          { glyph: '👥', label: 'Shared inbox' }, { glyph: '🙋', label: 'Human takeover' }, { glyph: '📊', label: 'Revenue attribution' },
+        ],
+      };
+    }
+    return {
+      page, tabs, brandGlyph: '📸', brandBg: '#FDF0F6', pageTitle: 'Instagram AI', pageSub: 'DM + comment automation with an AI shopping agent',
+      heroA: '#C13584', heroB: '#F56040', heroTag: 'INSTAGRAM · AI AGENT LIVE', heroValue: '$3,120 sold via Instagram this month', heroSub: '412 DMs · 68 orders · comment-to-DM converting at 34%',
+      heroStats: [{ value: '5', label: 'NEW DMS' }, { value: '88%', label: 'AI HANDLED' }, { value: '4.6', label: 'RATING' }],
+      kpis: [
+        { label: 'DM CONVERSATIONS', value: '412', delta: '▲ 24%' }, { label: 'ORDERS', value: '68', delta: '▲ 31%' },
+        { label: 'REVENUE', value: '$3,120', delta: '▲ 28%' }, { label: 'COMMENT REPLIES', value: '1,840', delta: '▲ 12%' },
+      ],
+      inboxTitle: 'Instagram DM inbox',
+      conversations: [
+        { name: '@priya.r', msg: 'Loved the story! How much is the lamp? 😍', tag: 'AI', tagColor: '#7C3AED', tagBg: '#F1EBFE', time: '3m', initials: 'PR', tint: '#FFF3E8', fg: '#C2620A' },
+        { name: '@homebymia', msg: 'Comment → DM: "price?"', tag: 'AUTO', tagColor: '#4F46E5', tagBg: '#EEF0FE', time: '11m', initials: 'HM', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: '@nordic.nest', msg: 'Do you restock the sage set?', tag: 'AI', tagColor: '#7C3AED', tagBg: '#F1EBFE', time: '20m', initials: 'NN', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { name: '@leo.makes', msg: 'Just ordered the throw 🙌', tag: 'WON', tagColor: '#0E9F6E', tagBg: '#EDF9F1', time: '38m', initials: 'LM', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: '@saskia.k', msg: 'Story reply: heart react', tag: 'AUTO', tagColor: '#4F46E5', tagBg: '#EEF0FE', time: '1h', initials: 'SK', tint: '#FDEDED', fg: '#E02424' },
+      ],
+      automations: [
+        mkAuto('i1', 'Comment → DM', 'Auto-DM commenters who ask "price"', '💬', '#F1EBFE', true),
+        mkAuto('i2', 'Story reply automation', 'Reply to story reactions with picks', '📷', '#FDF0F6', true),
+        mkAuto('i3', 'DM product recommendations', 'AI suggests products in DMs', '🛍️', '#EEF0FE', true),
+        mkAuto('i4', 'Coupon delivery', 'Send codes to engaged followers', '🎟️', '#FFF3E8', false),
+      ],
+      featureTitle: 'Enabled features',
+      features: [
+        { glyph: '🤖', label: 'AI agent' }, { glyph: '💬', label: 'Auto replies' }, { glyph: '📷', label: 'Story replies' }, { glyph: '🔁', label: 'Comment→DM' },
+        { glyph: '🛍️', label: 'Recommendations' }, { glyph: '💳', label: 'Checkout links' }, { glyph: '🙋', label: 'Human takeover' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

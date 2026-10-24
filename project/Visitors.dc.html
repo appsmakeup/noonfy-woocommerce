@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#0C0D1E;}
+a{color:#A5B4FC;text-decoration:none;}a:hover{color:#C7D2FE;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#26284A;border-radius:8px;}
+@keyframes liveDot{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes rowIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:none;}}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#0C0D1E">
+  <dc-import name="Sidebar" active="visitors" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 26px 40px 26px;color:#E6E7F5">
+    <header style="display:flex;align-items:center;gap:14px;padding:20px 0 18px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#fff;letter-spacing:-.3px">Live Visitor Intelligence</h1>
+        <p style="margin:3px 0 0 0;font-size:12.5px;color:#8E90B8;font-weight:500">Who's on your store right now — and how likely they are to buy</p>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;color:#34D399"><span style="width:7px;height:7px;border-radius:99px;background:#34D399;animation:liveDot 1.4s ease infinite"></span>{{ activeCount }} ACTIVE</div>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+        <div style="background:{{ k.bg }};border:1px solid {{ k.border }};border-radius:13px;padding:14px 16px">
+          <div style="font-size:10px;font-weight:800;color:{{ k.labelColor }};letter-spacing:.3px">{{ k.label }}</div>
+          <div style="font-size:22px;font-weight:800;color:{{ k.valueColor }};margin-top:5px;font-variant-numeric:tabular-nums">{{ k.value }}</div>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.15fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#fff">Live visitor map</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#34D399;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:99px;background:#34D399;animation:liveDot 1.4s ease infinite"></span>REAL-TIME</span></div>
+        <div style="position:relative;margin-top:12px;background:#10112A;border-radius:11px;overflow:hidden;height:230px">
+          <svg viewBox="0 0 400 230" style="width:100%;height:100%">
+            <sc-for list="{{ landmasses }}" as="m" hint-placeholder-count="6"><path d="{{ m.d }}" fill="#1E1F3D"></path></sc-for>
+            <sc-for list="{{ pings }}" as="p" hint-placeholder-count="8">
+              <g><circle cx="{{ p.x }}" cy="{{ p.y }}" r="{{ p.r }}" fill="{{ p.color }}" opacity="{{ p.opacity }}"></circle><circle cx="{{ p.x }}" cy="{{ p.y }}" r="2.5" fill="{{ p.color }}"></circle></g>
+            </sc-for>
+          </svg>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:12px">
+          <sc-for list="{{ geo }}" as="g" hint-placeholder-count="5"><span style="font-size:11.5px;font-weight:700;color:#9EA0C8">{{ g.flag }} {{ g.name }} <span style="color:#fff;font-weight:800">{{ g.count }}</span></span></sc-for>
+        </div>
+      </div>
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center"><span style="font-size:13.5px;font-weight:800;color:#fff">Real-time activity</span><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:#8E90B8">last 60s</span></div>
+        <div style="flex:1;overflow-y:auto;margin-top:12px;display:flex;flex-direction:column;gap:9px;max-height:250px">
+          <sc-for list="{{ feed }}" as="f" hint-placeholder-count="7">
+            <div style="display:flex;gap:10px;align-items:center;animation:rowIn .3s ease">
+              <span style="width:26px;height:26px;border-radius:7px;background:{{ f.tint }};display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">{{ f.glyph }}</span>
+              <span style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#C7C9E0;line-height:1.4">{{ f.text }}</span>
+              <span style="font-size:10px;font-weight:700;color:#5B5E88;flex-shrink:0">{{ f.time }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:14px">
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="font-size:13.5px;font-weight:800;color:#fff">Active visitors</div>
+        <div style="font-size:11.5px;color:#8E90B8;font-weight:600;margin-top:1px">Click a visitor for full intelligence</div>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr .9fr;gap:8px;padding:12px 4px 8px 4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#5B5E88;border-bottom:1px solid #24264A"><span>Visitor</span><span>Location</span><span>On page</span><span style="text-align:right">Intent</span></div>
+        <div style="max-height:280px;overflow-y:auto">
+          <sc-for list="{{ visitors }}" as="v" hint-placeholder-count="7">
+            <div onClick="{{ v.onClick }}" style="display:grid;grid-template-columns:1.6fr 1fr 1fr .9fr;gap:8px;align-items:center;padding:11px 4px;border-bottom:1px solid #1E1F3D;cursor:pointer;background:{{ v.activeBg }};border-left:3px solid {{ v.activeBar }}" style-hover="background:#1A1B36">
+              <span style="display:flex;align-items:center;gap:9px;min-width:0">
+                <span style="position:relative;flex-shrink:0"><span style="width:30px;height:30px;border-radius:99px;background:{{ v.tint }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ v.fg }}">{{ v.initials }}</span><sc-if value="{{ v.returning }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;bottom:-2px;right:-2px;font-size:9px">🔁</span></sc-if></span>
+                <span style="min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#E6E7F5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ v.name }}</span><span style="display:block;font-size:10px;color:#8E90B8;font-weight:600">{{ v.device }}</span></span>
+              </span>
+              <span style="font-size:11px;font-weight:700;color:#9EA0C8">{{ v.flag }} {{ v.city }}</span>
+              <span style="font-size:11px;font-weight:600;color:#9EA0C8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ v.page }}</span>
+              <span style="text-align:right"><span style="font-size:12px;font-weight:800;color:{{ v.scoreColor }}">{{ v.score }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background:#15162D;border:1px solid #24264A;border-radius:14px;padding:18px 20px">
+        <div style="display:flex;align-items:center;gap:11px">
+          <span style="width:40px;height:40px;border-radius:99px;background:{{ selTint }};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:{{ selFg }}">{{ selInitials }}</span>
+          <div><div style="font-size:14px;font-weight:800;color:#fff">{{ selName }}</div><div style="font-size:11px;color:#8E90B8;font-weight:600">{{ selType }}</div></div>
+          <span style="margin-left:auto;text-align:right"><span style="display:block;font-size:20px;font-weight:800;color:{{ selScoreColor }}">{{ selScore }}</span><span style="display:block;font-size:9px;font-weight:800;color:#5B5E88">INTENT</span></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+          <sc-for list="{{ selDetails }}" as="d" hint-placeholder-count="10">
+            <div style="background:#10112A;border:1px solid #24264A;border-radius:9px;padding:8px 10px"><div style="font-size:9px;font-weight:800;color:#5B5E88;letter-spacing:.3px">{{ d.label }}</div><div style="font-size:11.5px;font-weight:700;color:#E6E7F5;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.value }}</div></div>
+          </sc-for>
+        </div>
+        <div style="font-size:10px;font-weight:800;color:#5B5E88;letter-spacing:.4px;margin-top:14px">SESSION JOURNEY</div>
+        <div style="display:flex;flex-direction:column;gap:0;margin-top:9px">
+          <sc-for list="{{ selJourney }}" as="j" hint-placeholder-count="4">
+            <div style="display:flex;gap:9px"><div style="display:flex;flex-direction:column;align-items:center"><span style="width:7px;height:7px;border-radius:99px;background:{{ j.dot }};margin-top:4px"></span><span style="width:1.5px;flex:1;background:#24264A;margin-top:3px"></span></div><div style="padding-bottom:11px"><div style="font-size:11.5px;font-weight:600;color:#C7C9E0">{{ j.text }}</div><div style="font-size:9.5px;color:#5B5E88;font-weight:700;margin-top:1px">{{ j.time }}</div></div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:7px;margin-top:6px">
+          <a href="Inbox.dc.html" style="flex:1;text-align:center;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:9px;font-size:11.5px;font-weight:800" style-hover="opacity:.92;color:#fff">💬 Start chat</a>
+          <a href="AIBuilder.dc.html" style="flex:1;text-align:center;border:1px solid #2C2E52;background:#1A1B36;color:#C7D2FE;border-radius:9px;padding:9px;font-size:11.5px;font-weight:800" style-hover="border-color:#4F46E5;color:#C7D2FE">✨ Trigger flow</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { sel: 0, tick: 0, feedTick: 0 };
+  componentDidMount() {
+    this.iv = setInterval(() => this.setState(s => ({ tick: s.tick + 1 })), 1500);
+    this.fi = setInterval(() => this.setState(s => ({ feedTick: s.feedTick + 1 })), 3200);
+  }
+  componentWillUnmount() { clearInterval(this.iv); clearInterval(this.fi); }
+  visitorData() {
+    const V = (name, initials, tint, fg, flag, city, page, score, device, returning, type, details, journey) => ({ name, initials, tint, fg, flag, city, page, score, scoreColor: score >= 80 ? '#34D399' : score >= 55 ? '#FBBF24' : '#8E90B8', device, returning, type, details, journey });
+    return [
+      V('Elena Moreau', 'EM', '#F1EBFE', '#7C3AED', '🇫🇷', 'Lyon', '/product/linen-duvet', 94, 'iPhone · Safari', true, 'Returning VIP · 24 orders',
+        [['IP', '81.185••.42'], ['ISP', 'Orange S.A.'], ['DEVICE', 'iPhone 15'], ['OS', 'iOS 18'], ['BROWSER', 'Safari 18'], ['SCREEN', '1179×2556'], ['LANGUAGE', 'fr-FR'], ['REFERRAL', 'Email · Noonfy'], ['UTM', 'summer-linen'], ['VISITS', '18th visit']],
+        [['Landed on /email-link → product', '0:00'], ['Viewed Linen Duvet ×3', '0:42'], ['Added to wishlist', '1:20'], ['Now: reading reviews', 'live']]),
+      V('Visitor #8842', 'V8', '#EEF0FE', '#4F46E5', '🇺🇸', 'Austin', '/checkout', 88, 'MacBook · Chrome', false, 'New · high intent',
+        [['IP', '24.28••.9'], ['ISP', 'Spectrum'], ['DEVICE', 'MacBook Pro'], ['OS', 'macOS 15'], ['BROWSER', 'Chrome 128'], ['SCREEN', '1512×982'], ['LANGUAGE', 'en-US'], ['REFERRAL', 'Google Ads'], ['UTM', 'bedding-search'], ['VISITS', '2nd visit']],
+        [['Landed on /category/bedding', '0:00'], ['Viewed 4 products', '1:10'], ['Added duvet to cart', '2:40'], ['Now: at checkout', 'live']]),
+      V('David Chen', 'DC', '#EDF9F1', '#0E9F6E', '🇬🇧', 'London', '/product/kettle', 81, 'iPad · Safari', true, 'Returning · 19 orders',
+        [['IP', '86.14••.71'], ['ISP', 'BT Group'], ['DEVICE', 'iPad Air'], ['OS', 'iPadOS 18'], ['BROWSER', 'Safari'], ['SCREEN', '1180×820'], ['LANGUAGE', 'en-GB'], ['REFERRAL', 'Direct'], ['UTM', '—'], ['VISITS', '12th visit']],
+        [['Landed on /new-arrivals', '0:00'], ['Viewed Pour-Over Kettle', '0:30'], ['Compared 2 kettles', '1:15'], ['Now: on product page', 'live']]),
+      V('Visitor #9021', 'V9', '#FFF3E8', '#C2620A', '🇨🇦', 'Toronto', '/category/lighting', 64, 'Pixel · Chrome', false, 'New visitor',
+        [['IP', '99.240••.3'], ['ISP', 'Bell Canada'], ['DEVICE', 'Pixel 9'], ['OS', 'Android 15'], ['BROWSER', 'Chrome'], ['SCREEN', '1080×2400'], ['LANGUAGE', 'en-CA'], ['REFERRAL', 'Instagram'], ['UTM', 'ig-story'], ['VISITS', '1st visit']],
+        [['Landed from Instagram story', '0:00'], ['Browsing lighting', '0:50'], ['Now: scrolling category', 'live']]),
+      V('Hana Suzuki', 'HS', '#FDEDED', '#E02424', '🇯🇵', 'Osaka', '/cart', 71, 'iPhone · Safari', true, 'Returning · 12 orders',
+        [['IP', '126.72••.5'], ['ISP', 'SoftBank'], ['DEVICE', 'iPhone 14'], ['OS', 'iOS 18'], ['BROWSER', 'Safari'], ['SCREEN', '1170×2532'], ['LANGUAGE', 'ja-JP'], ['REFERRAL', 'WhatsApp'], ['UTM', 'wa-restock'], ['VISITS', '9th visit']],
+        [['Landed from WhatsApp link', '0:00'], ['Viewed throw blanket', '0:35'], ['Added to cart, removed 1', '1:50'], ['Now: reviewing cart', 'live']]),
+      V('Visitor #8790', 'V8', '#EEF0FE', '#4F46E5', '🇦🇺', 'Sydney', '/product/lamp', 52, 'Windows · Edge', false, 'New · VPN detected',
+        [['IP', '1.129••.8 (VPN)'], ['ISP', 'NordVPN'], ['DEVICE', 'Desktop'], ['OS', 'Windows 11'], ['BROWSER', 'Edge'], ['SCREEN', '1920×1080'], ['LANGUAGE', 'en-AU'], ['REFERRAL', 'Google'], ['UTM', '—'], ['VISITS', '1st visit']],
+        [['Landed on /product/lamp', '0:00'], ['Now: reading description', 'live']]),
+      V('Marcus Webb', 'MW', '#EDF9F1', '#0E9F6E', '🇺🇸', 'Denver', '/wholesale', 62, 'MacBook · Chrome', true, 'B2B lead',
+        [['IP', '73.14••.2'], ['ISP', 'Comcast'], ['DEVICE', 'MacBook Air'], ['OS', 'macOS 15'], ['BROWSER', 'Chrome'], ['SCREEN', '1440×900'], ['LANGUAGE', 'en-US'], ['REFERRAL', 'LinkedIn'], ['UTM', 'b2b-outreach'], ['VISITS', '4th visit']],
+        [['Landed on /wholesale', '0:00'], ['Downloaded price sheet', '1:05'], ['Now: reading terms', 'live']]),
+    ];
+  }
+  renderVals() {
+    const visitors = this.visitorData();
+    const sel = Math.min(this.state.sel, visitors.length - 1);
+    const kpis = [
+      { label: 'ACTIVE VISITORS', value: String(138 + (this.state.tick % 9)), bg: 'linear-gradient(135deg,#4F46E5,#7C3AED)', border: 'transparent', labelColor: 'rgba(255,255,255,.75)', valueColor: '#fff' },
+      { label: 'RETURNING', value: '54', bg: '#15162D', border: '#24264A', labelColor: '#8E90B8', valueColor: '#fff' },
+      { label: 'TODAY', value: '4,182', bg: '#15162D', border: '#24264A', labelColor: '#8E90B8', valueColor: '#fff' },
+      { label: 'HIGH INTENT', value: '26', bg: '#15162D', border: '#24264A', labelColor: '#8E90B8', valueColor: '#34D399' },
+      { label: 'LIVE CART VALUE', value: '$4,280', bg: '#15162D', border: '#24264A', labelColor: '#8E90B8', valueColor: '#fff' },
+      { label: 'ACTIVE CHATS', value: '9', bg: '#15162D', border: '#24264A', labelColor: '#8E90B8', valueColor: '#fff' },
+    ];
+    const landmasses = [
+      { d: 'M30 60 C55 46 100 52 122 68 C132 96 100 120 68 116 C40 112 18 88 30 60 Z' },
+      { d: 'M96 130 C112 124 126 144 118 168 C108 192 86 188 82 164 C80 148 86 134 96 130 Z' },
+      { d: 'M188 50 C222 40 268 46 282 66 C276 92 248 100 216 96 C188 92 172 70 188 50 Z' },
+      { d: 'M210 116 C234 110 252 128 246 152 C238 178 214 174 206 150 C202 136 202 120 210 116 Z' },
+      { d: 'M312 56 C356 44 392 60 386 86 C376 110 338 108 318 94 C302 82 300 64 312 56 Z' },
+      { d: 'M338 128 C362 122 380 138 374 156 C366 176 344 172 336 154 C332 144 330 130 338 128 Z' },
+    ];
+    const anchors = [[70, 78], [96, 74], [214, 66], [214, 140], [352, 80], [356, 120], [80, 90], [230, 90]];
+    const pings = anchors.map((a, i) => {
+      const phase = (this.state.tick + i) % 4;
+      return { x: a[0], y: a[1], r: 4 + phase * 3.5, opacity: (0.55 - phase * 0.12).toFixed(2), color: i % 3 === 0 ? '#34D399' : i % 3 === 1 ? '#60A5FA' : '#A78BFA' };
+    });
+    const feedAll = [
+      { glyph: '🛒', tint: '#1E2A22', text: 'Visitor in Austin added Linen Duvet to cart ($189)', time: 'now' },
+      { glyph: '👀', tint: '#1E2140', text: 'Elena viewed Linen Duvet for the 3rd time', time: '4s' },
+      { glyph: '🔍', tint: '#2A2140', text: 'Visitor searched “alpaca throw slate”', time: '9s' },
+      { glyph: '💳', tint: '#1E2A22', text: 'Checkout started in Toronto — cart $246', time: '14s' },
+      { glyph: '⚡', tint: '#2A2140', text: 'High-intent alert: Visitor #8842 hit 88', time: '22s' },
+      { glyph: '🚪', tint: '#2A1E1E', text: 'Visitor exited from /shipping in London', time: '31s' },
+      { glyph: '🔁', tint: '#1E2140', text: 'Returning VIP Hana Suzuki came back', time: '38s' },
+    ];
+    const off = this.state.feedTick % feedAll.length;
+    const feed = feedAll.slice(off).concat(feedAll.slice(0, off));
+    const v = visitors[sel];
+    return {
+      activeCount: String(138 + (this.state.tick % 9)),
+      kpis, landmasses, pings,
+      geo: [
+        { flag: '🇺🇸', name: 'US', count: '58' }, { flag: '🇬🇧', name: 'UK', count: '22' }, { flag: '🇨🇦', name: 'CA', count: '17' }, { flag: '🇦🇺', name: 'AU', count: '12' }, { flag: '🇯🇵', name: 'JP', count: '9' },
+      ],
+      feed,
+      visitors: visitors.map((vi, i) => ({ ...vi, onClick: () => this.setState({ sel: i }), activeBg: i === sel ? '#1A1B36' : 'transparent', activeBar: i === sel ? '#7C3AED' : 'transparent' })),
+      selName: v.name, selInitials: v.initials, selTint: v.tint, selFg: v.fg, selType: v.type, selScore: v.score, selScoreColor: v.scoreColor,
+      selDetails: v.details.map(d => ({ label: d[0], value: d[1] })),
+      selJourney: v.journey.map((j, i) => ({ text: j[0], time: j[1], dot: i === v.journey.length - 1 ? '#34D399' : '#4F46E5' })),
+    };
+  }
+}
+</script>
+</body>
+</html>

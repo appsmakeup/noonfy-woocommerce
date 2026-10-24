@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="{{ sidebarKey }}" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">{{ pageTitle }}</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">{{ pageSub }}</p>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:10px">
+        <a href="Templates.dc.html" style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;color:#3C3F55" style-hover="border-color:#D9DBEA;color:#14152A">Browse templates</a>
+        <a href="Builder.dc.html" style="display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#4F46E5,#8B5CF6);color:#fff;border-radius:9px;padding:8px 14px;font-size:13px;font-weight:700;box-shadow:0 4px 12px rgba(99,82,229,.3)" style-hover="opacity:.92;color:#fff">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          New workflow
+        </a>
+      </div>
+    </header>
+    <div style="display:flex;gap:4px;border-bottom:1px solid #ECEDF4;margin-bottom:20px">
+      <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="3">
+        <a href="{{ tb.href }}" style="padding:9px 14px;font-size:13px;font-weight:{{ tb.weight }};color:{{ tb.color }};border-bottom:2px solid {{ tb.border }};margin-bottom:-1px" style-hover="color:#14152A">{{ tb.label }}</a>
+      </sc-for>
+    </div>
+    <sc-if value="{{ isWorkflows }}" hint-placeholder-val="{{ true }}">
+      <section>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px">
+          <sc-for list="{{ wfKpis }}" as="k" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:15px 18px">
+              <div style="font-size:11.5px;font-weight:700;color:#8A8DA3">{{ k.label }}</div>
+              <div style="font-size:22px;font-weight:800;color:#14152A;margin-top:6px">{{ k.value }}</div>
+              <div style="font-size:11px;font-weight:700;color:#0E9F6E;margin-top:2px">{{ k.delta }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #F3F3FA;gap:10px">
+            <input placeholder="Filter workflows…" style="border:1px solid #ECEDF4;border-radius:8px;padding:7px 12px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:240px;background:#F8F8FC"></input>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <sc-for list="{{ wfFilters }}" as="f" hint-placeholder-count="3">
+                <button onClick="{{ f.onClick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:99px;padding:5px 12px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ f.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:2.2fr .8fr .9fr .9fr .9fr .9fr 1fr;gap:8px;padding:10px 20px;font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:#A5A8BD;border-bottom:1px solid #F3F3FA">
+            <span>Workflow</span><span>Status</span><span>Enrolled</span><span>Emails sent</span><span>Open rate</span><span>Click rate</span><span style="text-align:right">Revenue</span>
+          </div>
+          <sc-for list="{{ workflows }}" as="w" hint-placeholder-count="8">
+            <a href="#detail" style="display:grid;grid-template-columns:2.2fr .8fr .9fr .9fr .9fr .9fr 1fr;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid #F7F7FB;color:#14152A" style-hover="background:#FAFAFE;color:#14152A">
+              <span style="display:flex;align-items:center;gap:10px">
+                <span style="width:32px;height:32px;border-radius:9px;background:{{ w.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ w.glyph }}</span>
+                <span><span style="display:block;font-size:13px;font-weight:700">{{ w.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ w.trigger }}</span></span>
+              </span>
+              <span><span style="font-size:10.5px;font-weight:800;color:{{ w.stColor }};background:{{ w.stBg }};border-radius:99px;padding:3px 9px">{{ w.status }}</span></span>
+              <span style="font-size:12.5px;font-weight:700;color:#5B5E75">{{ w.enrolled }}</span>
+              <span style="font-size:12.5px;font-weight:700;color:#5B5E75">{{ w.sent }}</span>
+              <span style="font-size:12.5px;font-weight:700;color:#5B5E75">{{ w.open }}</span>
+              <span style="font-size:12.5px;font-weight:700;color:#5B5E75">{{ w.click }}</span>
+              <span style="font-size:13px;font-weight:800;text-align:right">{{ w.rev }}</span>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isJourneys }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Journey completion</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">How customers move through active flows</div>
+            <div style="height:250px;margin-top:12px"><canvas ref="{{ journeyRef }}"></canvas></div>
+          </div>
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A">Drop-off points</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600;margin-top:1px">Highest exit steps across journeys</div>
+            <div style="display:flex;flex-direction:column;gap:13px;margin-top:16px">
+              <sc-for list="{{ dropoffs }}" as="d" hint-placeholder-count="5">
+                <div>
+                  <div style="display:flex;font-size:12px;font-weight:700;color:#3C3F55"><span>{{ d.label }}</span><span style="margin-left:auto;color:#E02424;font-weight:800">{{ d.pct }}</span></div>
+                  <div style="height:7px;border-radius:99px;background:#F3F3FA;margin-top:5px"><div style="height:7px;border-radius:99px;background:linear-gradient(90deg,#F59E0B,#EF4444);width:{{ d.width }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px">
+          <sc-for list="{{ journeyCards }}" as="j" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:32px;height:32px;border-radius:9px;background:{{ j.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ j.glyph }}</span>
+                <span style="font-size:13.5px;font-weight:800;color:#14152A">{{ j.name }}</span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">
+                <div><div style="font-size:10.5px;font-weight:700;color:#A5A8BD">ENTERED</div><div style="font-size:15px;font-weight:800;color:#14152A;margin-top:2px">{{ j.entered }}</div></div>
+                <div><div style="font-size:10.5px;font-weight:700;color:#A5A8BD">COMPLETED</div><div style="font-size:15px;font-weight:800;color:#14152A;margin-top:2px">{{ j.completed }}</div></div>
+                <div><div style="font-size:10.5px;font-weight:700;color:#A5A8BD">CONVERTED</div><div style="font-size:15px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ j.converted }}</div></div>
+              </div>
+              <div style="height:7px;border-radius:99px;background:#F3F3FA;margin-top:12px"><div style="height:7px;border-radius:99px;background:linear-gradient(90deg,#4F46E5,#8B5CF6);width:{{ j.width }}"></div></div>
+              <div style="font-size:11px;color:#8A8DA3;font-weight:600;margin-top:6px">{{ j.rate }} completion rate</div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <section>
+        <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 20px">
+          <span style="width:40px;height:40px;border-radius:11px;background:#EEF0FE;display:flex;align-items:center;justify-content:center;font-size:18px">🛒</span>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:#14152A">Abandoned Cart Recovery</div>
+            <div style="font-size:12px;color:#8A8DA3;font-weight:600">Trigger: Cart abandoned for 2 hours · 3 emails · Created Mar 12</div>
+          </div>
+          <span style="font-size:11px;font-weight:800;color:#0E9F6E;background:#EDF9F1;border-radius:99px;padding:4px 11px;margin-left:6px">LIVE</span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <a href="Builder.dc.html" style="border:1px solid #ECEDF4;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#3C3F55;background:#fff" style-hover="border-color:#D9DBEA;color:#14152A">Edit in builder</a>
+            <button style="border:1px solid #FDE1E1;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:700;color:#E02424;background:#fff;cursor:pointer;font-family:inherit" style-hover="background:#FDEDED">Pause</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:14px">
+          <sc-for list="{{ detailKpis }}" as="k" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:14px 18px">
+              <div style="font-size:11px;font-weight:700;color:#8A8DA3">{{ k.label }}</div>
+              <div style="font-size:20px;font-weight:800;color:#14152A;margin-top:5px">{{ k.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:14px;margin-top:14px">
+          <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+            <div style="font-size:14px;font-weight:800;color:#14152A;margin-bottom:16px">Workflow</div>
+            <div style="display:flex;flex-direction:column;align-items:center">
+              <sc-for list="{{ steps }}" as="s" hint-placeholder-count="6">
+                <div style="width:100%;display:flex;flex-direction:column;align-items:center">
+                  <div style="width:320px;border:1.5px solid {{ s.border }};background:{{ s.bg }};border-radius:12px;padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 3px rgba(20,21,42,.04)">
+                    <span style="width:28px;height:28px;border-radius:8px;background:{{ s.iconBg }};display:flex;align-items:center;justify-content:center;font-size:13px">{{ s.glyph }}</span>
+                    <span style="flex:1"><span style="display:block;font-size:10px;font-weight:800;letter-spacing:.6px;color:{{ s.kindColor }}">{{ s.kind }}</span><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ s.label }}</span></span>
+                    <span style="font-size:11px;font-weight:800;color:#8A8DA3">{{ s.stat }}</span>
+                  </div>
+                  <sc-if value="{{ s.arrow }}" hint-placeholder-val="{{ true }}">
+                    <div style="height:22px;width:2px;background:#DDD6FE"></div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px">
+              <div style="font-size:14px;font-weight:800;color:#14152A">Email performance</div>
+              <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+                <sc-for list="{{ emailPerf }}" as="e" hint-placeholder-count="3">
+                  <div style="border:1px solid #F3F3FA;border-radius:11px;padding:12px 14px">
+                    <div style="display:flex;font-size:12.5px;font-weight:800;color:#14152A"><span>{{ e.name }}</span><span style="margin-left:auto;color:#4F46E5">{{ e.rev }}</span></div>
+                    <div style="display:flex;gap:16px;font-size:11px;color:#8A8DA3;font-weight:700;margin-top:5px"><span>Sent {{ e.sent }}</span><span>Open {{ e.open }}</span><span>Click {{ e.click }}</span><span>Conv {{ e.conv }}</span></div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:18px 20px;flex:1">
+              <div style="display:flex;align-items:center"><span style="font-size:14px;font-weight:800;color:#14152A">Customers in workflow</span><span style="margin-left:auto;font-size:11px;font-weight:800;color:#7C3AED;background:#F1EBFE;border-radius:99px;padding:3px 9px">1,284 active</span></div>
+              <div style="display:flex;flex-direction:column;gap:11px;margin-top:14px">
+                <sc-for list="{{ enrolled }}" as="c" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <span style="width:28px;height:28px;border-radius:99px;background:{{ c.tint }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:{{ c.fg }}">{{ c.initials }}</span>
+                    <span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:700;color:#14152A">{{ c.name }}</span><span style="display:block;font-size:11px;color:#8A8DA3;font-weight:600">{{ c.step }}</span></span>
+                    <span style="font-size:11px;font-weight:700;color:#A5A8BD">{{ c.time }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: (location.hash || '#workflows').slice(1), filter: 'all' };
+  componentDidMount() {
+    this.hh = () => this.setState({ page: (location.hash || '#workflows').slice(1) });
+    window.addEventListener('hashchange', this.hh);
+    this.initChart();
+  }
+  componentWillUnmount() { window.removeEventListener('hashchange', this.hh); this.jc && this.jc.destroy(); }
+  initChart() {
+    if (!window.Chart) { setTimeout(() => this.initChart(), 120); return; }
+    if (this.journeyEl && !this.jc) {
+      Chart.defaults.font.family = "'Manrope',sans-serif";
+      this.jc = new Chart(this.journeyEl, { type: 'bar',
+        data: { labels: ['Entered', 'Email 1', 'Email 2', 'Email 3', 'Converted'],
+          datasets: [{ data: [4820, 4390, 3120, 2240, 1130], backgroundColor: ['#4F46E5', '#6D5AE8', '#8B5CF6', '#A78BFA', '#0E9F6E'], borderRadius: 7, barPercentage: .6 }] },
+        options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+          scales: { x: { grid: { display: false }, ticks: { font: { size: 11, weight: 700 }, color: '#5B5E75' } },
+            y: { border: { display: false }, grid: { color: '#F3F3FA' }, ticks: { maxTicksLimit: 5, font: { size: 10, weight: 600 }, color: '#A5A8BD' } } } } });
+    }
+  }
+  renderVals() {
+    const page = ['workflows', 'journeys', 'detail'].includes(this.state.page) ? this.state.page : 'workflows';
+    const titles = { workflows: ['All Workflows', '9 automations · 6 live'], journeys: ['Journey Analytics', 'How customers move through your automations'], detail: ['Automation Detail', 'Abandoned Cart Recovery'] };
+    const tabs = [['Workflows', '#workflows', 'workflows'], ['Journey Analytics', '#journeys', 'journeys'], ['Detail', '#detail', 'detail']].map(t => ({
+      label: t[0], href: t[1], weight: page === t[2] ? 800 : 600,
+      color: page === t[2] ? '#4F46E5' : '#8A8DA3', border: page === t[2] ? '#4F46E5' : 'transparent' }));
+    const wfData = [
+      ['Abandoned Cart Recovery','Cart abandoned 2h','🛒','#EEF0FE','LIVE','1,284','8,420','46.2%','8.1%','$18,420'],
+      ['Welcome Series','Subscriber joins list','👋','#F1EBFE','LIVE','3,092','12,368','58.1%','11.4%','$12,800'],
+      ['Win Back — 90 days','No order in 90 days','💫','#FFF3E8','LIVE','842','2,526','31.4%','4.2%','$9,310'],
+      ['Browse Abandonment','Viewed product, no cart','👀','#EDF9F1','LIVE','2,156','6,468','38.9%','5.8%','$7,640'],
+      ['Post-Purchase Cross Sell','Order completed','🎁','#FDEDED','PAUSED','640','1,920','42.3%','7.2%','$4,120'],
+      ['VIP Loyalty Rewards','LTV over $1,500','👑','#F1EBFE','LIVE','214','642','64.8%','15.2%','$3,860'],
+      ['Back In Stock','Product restocked','📦','#EEF0FE','LIVE','1,872','1,872','51.6%','12.8%','$3,240'],
+      ['Review Request','Order delivered +5 days','⭐','#FFF3E8','PAUSED','988','2,964','36.2%','6.1%','$0'],
+      ['Birthday Offer','Customer birthday','🎂','#FDEDED','DRAFT','—','—','—','—','—'],
+    ];
+    const st = { LIVE: ['#0E9F6E', '#EDF9F1'], PAUSED: ['#C2620A', '#FFF3E8'], DRAFT: ['#8A8DA3', '#F3F3FA'] };
+    let workflows = wfData.map(w => ({ name: w[0], trigger: w[1], glyph: w[2], tint: w[3], status: w[4], stColor: st[w[4]][0], stBg: st[w[4]][1], enrolled: w[5], sent: w[6], open: w[7], click: w[8], rev: w[9] }));
+    if (this.state.filter !== 'all') workflows = workflows.filter(w => w.status === this.state.filter);
+    const wfFilters = [['All', 'all'], ['Live', 'LIVE'], ['Paused', 'PAUSED'], ['Draft', 'DRAFT']].map(f => ({
+      label: f[0], onClick: () => this.setState({ filter: f[1] }),
+      border: this.state.filter === f[1] ? '#4F46E5' : '#ECEDF4',
+      bg: this.state.filter === f[1] ? '#EEF0FE' : '#fff',
+      color: this.state.filter === f[1] ? '#4F46E5' : '#8A8DA3' }));
+    return {
+      sidebarKey: page === 'journeys' ? 'journeys' : 'workflows',
+      pageTitle: titles[page][0], pageSub: titles[page][1], tabs,
+      isWorkflows: page === 'workflows', isJourneys: page === 'journeys', isDetail: page === 'detail',
+      wfKpis: [
+        { label: 'ACTIVE WORKFLOWS', value: '6', delta: '+2 this month' },
+        { label: 'CUSTOMERS ENROLLED', value: '9,204', delta: '+18.4%' },
+        { label: 'AUTOMATION REVENUE', value: '$52,740', delta: '+24.1%' },
+        { label: 'AVG CONVERSION', value: '7.8%', delta: '+1.2pt' },
+      ],
+      workflows, wfFilters,
+      journeyRef: (el) => { this.journeyEl = el; this.initChart(); },
+      dropoffs: [
+        { label: 'Cart Recovery · after Email 2', pct: '28%', width: '78%' },
+        { label: 'Welcome · after Email 3', pct: '22%', width: '62%' },
+        { label: 'Win Back · after Email 1', pct: '19%', width: '54%' },
+        { label: 'Browse Abandon · after delay', pct: '12%', width: '34%' },
+        { label: 'Cross Sell · after Email 1', pct: '9%', width: '26%' },
+      ],
+      journeyCards: [
+        { name: 'Cart Recovery', glyph: '🛒', tint: '#EEF0FE', entered: '4,820', completed: '2,240', converted: '1,130', width: '46%', rate: '46.5%' },
+        { name: 'Welcome Series', glyph: '👋', tint: '#F1EBFE', entered: '6,410', completed: '4,180', converted: '892', width: '65%', rate: '65.2%' },
+        { name: 'Win Back', glyph: '💫', tint: '#FFF3E8', entered: '1,960', completed: '840', converted: '312', width: '43%', rate: '42.9%' },
+      ],
+      detailKpis: [
+        { label: 'REVENUE', value: '$18,420' }, { label: 'EMAILS SENT', value: '8,420' },
+        { label: 'OPEN RATE', value: '46.2%' }, { label: 'CLICK RATE', value: '8.1%' }, { label: 'CONVERSIONS', value: '486' },
+      ],
+      steps: [
+        { kind: 'TRIGGER', kindColor: '#7C3AED', label: 'Cart abandoned', glyph: '⚡', bg: '#FBFAFF', border: '#DDD6FE', iconBg: '#F1EBFE', stat: '4,820 entered', arrow: true },
+        { kind: 'DELAY', kindColor: '#C2620A', label: 'Wait 2 hours', glyph: '⏱️', bg: '#fff', border: '#ECEDF4', iconBg: '#FFF3E8', stat: '', arrow: true },
+        { kind: 'EMAIL', kindColor: '#4F46E5', label: '“You left something behind”', glyph: '✉️', bg: '#fff', border: '#ECEDF4', iconBg: '#EEF0FE', stat: '48% open', arrow: true },
+        { kind: 'CONDITION', kindColor: '#0E9F6E', label: 'Did purchase?', glyph: '🔀', bg: '#fff', border: '#ECEDF4', iconBg: '#EDF9F1', stat: '23% yes', arrow: true },
+        { kind: 'DELAY', kindColor: '#C2620A', label: 'Wait 1 day', glyph: '⏱️', bg: '#fff', border: '#ECEDF4', iconBg: '#FFF3E8', stat: '', arrow: true },
+        { kind: 'EMAIL', kindColor: '#4F46E5', label: '10% coupon reminder', glyph: '🎟️', bg: '#fff', border: '#ECEDF4', iconBg: '#EEF0FE', stat: '41% open', arrow: true },
+        { kind: 'GOAL', kindColor: '#0E9F6E', label: 'Purchase completed', glyph: '🏁', bg: '#F4FBF7', border: '#BEE9D2', iconBg: '#EDF9F1', stat: '1,130 converted', arrow: false },
+      ],
+      emailPerf: [
+        { name: 'Email 1 — “You left something behind”', rev: '$9,840', sent: '4,390', open: '48.2%', click: '9.4%', conv: '6.1%' },
+        { name: 'Email 2 — 10% coupon reminder', rev: '$6,220', sent: '3,120', open: '41.6%', click: '7.8%', conv: '4.9%' },
+        { name: 'Email 3 — Last chance', rev: '$2,360', sent: '2,240', open: '33.1%', click: '5.2%', conv: '2.8%' },
+      ],
+      enrolled: [
+        { name: 'Maya Okafor', step: 'Waiting · Email 2 in 4h', time: '2h ago', initials: 'MO', tint: '#F1EBFE', fg: '#7C3AED' },
+        { name: 'Jonas Lindqvist', step: 'Received Email 1', time: '3h ago', initials: 'JL', tint: '#EEF0FE', fg: '#4F46E5' },
+        { name: 'Priya Raman', step: 'Waiting · Email 1 in 20m', time: '1h ago', initials: 'PR', tint: '#FFF3E8', fg: '#C2620A' },
+        { name: 'Tom Becker', step: 'Received Email 2', time: '6h ago', initials: 'TB', tint: '#EDF9F1', fg: '#0E9F6E' },
+        { name: 'Alice Fontaine', step: 'Entered workflow', time: '12m ago', initials: 'AF', tint: '#FDEDED', fg: '#E02424' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Manrope',-apple-system,sans-serif;background:#F6F6FB;}
+a{color:#4F46E5;text-decoration:none;}a:hover{color:#4338CA;}
+*{box-sizing:border-box;}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#E2E4EE;border-radius:8px;}
+</style>
+</helmet>
+<div style="display:flex;min-height:100vh;background:#F6F6FB">
+  <dc-import name="Sidebar" active="events" hint-size="248px,100vh"></dc-import>
+  <main style="flex:1;min-width:0;padding:0 28px 40px 28px">
+    <header style="display:flex;align-items:center;padding:20px 0 14px 0">
+      <div>
+        <h1 style="margin:0;font-size:21px;font-weight:800;color:#14152A;letter-spacing:-.3px">Universal Event Engine</h1>
+        <p style="margin:2px 0 0 0;font-size:13px;color:#8A8DA3;font-weight:500">Every platform-wide event, usable as a trigger in the automation builder</p>
+      </div>
+      <input onInput="{{ onSearch }}" placeholder="Search events…" style="margin-left:auto;border:1px solid #ECEDF4;border-radius:9px;padding:8px 13px;font-size:12.5px;font-family:inherit;outline:none;color:#14152A;width:230px;background:#fff"></input>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:13px;padding:15px 17px"><div style="font-size:10.5px;font-weight:800;color:#8A8DA3">{{ k.label }}</div><div style="font-size:20px;font-weight:800;color:{{ k.color }};margin-top:5px">{{ k.value }}</div><div style="font-size:10.5px;font-weight:800;color:#0E9F6E;margin-top:2px">{{ k.note }}</div></div>
+      </sc-for>
+    </section>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="10">
+        <button onClick="{{ c.onClick }}" style="border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }};border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:800;cursor:pointer;font-family:inherit">{{ c.label }}</button>
+      </sc-for>
+    </div>
+
+    <section style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="6">
+        <div style="background:#fff;border:1px solid #ECEDF4;border-radius:14px;padding:16px 18px">
+          <div style="display:flex;align-items:center;gap:9px"><span style="width:32px;height:32px;border-radius:9px;background:{{ g.tint }};display:flex;align-items:center;justify-content:center;font-size:14px">{{ g.glyph }}</span><span style="flex:1;font-size:13px;font-weight:800;color:#14152A">{{ g.name }}</span><span style="font-size:10px;font-weight:800;color:#8A8DA3;background:#F3F3FA;border-radius:99px;padding:3px 8px">{{ g.count }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
+            <sc-for list="{{ g.events }}" as="e" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:8px;border:1px solid #F3F3FA;border-radius:9px;padding:8px 10px" style-hover="border-color:#C7C3F5;background:#FBFAFF">
+                <span style="font-family:'SF Mono',ui-monospace,monospace;font-size:11px;font-weight:700;color:#7C3AED">{{ e.code }}</span>
+                <span style="margin-left:auto;font-size:10px;font-weight:700;color:#A5A8BD">{{ e.fired }}</span>
+                <a href="Builder.dc.html" style="font-size:10px;font-weight:800;white-space:nowrap">Use →</a>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </section>
+    <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:60px 0;color:#8A8DA3"><div style="font-size:32px">🔍</div><div style="font-size:14px;font-weight:800;color:#14152A;margin-top:10px">No events match</div></div></sc-if>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { cat: 'All', q: '' };
+  data() {
+    const G = (name, cat, glyph, tint, events) => ({ name, cat, glyph, tint, events });
+    const ev = (code, fired) => ({ code, fired });
+    return [
+      G('Customer', 'Customer', '👤', '#EEF0FE', [ev('customer.registered', '142/day'), ev('customer.login', '2.1k/day'), ev('profile.updated', '38/day'), ev('email.verified', '96/day'), ev('phone.verified', '54/day'), ev('address.updated', '22/day')]),
+      G('Behavior', 'Behavior', '👀', '#EDF9F1', [ev('page.viewed', '48k/day'), ev('product.viewed', '12k/day'), ev('course.viewed', '3.2k/day'), ev('search.performed', '1.8k/day'), ev('file.downloaded', '410/day'), ev('video.watched', '890/day')]),
+      G('Purchase', 'Purchase', '🛒', '#F1EBFE', [ev('purchase.completed', '284/day'), ev('purchase.failed', '18/day'), ev('refund', '6/day'), ev('subscription.started', '38/day'), ev('subscription.renewed', '112/day'), ev('subscription.cancelled', '9/day')]),
+      G('Membership', 'Membership', '🎫', '#FFF3E8', [ev('membership.purchased', '38/day'), ev('membership.renewed', '96/day'), ev('membership.expired', '14/day')]),
+      G('Course', 'Course', '🎓', '#EDF9F1', [ev('course.enrolled', '96/day'), ev('lesson.completed', '640/day'), ev('quiz.passed', '142/day'), ev('quiz.failed', '38/day'), ev('course.completed', '54/day'), ev('certificate.earned', '48/day')]),
+      G('Booking', 'Booking', '📅', '#EEF0FE', [ev('appointment.booked', '54/day'), ev('appointment.cancelled', '8/day'), ev('appointment.completed', '46/day'), ev('appointment.rescheduled', '12/day')]),
+      G('Marketplace', 'Marketplace', '🏪', '#F1EBFE', [ev('vendor.registered', '4/day'), ev('vendor.approved', '3/day'), ev('vendor.product.added', '84/day'), ev('vendor.sale', '210/day'), ev('vendor.withdrawal', '18/day')]),
+      G('Forms', 'Forms', '📝', '#FFF3E8', [ev('lead.submitted', '410/day'), ev('quote.requested', '62/day'), ev('support.request', '72/day'), ev('newsletter.signup', '380/day'), ev('contact.form', '140/day')]),
+      G('Donations', 'Donations', '❤️', '#FDEDED', [ev('donation.received', '29/day'), ev('recurring.donation', '18/day'), ev('large.donation', '2/day')]),
+      G('Community', 'Community', '💬', '#EEF0FE', [ev('forum.post', '120/day'), ev('reply.created', '340/day'), ev('group.joined', '48/day'), ev('message.sent', '890/day')]),
+      G('Project', 'Project', '📋', '#EDF9F1', [ev('project.created', '12/day'), ev('task.assigned', '84/day'), ev('task.completed', '96/day'), ev('invoice.paid', '38/day')]),
+      G('Support', 'Support', '🎧', '#FDEDED', [ev('ticket.created', '72/day'), ev('ticket.closed', '68/day'), ev('ticket.escalated', '6/day')]),
+    ];
+  }
+  renderVals() {
+    const catNames = ['All', 'Customer', 'Behavior', 'Purchase', 'Membership', 'Course', 'Booking', 'Marketplace', 'Forms', 'Donations', 'Community', 'Project', 'Support'];
+    const cats = catNames.map(c => ({ label: c, onClick: () => this.setState({ cat: c }), border: this.state.cat === c ? '#4F46E5' : '#ECEDF4', bg: this.state.cat === c ? '#EEF0FE' : '#fff', color: this.state.cat === c ? '#4F46E5' : '#8A8DA3' }));
+    const q = this.state.q.toLowerCase();
+    let groups = this.data().filter(g => this.state.cat === 'All' || g.cat === this.state.cat);
+    if (q) groups = groups.map(g => ({ ...g, events: g.events.filter(e => e.code.includes(q)) })).filter(g => g.events.length);
+    groups = groups.map(g => ({ ...g, count: g.events.length + ' events' }));
+    return {
+      cats, groups, empty: groups.length === 0,
+      onSearch: (e) => this.setState({ q: e.target.value }),
+      kpis: [
+        { label: 'EVENT TYPES', value: '52', color: '#14152A', note: '12 categories' },
+        { label: 'PLUGINS EMITTING', value: '9', color: '#14152A', note: 'live connectors' },
+        { label: 'EVENTS · 24H', value: '78.4k', color: '#7C3AED', note: '▲ 9%' },
+        { label: 'USED IN FLOWS', value: '34', color: '#0E9F6E', note: 'active triggers' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
