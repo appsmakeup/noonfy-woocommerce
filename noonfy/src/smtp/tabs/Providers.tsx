@@ -15,15 +15,15 @@ export function Providers({ api }: { api: SmtpApi }) {
 
   return (
     <section>
-      <div className="row" style={{ gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-        <div className="segmented">
+      <div className="nf-row" style={{ gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
+        <div className="nf-segmented">
           {PROV_MODES.map(m => (
             <button key={m.key} type="button" onClick={() => update({ provMode: m.key })}
-              className={'segmented-btn' + (state.provMode === m.key ? ' segmented-btn--active' : '')}>{m.label}</button>
+              className={'nf-segmented-btn' + (state.provMode === m.key ? ' nf-segmented-btn--active' : '')}>{m.label}</button>
           ))}
         </div>
-        <input className="search-input" placeholder="Search providers…" value={state.provQ} onChange={e => update({ provQ: e.target.value })} />
-        <button type="button" className="btn-primary btn-primary--sm ml-auto"
+        <input className="nf-search-input" placeholder="Search providers…" value={state.provQ} onChange={e => update({ provQ: e.target.value })} />
+        <button type="button" className="nf-btn-primary nf-btn-primary--sm nf-ml-auto"
           onClick={() => showToast('info', 'Add connection', 'Pick a provider from the catalog below.')}>+ Add connection</button>
       </div>
 
@@ -32,19 +32,19 @@ export function Providers({ api }: { api: SmtpApi }) {
           const on = state.enabled[c.id] ?? true;
           const pct = Math.round((c.used / c.limit) * 100);
           return (
-            <div key={c.id} className="card conn-card" style={{ border: '1.5px solid ' + (on ? '#ECEDF4' : '#E6E7F0'), padding: '16px 18px' }}>
-              <div className="row" style={{ gap: 11 }}>
+            <div key={c.id} className="nf-card nf-conn-card" style={{ border: '1.5px solid ' + (on ? '#ECEDF4' : '#E6E7F0'), padding: '16px 18px' }}>
+              <div className="nf-row" style={{ gap: 11 }}>
                 <span style={{ width: 36, height: 36, borderRadius: 10, background: c.tint, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: c.fg, flexShrink: 0 }}>{c.mark}</span>
-                <span className="grow">
-                  <span className="block ellipsis" style={{ fontSize: 13, fontWeight: 800, color: '#14152A' }}>{c.name}</span>
-                  <span className="block ellipsis" style={{ fontSize: 10.5, color: '#8A8DA3', fontWeight: 600 }}>{c.host}</span>
+                <span className="nf-grow">
+                  <span className="nf-block nf-ellipsis" style={{ fontSize: 13, fontWeight: 800, color: '#14152A' }}>{c.name}</span>
+                  <span className="nf-block nf-ellipsis" style={{ fontSize: 10.5, color: '#8A8DA3', fontWeight: 600 }}>{c.host}</span>
                 </span>
                 <Toggle size="lg" on={on} onChange={() => toggleIn('enabled', c.id, on)} label={'Enable ' + c.name} />
               </div>
-              <div className="row" style={{ gap: 7, marginTop: 11, flexWrap: 'wrap' }}>
-                <span className="badge" style={{ color: on ? '#0E9F6E' : '#8A8DA3', background: on ? '#EDF9F1' : '#F3F3FA' }}>{on ? 'ACTIVE' : 'DISABLED'}</span>
-                <span className="badge" style={GREY_BADGE}>Priority {c.priority}</span>
-                <span className="badge" style={GREY_BADGE}>Weight {c.weight}%</span>
+              <div className="nf-row" style={{ gap: 7, marginTop: 11, flexWrap: 'wrap' }}>
+                <span className="nf-badge" style={{ color: on ? '#0E9F6E' : '#8A8DA3', background: on ? '#EDF9F1' : '#F3F3FA' }}>{on ? 'ACTIVE' : 'DISABLED'}</span>
+                <span className="nf-badge" style={GREY_BADGE}>Priority {c.priority}</span>
+                <span className="nf-badge" style={GREY_BADGE}>Weight {c.weight}%</span>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,minmax(0,1fr))', gap: 8, marginTop: 12 }}>
                 <div style={{ minWidth: 0 }}><div style={METRIC_LABEL}>TODAY</div><div style={METRIC_VALUE}>{c.today}</div></div>
@@ -54,13 +54,13 @@ export function Providers({ api }: { api: SmtpApi }) {
               <div style={{ marginTop: 11 }}>
                 <div style={{ display: 'flex', fontSize: 10, fontWeight: 700, color: '#8A8DA3' }}>
                   <span>Daily limit</span>
-                  <span className="ml-auto" style={{ fontWeight: 800, color: '#14152A' }}>{c.used.toLocaleString()} / {c.limit.toLocaleString()}</span>
+                  <span className="nf-ml-auto" style={{ fontWeight: 800, color: '#14152A' }}>{c.used.toLocaleString()} / {c.limit.toLocaleString()}</span>
                 </div>
                 <Bar pct={pct + '%'} color={usageColor(pct)} height={5} style={{ marginTop: 4 }} />
               </div>
               <div style={{ display: 'flex', gap: 7, marginTop: 13 }}>
-                <button type="button" className="btn-outline" onClick={() => testProvider(c.id)}>{state.testingId === c.id ? 'Testing…' : 'Test'}</button>
-                <a href="#queue" className="btn-outline">Logs</a>
+                <button type="button" className="nf-btn-outline" onClick={() => testProvider(c.id)}>{state.testingId === c.id ? 'Testing…' : 'Test'}</button>
+                <a href="#queue" className="nf-btn-outline">Logs</a>
               </div>
             </div>
           );
@@ -68,18 +68,18 @@ export function Providers({ api }: { api: SmtpApi }) {
       </div>
 
       {connections.length === 0 && (
-        <div className="empty" style={{ padding: '56px 0' }}>
+        <div className="nf-empty" style={{ padding: '56px 0' }}>
           <div style={{ fontSize: 30 }}>🔍</div>
-          <div className="empty-title" style={{ fontSize: 14, marginTop: 10 }}>No providers match</div>
+          <div className="nf-empty-title" style={{ fontSize: 14, marginTop: 10 }}>No providers match</div>
         </div>
       )}
 
-      <div className="card" style={{ marginTop: 14 }}>
+      <div className="nf-card" style={{ marginTop: 14 }}>
         <CardHead small title="Available integrations" sub={`${CATALOG.length} SMTP servers and email APIs ready to connect`} />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 13 }}>
           {CATALOG.map(name => (
-            <span key={name} className="chip">
-              <span className="dot" style={{ width: 6, height: 6, background: CATALOG_CONNECTED.has(name) ? '#0E9F6E' : '#C4C6D4' }} />
+            <span key={name} className="nf-chip">
+              <span className="nf-dot" style={{ width: 6, height: 6, background: CATALOG_CONNECTED.has(name) ? '#0E9F6E' : '#C4C6D4' }} />
               {name}
             </span>
           ))}

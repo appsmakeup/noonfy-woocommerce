@@ -1,8 +1,18 @@
 // Sidebar navigation + command-palette routes, transcribed from Sidebar.dc.html.
-// Only the SMTP page exists in this build: its links resolve to in-page hashes,
-// every other link keeps the prototype's page path.
+// Only the SMTP screen exists in the plugin so far. Its sections resolve to in-page hashes, the
+// WooCommerce entries open the real WooCommerce screens, and everything else is "coming soon" (null).
+import { config } from '../config';
 
-export const toHref = (path: string) => (path.startsWith('SMTP.dc.html') ? path.slice('SMTP.dc.html'.length) : path);
+const WOO_LINKS: Record<string, string> = {
+  'Woo.dc.html#products': 'wooProducts', 'Woo.dc.html#orders': 'wooOrders',
+  'Woo.dc.html#categories': 'wooCategories', 'Woo.dc.html#coupons': 'wooCoupons',
+};
+
+export function toHref(path: string): string | null {
+  if (path.startsWith('SMTP.dc.html')) return path.slice('SMTP.dc.html'.length);
+  const link = WOO_LINKS[path];
+  return link ? config.links[link] ?? null : null;
+}
 
 const I = {
   dash: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
@@ -17,7 +27,7 @@ const I = {
   gear: 'M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zM19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z',
 };
 
-export interface NavItem { key: string; label: string; href: string; icon?: string; sub?: boolean; badge?: string }
+export interface NavItem { key: string; label: string; href: string | null; icon?: string; sub?: boolean; badge?: string }
 export interface NavGroup { label: string; items: NavItem[] }
 
 type Row = [key: string, label: string, path: string, icon?: string, sub?: boolean, badge?: string];
@@ -146,7 +156,7 @@ export const NAV: NavGroup[] = [
   ]),
 ];
 
-export interface PaletteRoute { label: string; href: string; group: string; glyph: string; tint: string }
+export interface PaletteRoute { label: string; href: string | null; group: string; glyph: string; tint: string }
 const R = (label: string, path: string, grp: string, glyph: string, tint: string): PaletteRoute => ({ label, href: toHref(path), group: grp, glyph, tint });
 
 export const PALETTE_ROUTES: PaletteRoute[] = [

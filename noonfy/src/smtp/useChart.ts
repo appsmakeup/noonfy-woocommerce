@@ -1,7 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { Chart, registerables, type ChartConfiguration, type ChartType } from 'chart.js';
+import {
+  ArcElement, BarController, BarElement, CategoryScale, Chart, DoughnutController, Filler, LinearScale,
+  LineController, LineElement, PointElement, Tooltip, type ChartConfiguration, type ChartType,
+} from 'chart.js';
 
-Chart.register(...registerables);
+// Only what the SMTP screen's bar, doughnut and line charts need.
+Chart.register(BarController, BarElement, DoughnutController, ArcElement, LineController, LineElement, PointElement, CategoryScale, LinearScale, Filler, Tooltip);
 Chart.defaults.font.family = "'Manrope',sans-serif";
 Chart.defaults.color = '#A5A8BD';
 

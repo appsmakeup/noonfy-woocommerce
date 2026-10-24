@@ -9,9 +9,9 @@ const TOGGLE_SIZES = {
 export function Toggle({ on, onChange, size = 'md', label }: { on: boolean; onChange: () => void; size?: keyof typeof TOGGLE_SIZES; label: string }) {
   const s = TOGGLE_SIZES[size];
   return (
-    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onChange} className="toggle"
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={onChange} className="nf-toggle"
       style={{ width: s.w, height: s.h, background: on ? '#4F46E5' : '#D9DBEA' }}>
-      <span className="toggle-knob" style={{ width: s.knob, height: s.knob, left: on ? s.onLeft : 3 }} />
+      <span className="nf-toggle-knob" style={{ width: s.knob, height: s.knob, left: on ? s.onLeft : 3 }} />
     </button>
   );
 }
@@ -19,8 +19,8 @@ export function Toggle({ on, onChange, size = 'md', label }: { on: boolean; onCh
 /** Horizontal meter: grey track with a coloured fill. */
 export function Bar({ pct, color, height, style }: { pct: string; color: string; height: number; style?: CSSProperties }) {
   return (
-    <div className="bar-track" style={{ height, ...style }}>
-      <div className="bar-fill" style={{ background: color, width: pct }} />
+    <div className="nf-bar-track" style={{ height, ...style }}>
+      <div className="nf-bar-fill" style={{ background: color, width: pct }} />
     </div>
   );
 }
@@ -28,8 +28,8 @@ export function Bar({ pct, color, height, style }: { pct: string; color: string;
 export function CardHead({ title, sub, small }: { title: ReactNode; sub?: ReactNode; small?: boolean }) {
   return (
     <>
-      <div className={'card-title' + (small ? ' card-title--sm' : '')}>{title}</div>
-      {sub != null && <div className="card-sub">{sub}</div>}
+      <div className={'nf-card-title' + (small ? ' nf-card-title--sm' : '')}>{title}</div>
+      {sub != null && <div className="nf-card-sub">{sub}</div>}
     </>
   );
 }
@@ -46,11 +46,11 @@ const TOAST_STYLE: Record<ToastKind, { glyph: string; border: string; iconBg: st
 export function Toast({ toast }: { toast: ToastData }) {
   const s = TOAST_STYLE[toast.kind];
   return (
-    <div className="toast" role="status" style={{ borderColor: s.border }}>
-      <span className="toast-icon" style={{ background: s.iconBg }}>{s.glyph}</span>
+    <div className="nf-toast" role="status" style={{ borderColor: s.border }}>
+      <span className="nf-toast-icon" style={{ background: s.iconBg }}>{s.glyph}</span>
       <div style={{ minWidth: 0 }}>
-        <div className="toast-title">{toast.title}</div>
-        <div className="toast-text">{toast.text}</div>
+        <div className="nf-toast-title">{toast.title}</div>
+        <div className="nf-toast-text">{toast.text}</div>
       </div>
     </div>
   );
