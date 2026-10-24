@@ -16,9 +16,6 @@ class Noonfy_SMTP_Settings {
 
 	const OPTION = 'noonfy_smtp_settings';
 
-	/** Provider connection ids shown on the Connections tab. */
-	const PROVIDERS = array( 'ses', 'postmark', 'mailgun', 'brevo', 'sendgrid', 'gsuite' );
-
 	/** Routing rule ids. */
 	const RULES = array( 'r1', 'r2', 'r3', 'r4', 'r5' );
 
@@ -29,19 +26,19 @@ class Noonfy_SMTP_Settings {
 	const STRATEGIES = array( 'weighted', 'roundrobin', 'priority', 'leastused', 'fastest', 'cost', 'deliverability', 'health' );
 
 	/**
-	 * Defaults for a fresh install. Toggle maps start empty: the app treats a missing id as its design default.
+	 * Defaults for a fresh install. Rule/alert maps start empty: the app treats a missing id as its default.
 	 *
 	 * @return array
 	 */
 	public static function defaults() {
 		return array(
-			'enabled'   => array(),
-			'strategy'  => 'weighted',
+			'strategy'  => 'priority',
 			'rules'     => array(),
 			'alerts'    => array(),
 			'retention' => 30,
 			'fromName'  => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
 			'fromEmail' => (string) get_option( 'admin_email' ),
+			'forceFrom' => false,
 		);
 	}
 
@@ -82,13 +79,13 @@ class Noonfy_SMTP_Settings {
 	 */
 	public static function sanitize( array $input, array $base ) {
 		$out = array(
-			'enabled'   => self::bool_map( $input['enabled'] ?? array(), self::PROVIDERS ),
 			'strategy'  => in_array( $input['strategy'] ?? '', self::STRATEGIES, true ) ? $input['strategy'] : $base['strategy'],
 			'rules'     => self::bool_map( $input['rules'] ?? array(), self::RULES ),
 			'alerts'    => self::bool_map( $input['alerts'] ?? array(), self::ALERTS ),
 			'retention' => $base['retention'],
 			'fromName'  => sanitize_text_field( (string) ( $input['fromName'] ?? '' ) ),
 			'fromEmail' => sanitize_email( (string) ( $input['fromEmail'] ?? '' ) ),
+			'forceFrom' => rest_sanitize_boolean( $input['forceFrom'] ?? false ),
 		);
 
 		if ( isset( $input['retention'] ) && is_numeric( $input['retention'] ) ) {

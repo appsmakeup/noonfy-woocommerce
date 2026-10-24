@@ -88,19 +88,32 @@ class Noonfy_Admin {
 		$user = wp_get_current_user();
 		$name = $user->display_name ? $user->display_name : $user->user_login;
 
+		global $wp_version;
+
 		return array(
-			'restPath' => Noonfy_SMTP_REST::NS . '/smtp',
-			'settings' => Noonfy_SMTP_Settings::get(),
-			'user'     => array(
+			'restPath'    => Noonfy_SMTP_REST::NS . '/smtp',
+			'settings'    => Noonfy_SMTP_Settings::get(),
+			'presets'     => Noonfy_Providers::all(),
+			'connections' => Noonfy_Connections::all_public(),
+			'stats'       => Noonfy_Email_Log::stats(),
+			'recentLogs'  => Noonfy_Email_Log::query( array( 'limit' => 10 ) )['rows'],
+			'system'      => array(
+				'purgeScheduled' => (bool) wp_next_scheduled( NOONFY_PURGE_HOOK ),
+				'openssl'        => extension_loaded( 'openssl' ),
+				'php'            => PHP_VERSION,
+				'wordpress'      => $wp_version,
+				'woocommerce'    => defined( 'WC_VERSION' ) ? WC_VERSION : '',
+			),
+			'user'        => array(
 				'name'     => $name,
 				'initials' => self::initials( $name ),
 				'email'    => $user->user_email,
 			),
-			'site'     => array(
+			'site'        => array(
 				'name' => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
 				'host' => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
 			),
-			'links'    => array(
+			'links'       => array(
 				'wooProducts'     => admin_url( 'edit.php?post_type=product' ),
 				'wooOrders'       => self::orders_url(),
 				'wooCategories'   => admin_url( 'edit-tags.php?taxonomy=product_cat&post_type=product' ),

@@ -1,148 +1,187 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import apiFetch from '@wordpress/api-fetch';
-import { config, type PersistedSettings } from '../config';
-import { CONNECTIONS, TEST_RESULTS, makeLiveLog, type LiveLog, type LogFilter, type ProvMode, type StrategyKey } from './data';
+import { api, errorMessage } from '../api';
+import { config, type Connection, type ConnectionInput, type LogRow, type PersistedSettings, type Stats } from '../config';
+import type { StrategyKey } from './data';
 import type { ToastData, ToastKind } from './ui';
 
-export interface TestResult { ok: boolean; text: string }
+export interface ToolResult { ok: boolean; text: string }
+export type ConnFilter = 'all' | 'enabled' | 'disabled';
+export type LogFilter = 'all' | 'SENT' | 'FAILED' | 'RETRY';
 
 export interface SmtpState {
-  provMode: ProvMode;
-  provQ: string;
-  enabled: Record<string, boolean>;
+  connections: Connection[];
+  stats: Stats;
+  connFilter: ConnFilter;
+  connQuery: string;
   testingId: string | null;
   strategy: StrategyKey;
-  ruleTg: Record<string, boolean>;
   logFilter: LogFilter;
-  testRunning: boolean;
-  testName: string;
-  testDone: boolean;
-  testResults: TestResult[];
-  alertTg: Record<string, boolean>;
+  logConnection: string;
+  toolRunning: string;
+  toolResults: ToolResult[];
   retention: number;
   fromName: string;
   fromEmail: string;
+  forceFrom: boolean;
   sendingTest: boolean;
+  /** Connection form: null = closed, id '' = new, otherwise the connection being edited. */
+  editing: { id: string; preset?: string } | null;
 }
 
 const s0 = config.settings;
 const INITIAL: SmtpState = {
-  provMode: 'smtp', provQ: '', enabled: s0.enabled, testingId: null, strategy: s0.strategy, ruleTg: s0.rules,
-  logFilter: 'all', testRunning: false, testName: '', testDone: false, testResults: [], alertTg: s0.alerts,
-  retention: s0.retention, fromName: s0.fromName, fromEmail: s0.fromEmail, sendingTest: false,
+  connections: config.connections, stats: config.stats, connFilter: 'all', connQuery: '', testingId: null,
+  strategy: s0.strategy, logFilter: 'all', logConnection: '', toolRunning: '', toolResults: [],
+  retention: s0.retention, fromName: s0.fromName, fromEmail: s0.fromEmail, forceFrom: s0.forceFrom, sendingTest: false,
+  editing: null,
 };
 
-const errorMessage = (e: unknown) => (e && typeof e === 'object' && 'message' in e ? String((e as { message: unknown }).message) : 'Request failed.');
+const byPriority = (a: Connection, b: Connection) => a.priority - b.priority || a.createdAt - b.createdAt;
 
-/** The test-email tool really sends; every other tool is still a simulation (there is no sending engine yet). */
-const REAL_TEST = 'Send test email';
-
-/** All interactive page state lives here so it survives switching tabs, as in the design. */
+/** Page-level state and actions; lives above the tabs so it survives tab switches. */
 export function useSmtpState() {
   const [state, setState] = useState(INITIAL);
   const [toast, setToast] = useState<ToastData | null>(null);
   const toastTimer = useRef<number>();
-  const runTimer = useRef<number>();
-  const saveTimer = useRef<number>();
+  const retentionTimer = useRef<number>();
   const latest = useRef(state);
   latest.current = state;
 
-  useEffect(() => () => { clearTimeout(toastTimer.current); clearTimeout(runTimer.current); clearTimeout(saveTimer.current); }, []);
+  useEffect(() => () => { clearTimeout(toastTimer.current); clearTimeout(retentionTimer.current); }, []);
 
   const update = useCallback((patch: Partial<SmtpState>) => setState(s => ({ ...s, ...patch })), []);
 
   const showToast = useCallback((kind: ToastKind, title: string, text: string) => {
     clearTimeout(toastTimer.current);
     setToast({ kind, title, text });
-    toastTimer.current = window.setTimeout(() => setToast(null), 3000);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3500);
   }, []);
 
-  const save = useCallback((patch: Partial<PersistedSettings>) =>
-    apiFetch({ path: `/${config.restPath}/settings`, method: 'POST', data: patch })
-      .catch(e => showToast('warn', 'Couldn’t save settings', errorMessage(e))), [showToast]);
+  /** Shows the error as a toast and re-throws so callers (e.g. the connection form) can stay open. */
+  const fail = useCallback((title: string) => (e: unknown): never => { showToast('warn', title, errorMessage(e)); throw e; }, [showToast]);
 
-  // Toggles, strategy and retention autosave (debounced) whenever they change.
-  const persisted = { enabled: state.enabled, strategy: state.strategy, rules: state.ruleTg, alerts: state.alertTg, retention: state.retention };
-  const persistedKey = JSON.stringify(persisted);
-  const lastSaved = useRef(persistedKey);
-  useEffect(() => {
-    if (persistedKey === lastSaved.current) return;
-    clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => { lastSaved.current = persistedKey; save(JSON.parse(persistedKey)); }, 400);
-  }, [persistedKey, save]);
+  // ----- settings -----
+  const saveSettings = useCallback((patch: Partial<PersistedSettings>) =>
+    api.saveSettings(patch).catch(e => showToast('warn', 'Couldn’t save settings', errorMessage(e))), [showToast]);
 
-  const toggleIn = useCallback((field: 'enabled' | 'ruleTg' | 'alertTg', id: string, current: boolean) =>
-    setState(s => ({ ...s, [field]: { ...s[field], [id]: !current } })), []);
+  const setStrategy = useCallback((strategy: StrategyKey) => { update({ strategy }); saveSettings({ strategy }); }, [update, saveSettings]);
 
-  /** Text fields save on blur rather than per keystroke. */
-  const savedDefaults = useRef(JSON.stringify({ fromName: s0.fromName, fromEmail: s0.fromEmail }));
+  // Retention saves once the slider stops moving.
+  const setRetention = useCallback((retention: number) => {
+    update({ retention });
+    clearTimeout(retentionTimer.current);
+    retentionTimer.current = window.setTimeout(() => saveSettings({ retention }), 500);
+  }, [update, saveSettings]);
+
+  /** Sender fields save on blur, and only when changed; a rejected value is re-sent after it's edited. */
+  const savedDefaults = useRef(JSON.stringify({ fromName: s0.fromName, fromEmail: s0.fromEmail, forceFrom: s0.forceFrom }));
   const saveDefaults = useCallback(() => {
-    const next = JSON.stringify({ fromName: latest.current.fromName, fromEmail: latest.current.fromEmail });
+    const { fromName, fromEmail, forceFrom } = latest.current;
+    const next = JSON.stringify({ fromName, fromEmail, forceFrom });
     if (next === savedDefaults.current) return;
-    // Only remember the values once the server accepts them, so a rejected email is re-sent after it is edited.
-    apiFetch({ path: `/${config.restPath}/settings`, method: 'POST', data: JSON.parse(next) })
+    api.saveSettings({ fromName, fromEmail, forceFrom })
       .then(() => { savedDefaults.current = next; })
       .catch(e => showToast('warn', 'Couldn’t save settings', errorMessage(e)));
   }, [showToast]);
 
-  const requestTestEmail = useCallback(() =>
-    apiFetch<{ to: string }>({ path: `/${config.restPath}/test-email`, method: 'POST' }), []);
+  // ----- stats -----
+  const refreshStats = useCallback(() => { api.stats().then(stats => update({ stats })).catch(() => undefined); }, [update]);
 
-  const sendTestEmail = useCallback(() => {
+  // ----- connections -----
+  const replaceConnection = useCallback((c: Connection) =>
+    setState(s => ({ ...s, connections: [...s.connections.filter(x => x.id !== c.id), c].sort(byPriority) })), []);
+
+  const saveConnection = useCallback((id: string, input: ConnectionInput) =>
+    (id ? api.updateConnection(id, input) : api.createConnection(input))
+      .then(c => { replaceConnection(c); showToast('ok', id ? 'Connection saved' : 'Connection added', c.name); return c; })
+      .catch(fail('Couldn’t save connection')), [replaceConnection, showToast, fail]);
+
+  const toggleConnection = useCallback((c: Connection) => {
+    replaceConnection({ ...c, enabled: !c.enabled });
+    api.updateConnection(c.id, { enabled: !c.enabled }).then(replaceConnection)
+      .catch(e => { replaceConnection(c); showToast('warn', 'Couldn’t update connection', errorMessage(e)); });
+  }, [replaceConnection, showToast]);
+
+  const deleteConnection = useCallback((c: Connection) =>
+    api.deleteConnection(c.id)
+      .then(() => {
+        setState(s => ({ ...s, connections: s.connections.filter(x => x.id !== c.id), editing: null }));
+        showToast('ok', 'Connection deleted', c.name);
+      })
+      .catch(fail('Couldn’t delete connection')), [showToast, fail]);
+
+  const testConnection = useCallback((c: Connection) => {
+    update({ testingId: c.id });
+    api.testConnection(c.id)
+      .then(r => {
+        replaceConnection({ ...c, lastTest: { at: Date.now() / 1000, ...r } });
+        if (r.ok) showToast('ok', c.name + ' reachable', `Connected and authenticated in ${r.latencyMs}ms.`);
+        else showToast('warn', c.name + ' failed', r.error ?? 'Connection failed.');
+      })
+      .catch(e => showToast('warn', 'Test failed', errorMessage(e)))
+      .finally(() => update({ testingId: null }));
+  }, [update, replaceConnection, showToast]);
+
+  // ----- test email -----
+  const sendTestEmail = useCallback((connectionId?: string) => {
     update({ sendingTest: true });
-    requestTestEmail()
-      .then(r => showToast('ok', 'Test email sent', `wp_mail() accepted the message for ${r.to}.`))
+    api.sendTestEmail(connectionId)
+      .then(r => showToast('ok', 'Test email sent', `Accepted for ${r.to} via ${r.via}.`))
       .catch(e => showToast('warn', 'Test email failed', errorMessage(e)))
-      .finally(() => update({ sendingTest: false }));
-  }, [update, requestTestEmail, showToast]);
+      .finally(() => { update({ sendingTest: false }); refreshStats(); });
+  }, [update, showToast, refreshStats]);
 
-  const testProvider = useCallback((id: string) => {
-    const conn = CONNECTIONS.find(c => c.id === id)!;
-    update({ testingId: id });
-    clearTimeout(runTimer.current);
-    runTimer.current = window.setTimeout(() => {
-      update({ testingId: null });
-      showToast('ok', conn.name + ' reachable', 'Handshake completed in ' + conn.latency + '.');
-    }, 900);
-  }, [update, showToast]);
-
-  const runTest = useCallback((label: string) => {
-    update({ testRunning: true, testName: label, testDone: false });
-    clearTimeout(runTimer.current);
-    if (label === REAL_TEST) {
-      requestTestEmail()
-        .then(r => {
-          update({ testRunning: false, testDone: true, testResults: [{ ok: true, text: `wp_mail() accepted the message for ${r.to}` }] });
-          showToast('ok', label + ' passed', `Check ${r.to} for the message.`);
-        })
-        .catch(e => {
-          update({ testRunning: false, testDone: true, testResults: [{ ok: false, text: errorMessage(e) }] });
-          showToast('warn', label + ' failed', errorMessage(e));
-        });
-      return;
+  // ----- monitoring tools -----
+  const runTool = useCallback(async (key: string, label: string) => {
+    update({ toolRunning: label, toolResults: [] });
+    try {
+      if (key === 'email') {
+        const r = await api.sendTestEmail();
+        update({ toolResults: [{ ok: true, text: `Accepted for ${r.to} via ${r.via}` }] });
+      } else if (key === 'smtp') {
+        const enabled = latest.current.connections.filter(c => c.enabled);
+        if (!enabled.length) {
+          update({ toolResults: [{ ok: false, text: 'No enabled connections: WordPress is sending with PHP mail().' }] });
+        } else {
+          const results = await Promise.all(enabled.map(c => api.testConnection(c.id).then(r => ({ c, r }))));
+          results.forEach(({ c, r }) => replaceConnection({ ...c, lastTest: { at: Date.now() / 1000, ...r } }));
+          update({ toolResults: results.map(({ c, r }) => ({ ok: r.ok, text: r.ok ? `${c.name}: connected in ${r.latencyMs}ms` : `${c.name}: ${r.error}` })) });
+        }
+      }
+    } catch (e) {
+      update({ toolResults: [{ ok: false, text: errorMessage(e) }] });
+    } finally {
+      update({ toolRunning: '' });
+      refreshStats();
     }
-    runTimer.current = window.setTimeout(() => {
-      update({ testRunning: false, testDone: true, testResults: TEST_RESULTS.map(text => ({ ok: true, text })) });
-      showToast('ok', label + ' passed', 'All checks completed successfully.');
-    }, 1100);
-  }, [update, requestTestEmail, showToast]);
+  }, [update, replaceConnection, refreshStats]);
 
-  return { state, update, toggleIn, saveDefaults, toast, showToast, sendTestEmail, testProvider, runTest };
+  return {
+    state, update, toast, showToast,
+    setStrategy, setRetention, saveDefaults, refreshStats,
+    saveConnection, toggleConnection, deleteConnection, testConnection, sendTestEmail, runTool,
+  };
 }
 
 export type SmtpApi = ReturnType<typeof useSmtpState>;
 
-/** Live queue feed: seeded with 9 rows, two new rows every 1.5s while `active`, capped at 10. */
-export function useLiveQueue(active: boolean) {
-  const [logs, setLogs] = useState<LiveLog[]>(() => Array.from({ length: 9 }, makeLiveLog));
-  const [tick, setTick] = useState(0);
+/** Dashboard live feed: newest log rows, polled every 5s while `active`; stats refresh on new rows and every 30s. */
+export function useLiveLogs(active: boolean, onStats: () => void) {
+  const [logs, setLogs] = useState<LogRow[]>(config.recentLogs);
+  const newest = useRef(config.recentLogs[0]?.id ?? 0);
   useEffect(() => {
     if (!active) return;
+    let ticks = 0;
     const iv = window.setInterval(() => {
-      setLogs(prev => [makeLiveLog(), makeLiveLog(), ...prev].slice(0, 10));
-      setTick(t => t + 1);
-    }, 1500);
+      api.logs({ after: newest.current, limit: 10 }).then(({ rows }) => {
+        if (!rows.length) return;
+        newest.current = rows[0].id;
+        setLogs(prev => [...rows, ...prev].slice(0, 10));
+        onStats();
+      }).catch(() => undefined);
+      if (++ticks % 6 === 0) onStats();
+    }, 5000);
     return () => clearInterval(iv);
-  }, [active]);
-  return { logs, eps: 214 + (tick % 40) };
+  }, [active, onStats]);
+  return logs;
 }

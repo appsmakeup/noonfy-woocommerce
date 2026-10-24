@@ -1,9 +1,10 @@
 import { BOUNCE_KPIS, BOUNCE_REASONS, SUPPRESSIONS } from '../data';
-import { Bar, CardHead } from '../ui';
+import { Bar, CardHead, SampleBanner } from '../ui';
 
 export function Suppressions() {
   return (
     <section>
+      <SampleBanner>Sample data. Bounce and complaint tracking (via provider webhooks) and the suppression list are coming next.</SampleBanner>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, marginBottom: 14 }}>
         {BOUNCE_KPIS.map(b => (
           <div key={b.label} className="nf-stat">

@@ -9,14 +9,15 @@ Chart.register(BarController, BarElement, DoughnutController, ArcElement, LineCo
 Chart.defaults.font.family = "'Manrope',sans-serif";
 Chart.defaults.color = '#A5A8BD';
 
-/** Mounts a Chart.js chart on the returned canvas ref; the config is built once per mount. */
+/** Mounts a Chart.js chart on the returned canvas ref (config built once per mount); `chart` exposes the instance for updates. */
 export function useChart<T extends ChartType>(makeConfig: () => ChartConfiguration<T>) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const chart = useRef<Chart<T> | null>(null);
   const make = useRef(makeConfig);
   useEffect(() => {
     if (!ref.current) return;
-    const chart = new Chart(ref.current, make.current());
-    return () => chart.destroy();
+    chart.current = new Chart(ref.current, make.current());
+    return () => { chart.current?.destroy(); chart.current = null; };
   }, []);
-  return ref;
+  return { ref, chart };
 }

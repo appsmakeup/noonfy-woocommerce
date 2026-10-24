@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Sidebar } from '../sidebar/Sidebar';
 import { PAGES, PAGE_TITLES, SIDEBAR_KEY, TABS, type PageKey } from './data';
-import { useLiveQueue, useSmtpState } from './useSmtpState';
+import { useLiveLogs, useSmtpState } from './useSmtpState';
+import { ConnectionModal } from './ConnectionModal';
 import { Toast } from './ui';
 import { Dashboard } from './tabs/Dashboard';
 import { Providers } from './tabs/Providers';
@@ -30,8 +31,9 @@ function useHashPage() {
 export function SmtpPage() {
   const page = useHashPage();
   const api = useSmtpState();
-  const live = useLiveQueue(page === 'dashboard');
+  const liveLogs = useLiveLogs(page === 'dashboard', api.refreshStats);
   const [title, sub] = PAGE_TITLES[page];
+  const active = api.state.connections.filter(c => c.enabled).length;
 
   return (
     <div className="nf-shell">
@@ -43,11 +45,18 @@ export function SmtpPage() {
             <p className="nf-page-sub">{sub}</p>
           </div>
           <div className="nf-row nf-ml-auto nf-noshrink" style={{ gap: 9 }}>
-            <span className="nf-health-pill">
-              <span className="nf-dot" style={{ width: 7, height: 7, background: '#0E9F6E', animation: 'nf-blink 1.6s ease infinite' }} />
-              6 providers healthy
-            </span>
-            <button type="button" className="nf-btn-primary nf-btn-primary--shadow" disabled={api.state.sendingTest} onClick={api.sendTestEmail}>
+            {active ? (
+              <span className="nf-health-pill">
+                <span className="nf-dot" style={{ width: 7, height: 7, background: '#0E9F6E', animation: 'nf-blink 1.6s ease infinite' }} />
+                {active} {active === 1 ? 'provider' : 'providers'} active
+              </span>
+            ) : (
+              <a href="#providers" className="nf-health-pill nf-health-pill--idle" title="WordPress is sending with PHP mail(). Add a connection.">
+                <span className="nf-dot" style={{ width: 7, height: 7, background: '#C2620A' }} />
+                Using PHP mail()
+              </a>
+            )}
+            <button type="button" className="nf-btn-primary nf-btn-primary--shadow" disabled={api.state.sendingTest} onClick={() => api.sendTestEmail()}>
               {api.state.sendingTest ? 'Sending…' : 'Send test email'}
             </button>
           </div>
@@ -60,7 +69,7 @@ export function SmtpPage() {
           ))}
         </nav>
 
-        {page === 'dashboard' && <Dashboard liveLogs={live.logs} eps={live.eps} />}
+        {page === 'dashboard' && <Dashboard stats={api.state.stats} connections={api.state.connections} liveLogs={liveLogs} />}
         {page === 'providers' && <Providers api={api} />}
         {page === 'routing' && <Routing api={api} />}
         {page === 'queue' && <Queue api={api} />}
@@ -69,6 +78,7 @@ export function SmtpPage() {
         {page === 'suppressions' && <Suppressions />}
         {page === 'tools' && <Tools api={api} />}
 
+        {api.state.editing && <ConnectionModal api={api} />}
         {api.toast && <Toast toast={api.toast} />}
       </main>
     </div>

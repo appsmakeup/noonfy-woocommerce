@@ -41,12 +41,13 @@
   -webkit-font-smoothing: auto;
 }
 .nf-app *, .nf-app *::before, .nf-app *::after { box-sizing: border-box; }
-.nf-app a { color: var(--brand); text-decoration: none; }
-.nf-app a:hover { color: var(--brand-hover); }
+/* :where() keeps these at element-level specificity so component classes (.nf-tab, .nf-nav-item…) win. */
+:where(.nf-app) a { color: var(--brand); text-decoration: none; }
+:where(.nf-app) a:hover { color: var(--brand-hover); }
 .nf-app a:focus { box-shadow: none; outline: none; }
 .nf-app a:focus-visible, .nf-app button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .nf-app canvas { max-width: 100%; }
-.nf-app button, .nf-app input { font-family: inherit; margin: 0; }
+:where(.nf-app) button, :where(.nf-app) input { font-family: inherit; margin: 0; }
 .nf-app h1, .nf-app p { padding: 0; }
 .nf-app ::-webkit-scrollbar { width: 8px; height: 8px; }
 .nf-app ::-webkit-scrollbar-thumb { background: #e2e4ee; border-radius: 8px; }
@@ -100,12 +101,12 @@ body.noonfy-admin #wpbody-content > .notice, body.noonfy-admin #wpbody-content >
 .nf-btn-primary--sm { padding: 8px 15px; }
 
 .nf-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; flex-wrap: wrap; }
-.nf-tab {
+.nf-tab, .nf-tab:focus {
   padding: 9px 13px; font-size: 13px; font-weight: 600; color: var(--muted);
   border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap;
 }
 .nf-tab:hover { color: var(--ink); }
-.nf-tab--active, .nf-tab--active:hover { font-weight: 800; color: var(--brand); border-bottom-color: var(--brand); }
+.nf-tab--active, .nf-tab--active:hover, .nf-tab--active:focus { font-weight: 800; color: var(--brand); border-bottom-color: var(--brand); }
 
 /* ---------- cards & typography ---------- */
 .nf-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; min-width: 0; }
@@ -139,7 +140,7 @@ body.noonfy-admin #wpbody-content > .notice, body.noonfy-admin #wpbody-content >
 }
 .nf-btn-dashed:hover { background: var(--purple-soft); }
 
-.nf-btn-outline {
+.nf-btn-outline, .nf-btn-outline:focus {
   flex: 1; text-align: center; border: 1px solid var(--border); background: #fff; border-radius: 8px; padding: 7px;
   font-size: 11px; font-weight: 800; color: var(--ink-2); cursor: pointer;
 }
@@ -224,14 +225,14 @@ body.noonfy-admin #wpbody-content > .notice, body.noonfy-admin #wpbody-content >
 .nf-kbd { margin-left: auto; font-size: 10.5px; background: #fff; border: 1px solid #e7e8f0; border-radius: 5px; padding: 1px 5px; color: #a0a3b8; }
 .nf-sidebar-nav { flex: 1; overflow-y: auto; padding: 0 10px 16px 10px; }
 .nf-nav-group-label { font-size: 10px; font-weight: 800; letter-spacing: .9px; text-transform: uppercase; color: var(--muted-2); padding: 6px 10px 4px 10px; }
-.nf-nav-item {
+.nf-nav-item, .nf-nav-item:focus {
   display: flex; align-items: center; gap: 9px; padding: 7px 10px; border-radius: 8px; font-size: 13px; font-weight: 600;
   color: var(--ink-2); margin-top: 1px;
 }
-.nf-nav-item--sub { color: var(--ink-3); }
+.nf-nav-item--sub, .nf-nav-item--sub:focus { color: var(--ink-3); }
 .nf-nav-item:hover { background: var(--track); color: var(--ink); }
 .nf-nav-item--soon { cursor: default; }
-.nf-nav-item--active, .nf-nav-item--active:hover { background: linear-gradient(90deg, #eef0fe, #f4effe); color: var(--brand); font-weight: 800; }
+.nf-nav-item--active, .nf-nav-item--active:hover, .nf-nav-item--active:focus { background: linear-gradient(90deg, #eef0fe, #f4effe); color: var(--brand); font-weight: 800; }
 .nf-nav-badge { margin-left: auto; font-size: 10px; font-weight: 800; color: var(--purple); background: var(--purple-soft); border-radius: 99px; padding: 2px 7px; }
 .nf-sidebar-user { border-top: 1px solid var(--border); padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
 .nf-avatar {
@@ -248,5 +249,53 @@ body.noonfy-admin #wpbody-content > .notice, body.noonfy-admin #wpbody-content >
   overflow: hidden; animation: nf-fadeUp .18s ease;
 }
 .nf-palette-input { flex: 1; border: none; outline: none; font-size: 14.5px; color: var(--ink); background: transparent; }
-.nf-palette-result { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 9px; color: var(--ink); font-size: 13.5px; font-weight: 600; }
+.nf-palette-result, .nf-palette-result:focus { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 9px; color: var(--ink); font-size: 13.5px; font-weight: 600; }
 .nf-palette-result:hover { background: #f5f4fe; color: var(--ink); }
+
+/* ---------- live-data additions ---------- */
+.nf-app .nf-health-pill--idle, .nf-app .nf-health-pill--idle:hover { background: #fff3e8; border-color: #f8dfc5; color: #c2620a; }
+.nf-toggle:disabled { cursor: not-allowed; opacity: .55; }
+.nf-soon {
+  display: inline-block; font-size: 9.5px; font-weight: 800; letter-spacing: .3px; text-transform: uppercase; color: var(--purple);
+  background: var(--purple-soft); border-radius: 99px; padding: 3px 9px; white-space: nowrap;
+}
+.nf-sample-banner {
+  display: flex; align-items: center; gap: 10px; background: #fbfaff; border: 1px dashed var(--border-hover); border-radius: 11px;
+  padding: 10px 14px; margin-bottom: 14px; font-size: 12px; font-weight: 600; color: var(--ink-3);
+}
+.nf-dim { opacity: .55; }
+.nf-tool-btn--soon { opacity: .6; }
+.nf-tool-btn--soon:hover { border-color: var(--border); background: #fff; }
+.nf-btn-ghost {
+  border: 1px solid var(--border); background: #fff; border-radius: 9px; padding: 8px 14px; font-size: 12px; font-weight: 800;
+  color: var(--ink-2); cursor: pointer; white-space: nowrap;
+}
+.nf-btn-ghost:hover { border-color: var(--border-hover); color: var(--ink); }
+.nf-btn-ghost:disabled { opacity: .6; cursor: default; }
+.nf-btn-danger { border: none; background: none; color: #e02424; font-size: 12px; font-weight: 800; cursor: pointer; padding: 8px 4px; }
+.nf-btn-danger:hover { text-decoration: underline; }
+.nf-icon-btn { border: none; background: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
+.nf-icon-btn:hover { background: var(--track); color: var(--ink); }
+.nf-empty-card { text-align: center; padding: 40px 20px; }
+
+/* Modal + form. `.nf-app .nf-field` outranks wp-admin's input[type=…] and select rules. */
+.nf-modal {
+  width: 620px; max-width: 94vw; max-height: 88vh; display: flex; flex-direction: column; background: #fff; border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(20, 21, 42, .35); animation: nf-fadeUp .18s ease; font-family: 'Manrope', -apple-system, sans-serif;
+}
+.nf-palette-backdrop .nf-modal { margin-top: -6vh; }
+.nf-modal-head { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.nf-modal-body { padding: 18px 20px; overflow-y: auto; }
+.nf-modal-foot { display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--border); }
+.nf-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+.nf-form-grid .nf-span2 { grid-column: 1 / -1; }
+.nf-label { display: block; font-size: 10.5px; font-weight: 800; color: var(--ink-3); margin-bottom: 4px; }
+.nf-hint { font-size: 11px; font-weight: 600; color: var(--muted); line-height: 1.5; margin-top: 4px; }
+.nf-app .nf-field, .nf-modal .nf-field {
+  width: 100%; max-width: none; min-height: 0; margin: 0; line-height: normal; box-shadow: none; border: 1px solid var(--border);
+  border-radius: 9px; padding: 8px 11px; font-size: 12px; font-family: inherit; color: var(--ink); outline: none; background: var(--surface-soft);
+}
+.nf-app select.nf-field { appearance: auto; -webkit-appearance: auto; cursor: pointer; }
+.nf-app .nf-field:focus { border-color: var(--border-hover); background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, .1); }
+.nf-app .nf-field:disabled { color: var(--muted); cursor: not-allowed; }
+.nf-test-result { display: flex; align-items: center; gap: 9px; border: 1px solid var(--border-soft); border-radius: 9px; padding: 9px 11px; margin-top: 14px; font-size: 11.5px; font-weight: 600; color: var(--ink-3); }

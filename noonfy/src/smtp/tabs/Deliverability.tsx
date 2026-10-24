@@ -1,9 +1,10 @@
 import { BLACKLISTS, DELIV_CARDS, DELIV_RECS } from '../data';
-import { CardHead } from '../ui';
+import { CardHead, SampleBanner } from '../ui';
 
 export function Deliverability() {
   return (
     <section>
+      <SampleBanner>Sample data. Reputation, blacklist monitoring and inbox placement need provider webhooks, which are coming next.</SampleBanner>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, alignItems: 'stretch' }}>
         <div className="nf-col" style={{ flex: '1 1 240px', minWidth: 0, background: 'linear-gradient(135deg,#0E9F6E,#059669)', borderRadius: 16, padding: '22px 24px', color: '#fff', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.7px', opacity: 0.85, textAlign: 'center' }}>AI DELIVERABILITY SCORE</div>

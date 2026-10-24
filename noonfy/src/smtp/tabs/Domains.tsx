@@ -1,12 +1,14 @@
 import { CHECK_STYLE, DNS_RECORDS, DOMAINS } from '../data';
 import { useChart } from '../useChart';
-import { CardHead } from '../ui';
+import { CardHead, SampleBanner } from '../ui';
 
 const STAT_ROW = { display: 'flex', alignItems: 'center', gap: 9, fontSize: 11, fontWeight: 700, color: '#8A8DA3' } as const;
 
 export function Domains() {
   return (
-    <section className="nf-flow">
+    <section>
+      <SampleBanner>Sample data. Live SPF, DKIM, DMARC and MX checks for your sending domains are coming next.</SampleBanner>
+      <div className="nf-flow">
       <div className="nf-card" style={{ flex: '1 1 420px' }}>
         <CardHead title="Sending domains" sub="Authentication status per domain" />
         <div className="nf-col" style={{ gap: 11, marginTop: 14 }}>
@@ -52,12 +54,13 @@ export function Domains() {
           </div>
         </div>
       </div>
+      </div>
     </section>
   );
 }
 
 function WarmupCard() {
-  const canvas = useChart<'line'>(() => {
+  const { ref: canvas } = useChart<'line'>(() => {
     const days = Array.from({ length: 18 }, (_, i) => 'D' + (i + 1));
     const tick = { font: { size: 9, weight: 600 } } as const;
     return {
