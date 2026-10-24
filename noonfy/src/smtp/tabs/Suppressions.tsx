@@ -1,5 +1,5 @@
 import { BOUNCE_KPIS, BOUNCE_REASONS, SUPPRESSIONS } from '../data';
-import { Bar, CardHead, SampleBanner } from '../ui';
+import { Bar, CardHead, SampleBanner } from '../../shared/ui';
 
 export function Suppressions() {
   return (

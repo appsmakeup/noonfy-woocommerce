@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { api, errorMessage } from '../api';
 import { config, type Connection, type ConnectionInput, type Encryption, type TestResult } from '../config';
 import type { SmtpApi } from './useSmtpState';
-import { Modal, Toggle } from './ui';
+import { Modal, Toggle } from '../shared/ui';
 
 const ENCRYPTIONS: { key: Encryption; label: string }[] = [
   { key: 'tls', label: 'TLS (STARTTLS)' }, { key: 'ssl', label: 'SSL' }, { key: 'none', label: 'None' },

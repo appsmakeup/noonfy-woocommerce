@@ -1,6 +1,6 @@
 # Noonfy – AI Customer Engagement (WooCommerce plugin)
 
-WordPress plugin that adds an **AI Customer Engagement** menu to wp-admin. Its first screen is **SMTP & Email Delivery**: real multi-provider SMTP sending with routing, failover and logs, built from `project/SMTP.dc.html` (and the `Sidebar.dc.html` navigation) in the Claude Design handoff.
+WordPress plugin that adds an **AI Customer Engagement** menu to wp-admin. Its screens are **SMTP & Email Delivery** (real multi-provider SMTP sending with routing, failover and logs) and **Email Campaigns** (builder, audiences, scheduled batched sending, tracking and revenue attribution), built from `project/SMTP.dc.html` (and the `Sidebar.dc.html` navigation) in the Claude Design handoff (plus `project/Campaigns.dc.html` for campaigns).
 
 Requires WordPress 6.6+, PHP 7.4+ and WooCommerce (declared with the `Requires Plugins` header, plus a runtime guard).
 
@@ -27,7 +27,16 @@ For development, symlink or copy this folder into `wp-content/plugins/noonfy` an
 | Email log table `{prefix}noonfy_email_log`: inserts, queries, dashboard stats, purge | `includes/class-noonfy-email-log.php` |
 | Settings option `noonfy_smtp_settings`: strategy, retention, default sender | `includes/class-noonfy-smtp-settings.php` |
 | REST API under `noonfy/v1/smtp`: `settings`, `connections` (CRUD, `test`, `{id}/test`), `stats`, `logs`, `test-email` | `includes/class-noonfy-smtp-rest.php` |
-| Cleanup on delete (options, cron, log table) | `uninstall.php` |
+| Schema install/upgrade for all tables (`noonfy_db_version`) | `includes/class-noonfy-install.php` |
+| Contacts `{prefix}noonfy_contacts`: consent state, segments, WooCommerce customer sync | `includes/campaigns/class-noonfy-contacts.php` |
+| Campaign settings (audience mode, checkout opt-in, footer address, batch size) | `includes/campaigns/class-noonfy-campaign-settings.php` |
+| Campaigns + recipients tables, block validation, stats | `includes/campaigns/class-noonfy-campaigns.php` |
+| Email HTML renderer (table layout, merge tags, link tracking, mandatory footer) | `includes/campaigns/class-noonfy-email-renderer.php` |
+| Scheduling and batched sending (WP-Cron, claim-based, lock per campaign) | `includes/campaigns/class-noonfy-campaign-sender.php` |
+| Open pixel, signed click redirects, unsubscribe page (incl. RFC 8058 one-click), revenue attribution | `includes/campaigns/class-noonfy-tracking.php` |
+| WooCommerce hooks: checkout opt-in (classic + blocks), My Account preference, contacts from orders, paid-order attribution | `includes/campaigns/class-noonfy-woo-integration.php` |
+| REST API under `noonfy/v1/campaigns` | `includes/campaigns/class-noonfy-campaigns-rest.php` |
+| Cleanup on delete (options, cron, all tables) | `uninstall.php` |
 | React app (entry `src/index.tsx`, REST client `src/api.ts`) | `src/` |
 
 - **Build:** `@wordpress/scripts` builds the app. React, `@wordpress/element` and `@wordpress/api-fetch` are externalised to the copies WordPress ships, and `build/smtp.asset.php` lists them as script dependencies. Chart.js and the Manrope font are bundled, so wp-admin makes no request to Google Fonts.
@@ -44,9 +53,19 @@ For development, symlink or copy this folder into `wp-content/plugins/noonfy` an
 5. **Timeouts:** connect 15s, and each server reply 20s (PHPMailer's default is 300s), so a stalled SMTP server can't hang a checkout.
 6. **Credentials:** encrypted with libsodium using a key from `NOONFY_SECRET_KEY` (define it in `wp-config.php` to make it independent of the salts) or the site's auth salts. Changing that key means re-entering passwords. Passwords are never sent to the browser.
 
+## How campaigns work
+
+1. **Contacts** come from WooCommerce: every order creates or updates the buyer's contact. Ticking the checkout checkbox (classic checkout hook, or the block checkout's Additional Checkout Fields API, WooCommerce 8.9+) or the My Account preference subscribes them. "Sync WooCommerce customers" backfills existing orders. Importing customers as subscribers requires the store to confirm it has their consent.
+2. **Audience mode:** in "opt-in only" (default) campaigns reach `subscribed` contacts; in "all customers" they also reach customers who never opted in. Unsubscribed contacts are never sent to, and consent is re-checked just before each email.
+3. **Sending:** starting a campaign snapshots the audience into `{prefix}noonfy_campaign_recipients`. WP-Cron batches claim rows, render each email with `Noonfy_Email_Renderer` and send it with `wp_mail()`, so it goes through Noonfy's SMTP routing and email log. Admin screens nudge overdue batches when they poll, so sending progresses on quiet sites. If no connection can send (none enabled, or all at their daily limit), recipients stay queued and are retried every 15 minutes. Campaigns never use PHP `mail()`.
+4. **Compliance:** every email carries the store address, an unsubscribe link (`?noonfy_unsub=token`: GET shows a confirmation, POST unsubscribes) and `List-Unsubscribe` / `List-Unsubscribe-Post` headers for one-click unsubscribe.
+5. **Tracking:** an open pixel (`?noonfy_o`) and click redirects (`?noonfy_c`, HMAC-signed over the destination so they can't be used as open redirects). A click sets a 7-day cookie, which is captured on the order at checkout. When an order is paid, its revenue goes to that recipient, or else to the most recent campaign the same email address opened or clicked within 5 days.
+
 ## What's real and what's still a preview
 
 **Real:** connections, routing, failover, daily limits, logs, the Dashboard / Queue & Logs / Routing numbers, connection tests, test emails, the SMTP-connection and send-test-email tools, system monitoring, default sender, and log retention (purged daily by cron).
+
+**Campaigns:** everything above is real. A/B testing and AI subject lines are marked "Coming soon".
 
 **Preview (marked "Coming soon" or "Preview" in the screen):**
 - Conditional routing rules and alert rules (shown but disabled).
@@ -56,9 +75,11 @@ For development, symlink or copy this folder into `wp-content/plugins/noonfy` an
 
 ## Testing
 
-Tested end-to-end on WordPress 6.6 with MariaDB, using a local SMTP server and a placeholder `woocommerce` plugin to satisfy the dependency (real WooCommerce couldn't be downloaded in the build environment):
-- **REST and sending:** every REST route, plus real email through PHPMailer, including failover, auth failures, daily limits and log/stat queries.
-- **UI:** the full flow driven in a browser against that backend.
+Tested end-to-end on WordPress 6.6 with MariaDB, using a local SMTP server. Real WooCommerce couldn't be downloaded in the build environment, so a placeholder `woocommerce` plugin stood in, faking the few WooCommerce functions Noonfy calls (products, orders, prices).
+- **SMTP:** every REST route, plus real email through PHPMailer, including failover, auth failures, daily limits and log/stat queries.
+- **Campaigns:** audiences and consent modes, preview and test sends, scheduling and unscheduling, batched sending to the right contacts, personalisation, unsubscribe headers and page, open and click tracking, revenue attribution, and the daily-limit wait.
+- **UI:** both screens driven in a browser against that backend.
+- **Not covered:** the WooCommerce hooks against real WooCommerce (checkout checkbox, block checkout field, order status changes). Check these on a real store.
 
 ## Not done yet
 

@@ -1,7 +1,7 @@
-import { config } from '../../config';
+import { app, config } from '../../config';
 import { ALERTS, TESTS } from '../data';
 import type { SmtpApi } from '../useSmtpState';
-import { CardHead, SoonBadge, Toggle, fmtMs, fmtNum, fmtPct } from '../ui';
+import { CardHead, SoonBadge, Toggle, fmtMs, fmtNum, fmtPct } from '../../shared/ui';
 
 const FIELD_LABEL = { fontSize: 10.5, fontWeight: 800, color: '#5B5E75' } as const;
 const GREEN = '#0E9F6E', ORANGE = '#C2620A', RED = '#E02424', GREY = '#A5A8BD';
@@ -116,7 +116,7 @@ export function Tools({ api }: { api: SmtpApi }) {
               <input type="range" min={7} max={180} step={1} value={state.retention} onChange={e => setRetention(+e.target.value)}
                 style={{ width: '100%', marginTop: 7, accentColor: '#4F46E5' }} />
             </label>
-            <a href={config.links.wcEmailSettings} className="nf-btn-outline" style={{ display: 'block', borderRadius: 9, padding: 8, fontSize: 11.5 }}>WooCommerce email settings →</a>
+            <a href={app.links.wcEmailSettings} className="nf-btn-outline" style={{ display: 'block', borderRadius: 9, padding: 8, fontSize: 11.5 }}>WooCommerce email settings →</a>
           </div>
         </div>
       </div>

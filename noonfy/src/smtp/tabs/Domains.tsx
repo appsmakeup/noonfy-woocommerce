@@ -1,6 +1,6 @@
 import { CHECK_STYLE, DNS_RECORDS, DOMAINS } from '../data';
-import { useChart } from '../useChart';
-import { CardHead, SampleBanner } from '../ui';
+import { useChart } from '../../shared/useChart';
+import { CardHead, SampleBanner } from '../../shared/ui';
 
 const STAT_ROW = { display: 'flex', alignItems: 'center', gap: 9, fontSize: 11, fontWeight: 700, color: '#8A8DA3' } as const;
 

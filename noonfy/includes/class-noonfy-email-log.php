@@ -15,8 +15,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class Noonfy_Email_Log {
 
-	const DB_VERSION        = '1';
-	const DB_VERSION_OPTION = 'noonfy_db_version';
 	const STATUSES          = array( 'SENT', 'RETRY', 'FAILED' );
 
 	/** @return string */
@@ -25,8 +23,8 @@ class Noonfy_Email_Log {
 		return $wpdb->prefix . 'noonfy_email_log';
 	}
 
-	/** Creates or upgrades the table. */
-	public static function install() {
+	/** Creates or upgrades the table (called by Noonfy_Install). */
+	public static function create_table() {
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$table   = self::table();
@@ -50,14 +48,6 @@ class Noonfy_Email_Log {
 				KEY connection_created (connection_id, created_at)
 			) {$charset};"
 		);
-		update_option( self::DB_VERSION_OPTION, self::DB_VERSION );
-	}
-
-	/** Installs or upgrades when the stored schema version is behind. */
-	public static function maybe_upgrade() {
-		if ( get_option( self::DB_VERSION_OPTION ) !== self::DB_VERSION ) {
-			self::install();
-		}
 	}
 
 	/**

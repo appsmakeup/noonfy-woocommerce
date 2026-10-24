@@ -2,8 +2,8 @@ import { useEffect, type MutableRefObject } from 'react';
 import type { Chart, ChartType } from 'chart.js';
 import type { Connection, LogRow, Stats } from '../../config';
 import { C, healthColor } from '../data';
-import { useChart } from '../useChart';
-import { CardHead, fmtCompact, fmtMs, fmtNum, fmtPct, fmtTime, presetOf } from '../ui';
+import { useChart } from '../../shared/useChart';
+import { CardHead, fmtCompact, fmtMs, fmtNum, fmtPct, fmtTime, presetOf } from '../../shared/ui';
 
 const SHARE_COLORS = ['#4F46E5', '#8B5CF6', '#C4B5FD', '#E0D7FE', '#EFEFF7'];
 const LIVE_COLORS: Record<string, string> = { SENT: '#34D399', RETRY: '#FBBF24', FAILED: '#F87171' };

@@ -1,5 +1,5 @@
 import { BLACKLISTS, DELIV_CARDS, DELIV_RECS } from '../data';
-import { CardHead, SampleBanner } from '../ui';
+import { CardHead, SampleBanner } from '../../shared/ui';
 
 export function Deliverability() {
   return (

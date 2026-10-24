@@ -1,7 +1,7 @@
 import type { Connection, Stats } from '../../config';
 import { RULES, STRATEGIES } from '../data';
 import type { SmtpApi } from '../useSmtpState';
-import { Bar, CardHead, SoonBadge, Toggle, fmtMs, fmtPct } from '../ui';
+import { Bar, CardHead, SoonBadge, Toggle, fmtMs, fmtPct } from '../../shared/ui';
 
 const SPLIT_COLORS = ['#4F46E5', '#8B5CF6', '#C4B5FD', '#E0D7FE', '#EFEFF7'];
 const CHAIN_TAGS = [

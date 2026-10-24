@@ -3,7 +3,7 @@ import { Sidebar } from '../sidebar/Sidebar';
 import { PAGES, PAGE_TITLES, SIDEBAR_KEY, TABS, type PageKey } from './data';
 import { useLiveLogs, useSmtpState } from './useSmtpState';
 import { ConnectionModal } from './ConnectionModal';
-import { Toast } from './ui';
+import { Toast } from '../shared/ui';
 import { Dashboard } from './tabs/Dashboard';
 import { Providers } from './tabs/Providers';
 import { Routing } from './tabs/Routing';

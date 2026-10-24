@@ -299,3 +299,70 @@ body.noonfy-admin #wpbody-content > .notice, body.noonfy-admin #wpbody-content >
 .nf-app .nf-field:focus { border-color: var(--border-hover); background: #fff; box-shadow: 0 0 0 3px rgba(79, 70, 229, .1); }
 .nf-app .nf-field:disabled { color: var(--muted); cursor: not-allowed; }
 .nf-test-result { display: flex; align-items: center; gap: 9px; border: 1px solid var(--border-soft); border-radius: 9px; padding: 9px 11px; margin-top: 14px; font-size: 11.5px; font-weight: 600; color: var(--ink-3); }
+
+/* ---------- campaigns ---------- */
+.nf-campaign-row {
+  display: grid; gap: 8px; align-items: center; padding: 13px 20px; border-bottom: 1px solid var(--border-faint);
+}
+.nf-campaign-row, .nf-campaign-row:focus, .nf-campaign-row:hover { color: var(--ink); }
+.nf-campaign-row:hover { background: var(--row-hover); }
+.nf-builder-side {
+  flex-shrink: 0; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px;
+  position: sticky; top: calc(var(--nf-top) + 14px); max-height: calc(100vh - var(--nf-top) - 28px); overflow-y: auto;
+}
+.nf-panel-title { font-size: 10.5px; font-weight: 800; letter-spacing: .7px; text-transform: uppercase; color: var(--muted-2); }
+.nf-palette-btn {
+  display: flex; align-items: center; gap: 9px; border: 1px solid var(--border); background: #fff; border-radius: 9px; padding: 8px 10px;
+  cursor: pointer; text-align: left;
+}
+.nf-palette-btn:hover { border-color: var(--border-hover); background: var(--surface-tint); }
+.nf-palette-btn:disabled { opacity: .45; cursor: default; }
+.nf-device-btn {
+  border: 1px solid var(--border); background: #fff; color: var(--muted); border-radius: 8px; padding: 6px 14px; font-size: 12px;
+  font-weight: 800; cursor: pointer;
+}
+.nf-device-btn--active { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); }
+.nf-email-canvas {
+  max-width: 100%; background: #fff; border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  box-shadow: 0 12px 34px rgba(20, 21, 42, .08); transition: width .25s ease; padding-bottom: 0;
+}
+.nf-block { position: relative; border: 1.5px dashed transparent; border-radius: 8px; cursor: pointer; }
+.nf-block:hover { border-color: #E0D7FE; }
+.nf-block--selected, .nf-block--selected:hover { border-color: var(--violet); }
+.nf-block-tools { position: absolute; top: -11px; right: -9px; display: flex; gap: 4px; z-index: 2; }
+.nf-block-tools button {
+  width: 22px; height: 22px; border-radius: 99px; border: 1px solid var(--border); background: #fff; color: var(--ink-2);
+  font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 2px 6px rgba(20, 21, 42, .12); padding: 0; line-height: 1;
+}
+.nf-block-tools button:disabled { opacity: .4; cursor: default; }
+.nf-block-tools .nf-block-remove { border: none; background: #E02424; color: #fff; box-shadow: 0 2px 6px rgba(224, 36, 36, .4); }
+.nf-editable { outline: none; border-radius: 4px; min-width: 1ch; }
+.nf-editable[contenteditable="true"] { cursor: text; }
+.nf-editable[contenteditable="true"]:hover { box-shadow: 0 0 0 1px rgba(139, 92, 246, .45); }
+.nf-editable[contenteditable="true"]:focus { box-shadow: 0 0 0 2px var(--violet); }
+.nf-editable:empty::before { content: attr(data-placeholder); opacity: .45; }
+.nf-editable a { color: inherit; text-decoration: underline; }
+.nf-text-toolbar {
+  display: inline-flex; gap: 2px; background: #14152A; border-radius: 8px; padding: 3px; margin-bottom: 8px;
+}
+.nf-text-toolbar button { border: none; background: transparent; color: #fff; font-size: 12px; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+.nf-text-toolbar button:hover { background: rgba(255, 255, 255, .15); }
+.nf-link-btn { border: none; background: none; padding: 0; color: var(--brand); font-size: 11.5px; font-weight: 800; cursor: pointer; font-family: inherit; }
+.nf-link-btn:hover { color: var(--brand-hover); text-decoration: underline; }
+.nf-picked { gap: 6px; border: 1px solid var(--border-soft); border-radius: 8px; padding: 5px 4px 5px 10px; margin-top: 5px; font-size: 11.5px; font-weight: 700; color: var(--ink); }
+.nf-pick-result {
+  display: flex; gap: 8px; align-items: center; border: 1px solid var(--border); background: #fff; border-radius: 8px; padding: 7px 9px;
+  font-size: 11.5px; font-weight: 700; color: var(--ink); cursor: pointer; text-align: left;
+}
+.nf-pick-result:hover { border-color: var(--border-hover); background: var(--surface-tint); }
+.nf-pick-result:disabled { opacity: .5; cursor: default; }
+.nf-status-card { margin-top: 12px; border: 1px solid var(--border-soft); border-radius: 11px; padding: 12px; }
+.nf-stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; margin-top: 12px; }
+.nf-stat-grid div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nf-stat-grid span { font-size: 9.5px; font-weight: 800; color: var(--muted-2); text-transform: uppercase; }
+.nf-stat-grid b { font-size: 14px; font-weight: 800; color: var(--ink); }
+.nf-choice { display: flex; gap: 10px; align-items: flex-start; border: 1.5px solid var(--border); border-radius: 11px; padding: 11px 13px; margin-top: 8px; cursor: pointer; font-size: 12.5px; color: var(--ink); }
+.nf-choice--active { border-color: var(--brand); background: #F7F6FE; }
+.nf-choice input { margin-top: 2px; }
+.nf-sync-box { border: 1px solid var(--border-soft); border-radius: 12px; padding: 14px; background: var(--surface-soft); }
+.nf-btn-danger:disabled { opacity: .5; cursor: default; text-decoration: none; }

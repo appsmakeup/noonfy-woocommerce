@@ -8,15 +8,17 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the "AI Customer Engagement" admin menu and boots the React app on its screen.
+ * Registers the "AI Customer Engagement" admin menu and boots the React app on its screens.
+ * One bundle serves every screen; the mount point's id tells it which screen to render.
  */
 class Noonfy_Admin {
 
 	const SLUG       = 'noonfy-smtp';
+	const CAMPAIGNS  = 'noonfy-campaigns';
 	const CAPABILITY = 'manage_woocommerce';
 
-	/** Screen hook suffix returned by add_menu_page(). */
-	private static $hook = '';
+	/** @var array<string, string> Screen key => hook suffix. */
+	private static $hooks = array();
 
 	/** Hooks into wp-admin. */
 	public static function init() {
@@ -27,12 +29,12 @@ class Noonfy_Admin {
 
 	/** Top-level menu (placed after WooCommerce's menus), with the SMTP screen as its first item. */
 	public static function register_menu() {
-		self::$hook = add_menu_page(
+		self::$hooks['smtp'] = add_menu_page(
 			__( 'SMTP & Email Delivery', 'noonfy' ),
 			__( 'AI Customer Engagement', 'noonfy' ),
 			self::CAPABILITY,
 			self::SLUG,
-			array( __CLASS__, 'render' ),
+			array( __CLASS__, 'render_smtp' ),
 			'dashicons-email-alt',
 			58.5
 		);
@@ -42,14 +44,23 @@ class Noonfy_Admin {
 			__( 'SMTP & Delivery', 'noonfy' ),
 			self::CAPABILITY,
 			self::SLUG,
-			array( __CLASS__, 'render' )
+			array( __CLASS__, 'render_smtp' )
+		);
+		self::$hooks['campaigns'] = add_submenu_page(
+			self::SLUG,
+			__( 'Email Campaigns', 'noonfy' ),
+			__( 'Campaigns', 'noonfy' ),
+			self::CAPABILITY,
+			self::CAMPAIGNS,
+			array( __CLASS__, 'render_campaigns' )
 		);
 	}
 
-	/** @return bool Whether the current request is a Noonfy screen. */
-	private static function is_noonfy_screen() {
+	/** @return string|null Key of the current Noonfy screen. */
+	private static function current_screen_key() {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		return $screen && self::$hook && $screen->id === self::$hook;
+		$key    = $screen ? array_search( $screen->id, self::$hooks, true ) : false;
+		return false === $key ? null : $key;
 	}
 
 	/**
@@ -57,7 +68,7 @@ class Noonfy_Admin {
 	 * @return string
 	 */
 	public static function body_class( $classes ) {
-		return self::is_noonfy_screen() ? $classes . ' noonfy-admin' : $classes;
+		return self::current_screen_key() ? $classes . ' noonfy-admin' : $classes;
 	}
 
 	/**
@@ -66,7 +77,8 @@ class Noonfy_Admin {
 	 * @param string $hook_suffix Current admin screen hook.
 	 */
 	public static function enqueue_assets( $hook_suffix ) {
-		if ( $hook_suffix !== self::$hook ) {
+		$screen = array_search( $hook_suffix, self::$hooks, true );
+		if ( false === $screen ) {
 			return;
 		}
 
@@ -80,14 +92,62 @@ class Noonfy_Admin {
 		wp_enqueue_script( 'noonfy-smtp', NOONFY_URL . 'build/smtp.js', $asset['dependencies'], $asset['version'], true );
 		wp_enqueue_style( 'noonfy-smtp', NOONFY_URL . 'build/smtp.css', array(), $asset['version'] );
 		wp_style_add_data( 'noonfy-smtp', 'rtl', 'replace' );
-		wp_add_inline_script( 'noonfy-smtp', 'window.noonfySmtp = ' . wp_json_encode( self::boot_data() ) . ';', 'before' );
+
+		$boot = 'window.noonfyApp = ' . wp_json_encode( self::app_data() ) . ';';
+		if ( 'campaigns' === $screen ) {
+			wp_enqueue_media(); // Image block: WordPress media library picker.
+			$boot .= 'window.noonfyCampaigns = ' . wp_json_encode( self::campaigns_data() ) . ';';
+		} else {
+			$boot .= 'window.noonfySmtp = ' . wp_json_encode( self::smtp_data() ) . ';';
+		}
+		wp_add_inline_script( 'noonfy-smtp', $boot, 'before' );
 	}
 
-	/** Data the app reads as `window.noonfySmtp` (typed in src/config.ts). */
-	private static function boot_data() {
+	/** Shared data, read as `window.noonfyApp` (typed in src/config.ts). */
+	private static function app_data() {
 		$user = wp_get_current_user();
 		$name = $user->display_name ? $user->display_name : $user->user_login;
+		return array(
+			'user'    => array(
+				'name'     => $name,
+				'initials' => self::initials( $name ),
+				'email'    => $user->user_email,
+			),
+			'site'    => array(
+				'name' => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+				'host' => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
+				'home' => home_url( '/' ),
+			),
+			'screens' => array(
+				'smtp'      => admin_url( 'admin.php?page=' . self::SLUG ),
+				'campaigns' => admin_url( 'admin.php?page=' . self::CAMPAIGNS ),
+			),
+			'links'   => array(
+				'wooProducts'     => admin_url( 'edit.php?post_type=product' ),
+				'wooOrders'       => self::orders_url(),
+				'wooCategories'   => admin_url( 'edit-tags.php?taxonomy=product_cat&post_type=product' ),
+				'wooCoupons'      => admin_url( 'edit.php?post_type=shop_coupon' ),
+				'wcEmailSettings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+			),
+		);
+	}
 
+	/** Campaigns screen data, read as `window.noonfyCampaigns` (typed in src/campaigns/types.ts). */
+	private static function campaigns_data() {
+		return Noonfy_Campaigns_REST::overview() + array(
+			'settings' => Noonfy_Campaign_Settings::get(),
+			'emojis'   => Noonfy_Campaigns::EMOJIS,
+			'currency' => array(
+				'symbol'   => function_exists( 'get_woocommerce_currency_symbol' ) ? html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES ) : '$',
+				'position' => (string) get_option( 'woocommerce_currency_pos', 'left' ),
+				'decimals' => function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2,
+			),
+			'timezone' => wp_timezone_string(),
+		);
+	}
+
+	/** SMTP screen data, read as `window.noonfySmtp`. */
+	private static function smtp_data() {
 		global $wp_version;
 
 		return array(
@@ -103,22 +163,6 @@ class Noonfy_Admin {
 				'php'            => PHP_VERSION,
 				'wordpress'      => $wp_version,
 				'woocommerce'    => defined( 'WC_VERSION' ) ? WC_VERSION : '',
-			),
-			'user'        => array(
-				'name'     => $name,
-				'initials' => self::initials( $name ),
-				'email'    => $user->user_email,
-			),
-			'site'        => array(
-				'name' => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
-				'host' => (string) wp_parse_url( home_url(), PHP_URL_HOST ),
-			),
-			'links'       => array(
-				'wooProducts'     => admin_url( 'edit.php?post_type=product' ),
-				'wooOrders'       => self::orders_url(),
-				'wooCategories'   => admin_url( 'edit-tags.php?taxonomy=product_cat&post_type=product' ),
-				'wooCoupons'      => admin_url( 'edit.php?post_type=shop_coupon' ),
-				'wcEmailSettings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 			),
 		);
 	}
@@ -152,11 +196,21 @@ class Noonfy_Admin {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'Noonfy admin assets are missing. Run `npm install && npm run build` in the plugin folder.', 'noonfy' ) . '</p></div>';
 	}
 
-	/** App mount point. */
-	public static function render() {
+	/** SMTP screen mount point. */
+	public static function render_smtp() {
+		self::render( 'noonfy-smtp-root' );
+	}
+
+	/** Campaigns screen mount point. */
+	public static function render_campaigns() {
+		self::render( 'noonfy-campaigns-root' );
+	}
+
+	/** @param string $id Mount point id. */
+	private static function render( $id ) {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to access this page.', 'noonfy' ) );
 		}
-		echo '<div id="noonfy-smtp-root" class="nf-app"></div>';
+		echo '<div id="' . esc_attr( $id ) . '" class="nf-app"></div>';
 	}
 }

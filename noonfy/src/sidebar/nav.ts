@@ -1,17 +1,20 @@
 // Sidebar navigation + command-palette routes, transcribed from Sidebar.dc.html.
-// Only the SMTP screen exists in the plugin so far. Its sections resolve to in-page hashes, the
-// WooCommerce entries open the real WooCommerce screens, and everything else is "coming soon" (null).
-import { config } from '../config';
+// Noonfy screens that exist (SMTP, Campaigns) link to their wp-admin pages, WooCommerce entries open the
+// real WooCommerce screens, and everything else is "coming soon" (null).
+import { app } from '../config';
 
 const WOO_LINKS: Record<string, string> = {
   'Woo.dc.html#products': 'wooProducts', 'Woo.dc.html#orders': 'wooOrders',
   'Woo.dc.html#categories': 'wooCategories', 'Woo.dc.html#coupons': 'wooCoupons',
 };
+const SCREENS: Record<string, keyof typeof app.screens> = { 'SMTP.dc.html': 'smtp', 'Campaigns.dc.html': 'campaigns' };
 
 export function toHref(path: string): string | null {
-  if (path.startsWith('SMTP.dc.html')) return path.slice('SMTP.dc.html'.length);
+  const [file, hash] = path.split('#');
+  const screen = SCREENS[file];
+  if (screen) return app.screens[screen] + (hash ? '#' + hash : '');
   const link = WOO_LINKS[path];
-  return link ? config.links[link] ?? null : null;
+  return link ? app.links[link] ?? null : null;
 }
 
 const I = {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api, errorMessage } from '../../api';
 import type { LogRow, LogStatus } from '../../config';
 import type { LogFilter, SmtpApi } from '../useSmtpState';
-import { fmtMs, fmtNum, fmtWhen } from '../ui';
+import { fmtMs, fmtNum, fmtWhen } from '../../shared/ui';
 
 const COLS = '1.6fr 1.7fr 1fr .9fr .8fr .9fr';
 const CELL_MUTED = { fontSize: 11, fontWeight: 700, color: '#8A8DA3' } as const;

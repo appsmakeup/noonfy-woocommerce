@@ -1,7 +1,7 @@
 import { config } from '../../config';
 import { CATALOG_SOON, healthColor, usageColor } from '../data';
 import type { ConnFilter, SmtpApi } from '../useSmtpState';
-import { Bar, CardHead, Toggle, fmtMs, fmtNum, fmtPct, presetOf } from '../ui';
+import { Bar, CardHead, Toggle, fmtMs, fmtNum, fmtPct, presetOf } from '../../shared/ui';
 
 const METRIC_LABEL = { fontSize: 9.5, fontWeight: 800, color: '#A5A8BD' } as const;
 const METRIC_VALUE = { fontSize: 13, fontWeight: 800, color: '#14152A', marginTop: 2 } as const;

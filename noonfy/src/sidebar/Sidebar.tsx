@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { config } from '../config';
+import { app } from '../config';
 import { NAV, PALETTE_ROUTES } from './nav';
 
 const SOON = 'Coming soon';
@@ -59,10 +59,10 @@ export function Sidebar({ active }: { active: string }) {
       </nav>
 
       <div className="nf-sidebar-user">
-        <div className="nf-avatar">{config.user.initials}</div>
+        <div className="nf-avatar">{app.user.initials}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="nf-ellipsis" style={{ fontSize: 12.5, fontWeight: 700, color: '#14152A' }}>{config.user.name}</div>
-          <div className="nf-ellipsis" style={{ fontSize: 11, color: '#8A8DA3' }}>{config.site.host}</div>
+          <div className="nf-ellipsis" style={{ fontSize: 12.5, fontWeight: 700, color: '#14152A' }}>{app.user.name}</div>
+          <div className="nf-ellipsis" style={{ fontSize: 11, color: '#8A8DA3' }}>{app.site.host}</div>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A0A3B8" strokeWidth="2" strokeLinecap="round"><path d="M8 9l4-4 4 4M8 15l4 4 4-4" /></svg>
       </div>

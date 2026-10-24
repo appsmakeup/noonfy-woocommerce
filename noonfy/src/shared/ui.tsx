@@ -72,7 +72,7 @@ export function SampleBanner({ children }: { children: ReactNode }) {
   );
 }
 
-export function Modal({ title, onClose, children, footer }: { title: string; onClose: () => void; children: ReactNode; footer: ReactNode }) {
+export function Modal({ title, onClose, children, footer, width }: { title: string; onClose: () => void; children: ReactNode; footer: ReactNode; width?: number }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -80,7 +80,7 @@ export function Modal({ title, onClose, children, footer }: { title: string; onC
   }, [onClose]);
   return (
     <div className="nf-palette-backdrop" onMouseDown={onClose}>
-      <div className="nf-modal" role="dialog" aria-modal="true" aria-label={title} onMouseDown={e => e.stopPropagation()}>
+      <div className="nf-modal" role="dialog" aria-modal="true" aria-label={title} style={width ? { width } : undefined} onMouseDown={e => e.stopPropagation()}>
         <div className="nf-modal-head">
           <span className="nf-card-title">{title}</span>
           <button type="button" className="nf-icon-btn nf-ml-auto" aria-label="Close" onClick={onClose}>✕</button>

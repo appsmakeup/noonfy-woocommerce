@@ -49,7 +49,7 @@ export interface LogRow {
 
 export interface TestResult { ok: boolean; latencyMs: number | null; error: string | null }
 
-/** Bootstrapped by PHP as `window.noonfySmtp` (see Noonfy_Admin::boot_data). */
+/** SMTP screen data, bootstrapped as `window.noonfySmtp` (Noonfy_Admin::smtp_data). */
 export interface NoonfyConfig {
   restPath: string;
   settings: PersistedSettings;
@@ -58,15 +58,28 @@ export interface NoonfyConfig {
   stats: Stats;
   recentLogs: LogRow[];
   system: { purgeScheduled: boolean; openssl: boolean; php: string; wordpress: string; woocommerce: string };
+}
+
+/** Shared by every Noonfy screen, bootstrapped as `window.noonfyApp` (Noonfy_Admin::app_data). */
+export interface AppConfig {
   user: { name: string; initials: string; email: string };
-  site: { name: string; host: string };
+  site: { name: string; host: string; home: string };
+  /** wp-admin URLs of Noonfy's own screens. */
+  screens: { smtp: string; campaigns: string };
   /** Real wp-admin URLs for sidebar entries that map onto WordPress/WooCommerce screens. */
   links: Record<string, string>;
 }
 
 declare global {
-  interface Window { noonfySmtp?: NoonfyConfig }
+  interface Window { noonfySmtp?: NoonfyConfig; noonfyApp?: AppConfig }
 }
+
+export const app: AppConfig = window.noonfyApp ?? {
+  user: { name: '', initials: '', email: '' },
+  site: { name: '', host: '', home: '/' },
+  screens: { smtp: '', campaigns: '' },
+  links: {},
+};
 
 const EMPTY_STATS: Stats = {
   sentToday: 0, failedToday: 0, retriedToday: 0, sentYesterday: 0, sentMonth: 0, lastHour: 0, totalLogged: 0,
@@ -78,9 +91,6 @@ const FALLBACK: NoonfyConfig = {
   settings: { strategy: 'priority', rules: {}, alerts: {}, retention: 30, fromName: '', fromEmail: '', forceFrom: false },
   presets: {}, connections: [], stats: EMPTY_STATS, recentLogs: [],
   system: { purgeScheduled: false, openssl: false, php: '', wordpress: '', woocommerce: '' },
-  user: { name: '', initials: '', email: '' },
-  site: { name: '', host: '' },
-  links: {},
 };
 
 export const config: NoonfyConfig = window.noonfySmtp ?? FALLBACK;

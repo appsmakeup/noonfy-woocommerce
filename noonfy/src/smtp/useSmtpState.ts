@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, errorMessage } from '../api';
 import { config, type Connection, type ConnectionInput, type LogRow, type PersistedSettings, type Stats } from '../config';
 import type { StrategyKey } from './data';
-import type { ToastData, ToastKind } from './ui';
+import type { ToastData, ToastKind } from '../shared/ui';
 
 export interface ToolResult { ok: boolean; text: string }
 export type ConnFilter = 'all' | 'enabled' | 'disabled';
