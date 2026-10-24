@@ -11,8 +11,9 @@ defined( 'ABSPATH' ) || exit;
  * - Checkout opt-in checkbox: classic checkout (template hook) and block checkout (Additional Checkout
  *   Fields API, WooCommerce 8.9+). Unticked by default; ticking it is the consent.
  * - "Email me news and offers" preference on My Account → Account details.
- * - Every order creates/updates the buyer's contact; paid orders add to their stats and are credited to
- *   the campaign that drove them (Noonfy_Tracking::attribute_order).
+ * - Every order creates/updates the buyer's contact and marks their saved cart ordered; paid orders add
+ *   to their stats, are credited to the email that drove them (Noonfy_Tracking::attribute_order) and
+ *   fire `noonfy_order_paid` for automations.
  */
 class Noonfy_Woo_Integration {
 
@@ -84,9 +85,10 @@ class Noonfy_Woo_Integration {
 	 */
 	private static function order_placed( $order, $optin ) {
 		Noonfy_Contacts::upsert_from_order( $order, array( 'optin' => $optin ) );
+		Noonfy_Carts::order_placed( $order );
 		// Capture the campaign click cookie now: payment confirmation often arrives later via a webhook without it.
 		$rid = Noonfy_Tracking::cookie_recipient();
-		if ( $rid ) {
+		if ( '' !== $rid ) {
 			$order->update_meta_data( '_noonfy_click_rid', $rid );
 		}
 		if ( $optin ) {
@@ -114,6 +116,15 @@ class Noonfy_Woo_Integration {
 			Noonfy_Contacts::add_order( $contact_id, (float) $order->get_total(), Noonfy_Contacts::order_date_utc( $order ) );
 		}
 		Noonfy_Tracking::attribute_order( $order );
+		if ( $contact_id ) {
+			/**
+			 * An order became paid; the buyer's contact stats include it. Automations hook in here.
+			 *
+			 * @param WC_Order $order      Order.
+			 * @param int      $contact_id Contact id.
+			 */
+			do_action( 'noonfy_order_paid', $order, $contact_id );
+		}
 	}
 
 	/** Newsletter preference on My Account → Account details. */

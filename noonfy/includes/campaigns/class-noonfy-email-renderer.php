@@ -16,6 +16,8 @@ defined( 'ABSPATH' ) || exit;
  * - link: callable( string $url ): string, used to rewrite every link (click tracking)
  * - unsubscribe_url: string
  * - pixel_url: string|null (open tracking)
+ * - products: int[][] by source (cart, order, viewed, cross_sells) for automation emails
+ * - cart_url: string, the saved-cart restore link (buttons with dest "cart")
  */
 class Noonfy_Email_Renderer {
 
@@ -36,6 +38,8 @@ class Noonfy_Email_Renderer {
 			},
 			'unsubscribe_url' => '#',
 			'pixel_url'       => null,
+			'products'        => array(),
+			'cart_url'        => '',
 		);
 
 		$rows       = '';
@@ -141,10 +145,15 @@ class Noonfy_Email_Renderer {
 				return '<tr><td style="padding:18px 24px;font-size:14px;line-height:1.65;color:#3C3F55;font-weight:500">' . $html . '</td></tr>';
 
 			case 'products':
-				return self::products( $b['productIds'] ?? array(), $accent, $link );
+				$source = $b['source'] ?? 'manual';
+				$ids    = 'manual' === $source ? ( $b['productIds'] ?? array() ) : array_slice( (array) ( $ctx['products'][ $source ] ?? array() ), 0, 4 );
+				return self::products( $ids, $accent, $link );
 
 			case 'button':
 				$url = ! empty( $b['url'] ) ? $b['url'] : home_url( '/' );
+				if ( 'cart' === ( $b['dest'] ?? '' ) ) {
+					$url = '' !== $ctx['cart_url'] ? $ctx['cart_url'] : ( function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/' ) );
+				}
 				return '<tr><td style="padding:16px 24px;text-align:center"><table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td style="' . $grad . ';border-radius:10px">'
 					. '<a href="' . esc_url( $link( $url ) ) . '" target="_blank" style="display:inline-block;padding:12px 34px;font-size:14px;font-weight:800;color:#ffffff;text-decoration:none">' . $t( $b['label'] ?? '' ) . '</a></td></tr></table></td></tr>';
 

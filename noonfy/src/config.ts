@@ -65,7 +65,7 @@ export interface AppConfig {
   user: { name: string; initials: string; email: string };
   site: { name: string; host: string; home: string };
   /** wp-admin URLs of Noonfy's own screens. */
-  screens: { smtp: string; campaigns: string };
+  screens: { smtp: string; campaigns: string; automations: string };
   /** Real wp-admin URLs for sidebar entries that map onto WordPress/WooCommerce screens. */
   links: Record<string, string>;
 }
@@ -77,7 +77,7 @@ declare global {
 export const app: AppConfig = window.noonfyApp ?? {
   user: { name: '', initials: '', email: '' },
   site: { name: '', host: '', home: '/' },
-  screens: { smtp: '', campaigns: '' },
+  screens: { smtp: '', campaigns: '', automations: '' },
   links: {},
 };
 

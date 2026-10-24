@@ -4,7 +4,7 @@ Tags: woocommerce, email marketing, smtp, deliverability, automation
 Requires at least: 6.6
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 0.4.0
+Stable tag: 0.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,16 @@ Email marketing, automation and multi-provider SMTP delivery for WooCommerce sto
 
 == Description ==
 
-Adds an **AI Customer Engagement** menu to wp-admin with two screens: **SMTP & Email Delivery** and **Email Campaigns**.
+Adds an **AI Customer Engagement** menu to wp-admin with three screens: **SMTP & Email Delivery**, **Email Campaigns** and **Automations**.
+
+= Automations =
+
+* Visual workflow builder: drag steps onto a canvas and connect them — trigger, delay, email, condition (yes/no), wait for an order/open/click, A/B split, goal and exit. Auto-saves, test runs to your inbox, and the same email builder as campaigns.
+* Triggers: contact subscribes, order paid (first order / minimum total), order completed, no order in N days, lifetime spend reached, abandoned cart, browse abandonment (signed-in shoppers) and everyone in a segment.
+* Abandoned carts: saved for signed-in customers and for guests once they type their email at checkout, with a notice under the email field. Emails show the cart's products and a button that refills the cart.
+* 20 ready-made templates (welcome series, cart and checkout recovery, browse abandonment, first purchase, cross-sell, upsell, win-back, VIP, review request, shipping and delivery follow-ups, seasonal and flash sales…).
+* Per-step stats, email performance, conversions and attributed revenue, contacts in each workflow, journey funnels and drop-off points.
+* Respects consent and unsubscribes, never uses PHP mail(), and waits for an SMTP connection when none can send.
 
 = Email Campaigns =
 
@@ -33,11 +42,18 @@ Adds an **AI Customer Engagement** menu to wp-admin with two screens: **SMTP & E
 
 With no connection enabled, WordPress keeps sending email as before (still logged).
 
-Still in preview (clearly marked in the screen): AI subject lines, conditional routing rules, alerts, DNS checks, deliverability and bounce/complaint tracking.
+Privacy: when cart capture is on, mention in your privacy policy that carts and checkout emails are saved to send reminders.
+
+Still in preview (clearly marked in the screen): SMS steps, AI subject lines, conditional routing rules, alerts, DNS checks, deliverability and bounce/complaint tracking.
 
 Requires WooCommerce.
 
 == Changelog ==
+
+= 0.5.0 =
+* Automations: workflows list, visual builder, email step editor, 20 templates, detail and journey analytics.
+* Triggers: subscribe, order paid, order completed, no order in N days, lifetime spend, abandoned cart (with checkout email capture and notice), browse abandonment, segment.
+* Opens, clicks and revenue attribution for automation emails; cart restore links; dynamic products (cart, viewed, ordered, cross-sells) in emails.
 
 = 0.4.0 =
 * A/B testing for campaigns: subject line or email content, configurable test group, wait time and winner metric, automatic or manual winner, A/B results tab.

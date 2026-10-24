@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class Noonfy_Install {
 
-	const DB_VERSION = '3';
+	const DB_VERSION = '4';
 	const OPTION     = 'noonfy_db_version';
 
 	/** Creates or upgrades all tables. */
@@ -21,6 +21,8 @@ class Noonfy_Install {
 		Noonfy_Email_Log::create_table();
 		Noonfy_Contacts::create_table();
 		Noonfy_Campaigns::create_tables();
+		Noonfy_Workflows::create_tables();
+		Noonfy_Carts::create_tables();
 		update_option( self::OPTION, self::DB_VERSION );
 	}
 

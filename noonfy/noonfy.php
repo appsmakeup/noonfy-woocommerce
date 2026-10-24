@@ -3,7 +3,7 @@
  * Plugin Name:          Noonfy – AI Customer Engagement
  * Plugin URI:           https://noonfy.com
  * Description:          Email marketing, automation and multi-provider SMTP delivery for WooCommerce stores.
- * Version:              0.4.0
+ * Version:              0.5.0
  * Requires at least:    6.6
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NOONFY_VERSION', '0.4.0' );
+define( 'NOONFY_VERSION', '0.5.0' );
 define( 'NOONFY_FILE', __FILE__ );
 define( 'NOONFY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'NOONFY_URL', plugin_dir_url( __FILE__ ) );
@@ -39,6 +39,13 @@ require_once NOONFY_DIR . 'includes/campaigns/class-noonfy-campaign-sender.php';
 require_once NOONFY_DIR . 'includes/campaigns/class-noonfy-tracking.php';
 require_once NOONFY_DIR . 'includes/campaigns/class-noonfy-woo-integration.php';
 require_once NOONFY_DIR . 'includes/campaigns/class-noonfy-campaigns-rest.php';
+require_once NOONFY_DIR . 'includes/automations/class-noonfy-workflows.php';
+require_once NOONFY_DIR . 'includes/automations/class-noonfy-automation-settings.php';
+require_once NOONFY_DIR . 'includes/automations/class-noonfy-carts.php';
+require_once NOONFY_DIR . 'includes/automations/class-noonfy-automation-runner.php';
+require_once NOONFY_DIR . 'includes/automations/class-noonfy-automation-triggers.php';
+require_once NOONFY_DIR . 'includes/automations/class-noonfy-automation-templates.php';
+require_once NOONFY_DIR . 'includes/automations/class-noonfy-automations-rest.php';
 require_once NOONFY_DIR . 'includes/class-noonfy-admin.php';
 
 const NOONFY_PURGE_HOOK = 'noonfy_purge_email_log';
@@ -57,6 +64,9 @@ register_deactivation_hook(
 	__FILE__,
 	static function () {
 		wp_clear_scheduled_hook( NOONFY_PURGE_HOOK );
+		wp_clear_scheduled_hook( Noonfy_Automation_Runner::RUN_HOOK );
+		wp_clear_scheduled_hook( Noonfy_Automation_Runner::NOW_HOOK );
+		wp_clear_scheduled_hook( Noonfy_Automation_Runner::DAILY_HOOK );
 	}
 );
 
@@ -88,6 +98,7 @@ add_action(
 		// Campaign sending, tracking links and unsubscribe pages keep working for emails already sent.
 		Noonfy_Campaign_Sender::init();
 		Noonfy_Tracking::init();
+		Noonfy_Automation_Runner::init();
 		if ( is_admin() && ! wp_next_scheduled( NOONFY_PURGE_HOOK ) ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', NOONFY_PURGE_HOOK );
 		}
@@ -109,6 +120,9 @@ add_action(
 		Noonfy_SMTP_REST::init();
 		Noonfy_Campaigns_REST::init();
 		Noonfy_Woo_Integration::init();
+		Noonfy_Automations_REST::init();
+		Noonfy_Automation_Triggers::init();
+		Noonfy_Carts::init();
 		Noonfy_Admin::init();
 	}
 );

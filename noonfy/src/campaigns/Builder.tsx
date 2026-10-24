@@ -11,7 +11,7 @@ import { defaultAb } from './ab';
 import { campaignsConfig, type Block, type BlockType, type Campaign, type Content, type Draft, type Product } from './types';
 import { money, pct, type CampaignsApi } from './useCampaigns';
 
-const PALETTE: [BlockType, string, string][] = [
+export const PALETTE: [BlockType, string, string][] = [
   ['header', 'Header', '🏷️'], ['image', 'Image', '🖼️'], ['text', 'Text', '📝'], ['products', 'Products', '🛍️'], ['button', 'Button', '🔘'],
   ['countdown', 'Countdown', '⏳'], ['reviews', 'Reviews', '⭐'], ['coupon', 'Coupon', '🎟️'], ['footer', 'Footer', '📎'],
 ];
@@ -19,7 +19,7 @@ const LABEL = { fontSize: 11, fontWeight: 800, color: '#5B5E75', marginTop: 14, 
 
 const uid = () => 'b' + Math.random().toString(36).slice(2, 9);
 
-function newBlock(type: BlockType): Block {
+export function newBlock(type: BlockType): Block {
   const id = uid();
   switch (type) {
     case 'header': return { id, type, eyebrow: app.site.name.toUpperCase(), title: 'Your headline here' };
@@ -55,7 +55,7 @@ const fromCampaign = (c: Campaign): Draft => ({
 const toLocalInput = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 const fmtDate = (iso: string) => new Date(iso).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-type MediaFrame = { on: (e: string, cb: () => void) => void; open: () => void; state: () => { get: (k: string) => { first: () => { toJSON: () => { url: string; alt?: string } } } } };
+export type MediaFrame = { on: (e: string, cb: () => void) => void; open: () => void; state: () => { get: (k: string) => { first: () => { toJSON: () => { url: string; alt?: string } } } } };
 
 export function Builder({ api, campaign, missing, onOpenSettings }: { api: CampaignsApi; campaign: Campaign | null; missing: boolean; onOpenSettings: () => void }) {
   const [draft, setDraft] = useState<Draft>(() => (campaign ? fromCampaign(campaign) : blankDraft()));

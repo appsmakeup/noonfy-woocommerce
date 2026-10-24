@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { errorMessage } from '../api';
 import { campaignsApi } from './api';
-import type { Block, Product } from './types';
+import type { Block, Product, ProductSource } from './types';
 
 const LABEL = { fontSize: 11, fontWeight: 800, color: '#5B5E75', marginTop: 14, marginBottom: 5, display: 'block' } as const;
 const NAMES: Record<Block['type'], string> = {
@@ -16,14 +16,17 @@ const toLocalInput = (iso?: string) => {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 };
 
-export function BlockPanel({ block, accent, products, onChange, onAccent, onProducts, onPickImage, onBack, onOpenSettings }: {
+export function BlockPanel({ block, accent, products, onChange, onAccent, onProducts, onPickImage, onBack, onOpenSettings, dynamic = false, backLabel = 'Campaign settings' }: {
   block: Block; accent: string; products: Record<number, Product>;
   onChange: (patch: Partial<Block>) => void; onAccent: (hex: string) => void; onProducts: (items: Product[]) => void;
   onPickImage: () => void; onBack: () => void; onOpenSettings: () => void;
+  /** Automation emails: products and links can come from what triggered the workflow. */
+  dynamic?: boolean; backLabel?: string;
 }) {
+  const source = block.source ?? 'manual';
   return (
     <>
-      <button type="button" className="nf-link-btn" onClick={onBack}>← Campaign settings</button>
+      <button type="button" className="nf-link-btn" onClick={onBack}>← {backLabel}</button>
       <div className="nf-panel-title" style={{ marginTop: 10 }}>{NAMES[block.type]} block</div>
       <div className="nf-hint">Click text in the email to edit it directly.</div>
 
@@ -53,11 +56,32 @@ export function BlockPanel({ block, accent, products, onChange, onAccent, onProd
         </div>
       )}
 
-      {block.type === 'button' && (
+      {block.type === 'button' && dynamic && (
+        <label><span style={LABEL}>Button goes to</span>
+          <select className="nf-field" value={block.dest ?? 'url'} onChange={e => onChange({ dest: e.target.value as Block['dest'] })}>
+            <option value="url">A link</option>
+            <option value="cart">Their saved cart (refills it)</option>
+          </select>
+          {block.dest === 'cart' && <div className="nf-hint">For cart-abandonment workflows. Other workflows link to the cart page.</div>}
+        </label>
+      )}
+      {block.type === 'button' && (!dynamic || block.dest !== 'cart') && (
         <label><span style={LABEL}>Button link</span><input className="nf-field" value={block.url ?? ''} placeholder="https://" onChange={e => onChange({ url: e.target.value })} /></label>
       )}
 
-      {block.type === 'products' && <ProductPicker ids={block.productIds ?? []} products={products} onProducts={onProducts} onChange={productIds => onChange({ productIds })} />}
+      {block.type === 'products' && dynamic && (
+        <label><span style={LABEL}>Show</span>
+          <select className="nf-field" value={source} onChange={e => onChange({ source: e.target.value as ProductSource })}>
+            <option value="manual">Products I pick</option>
+            <option value="cart">Products in their cart</option>
+            <option value="viewed">Products they viewed</option>
+            <option value="order">Products they ordered</option>
+            <option value="cross_sells">Cross-sells of what they bought</option>
+          </select>
+          {source !== 'manual' && <div className="nf-hint">Comes from what started the workflow (the abandoned cart, viewed products or order). Set cross-sells on each product in WooCommerce. With nothing to show, the block is left out.</div>}
+        </label>
+      )}
+      {block.type === 'products' && (!dynamic || source === 'manual') && <ProductPicker ids={block.productIds ?? []} products={products} onProducts={onProducts} onChange={productIds => onChange({ productIds })} />}
 
       {block.type === 'countdown' && (
         <label><span style={LABEL}>Counts down to</span>

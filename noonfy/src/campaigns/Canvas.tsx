@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties, type MouseEvent } from 'react';
 import { app } from '../config';
-import type { Block, CampaignSettings, Content, Product } from './types';
+import type { Block, CampaignSettings, Content, Product, ProductSource } from './types';
 
 /** Second gradient colour; mirrors Noonfy_Email_Renderer::accent2(). */
 export function accent2(accent: string) {
@@ -74,6 +74,10 @@ function Countdown({ until }: { until?: string }) {
   );
 }
 
+export const DYNAMIC_LABEL: Record<Exclude<ProductSource, 'manual'>, string> = {
+  cart: 'Products in their cart', order: 'Products they ordered', viewed: 'Products they viewed', cross_sells: 'Cross-sells of what they bought',
+};
+
 export interface CanvasProps {
   content: Content;
   editable: boolean;
@@ -125,6 +129,16 @@ export function Canvas(p: CanvasProps) {
           </div>
         );
       case 'products': {
+        if (b.source && b.source !== 'manual') {
+          return (
+            <div style={{ padding: '10px 24px' }}>
+              <div style={{ border: '1.5px dashed #DDD6FE', borderRadius: 10, background: '#FBFAFF', padding: '18px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: '#7C3AED' }}>
+                🛍️ {DYNAMIC_LABEL[b.source]}
+                <div style={{ fontSize: 11, color: '#8A8DA3', fontWeight: 600, marginTop: 3 }}>Filled in for each contact when the email is sent (up to 4).</div>
+              </div>
+            </div>
+          );
+        }
         const items = (b.productIds ?? []).map(id => p.products[id]).filter(Boolean);
         return items.length ? (
           <div style={{ display: 'grid', gridTemplateColumns: p.width < 500 ? '1fr' : '1fr 1fr', gap: 12, padding: '10px 24px' }}>

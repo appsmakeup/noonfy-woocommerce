@@ -3,11 +3,11 @@ import { Sidebar } from '../sidebar/Sidebar';
 import { Toast, type ToastData } from './ui';
 
 /** Page frame shared by Noonfy screens: sidebar, main column and the toast slot. */
-export function Shell({ active, toast, children }: { active: string; toast: ToastData | null; children: ReactNode }) {
+export function Shell({ active, toast, children, flush }: { active: string; toast: ToastData | null; children: ReactNode; flush?: boolean }) {
   return (
     <div className="nf-shell">
       <Sidebar active={active} />
-      <main className="nf-main">
+      <main className={'nf-main' + (flush ? ' nf-main--flush' : '')}>
         {children}
         {toast && <Toast toast={toast} />}
       </main>

@@ -15,6 +15,7 @@ class Noonfy_Admin {
 
 	const SLUG       = 'noonfy-smtp';
 	const CAMPAIGNS  = 'noonfy-campaigns';
+	const AUTOMATION = 'noonfy-automations';
 	const CAPABILITY = 'manage_woocommerce';
 
 	/** @var array<string, string> Screen key => hook suffix. */
@@ -53,6 +54,14 @@ class Noonfy_Admin {
 			self::CAPABILITY,
 			self::CAMPAIGNS,
 			array( __CLASS__, 'render_campaigns' )
+		);
+		self::$hooks['automations'] = add_submenu_page(
+			self::SLUG,
+			__( 'Automations', 'noonfy' ),
+			__( 'Automations', 'noonfy' ),
+			self::CAPABILITY,
+			self::AUTOMATION,
+			array( __CLASS__, 'render_automations' )
 		);
 	}
 
@@ -97,6 +106,9 @@ class Noonfy_Admin {
 		if ( 'campaigns' === $screen ) {
 			wp_enqueue_media(); // Image block: WordPress media library picker.
 			$boot .= 'window.noonfyCampaigns = ' . wp_json_encode( self::campaigns_data() ) . ';';
+		} elseif ( 'automations' === $screen ) {
+			wp_enqueue_media();
+			$boot .= 'window.noonfyAutomations = ' . wp_json_encode( self::automations_data() ) . ';';
 		} else {
 			$boot .= 'window.noonfySmtp = ' . wp_json_encode( self::smtp_data() ) . ';';
 		}
@@ -120,7 +132,8 @@ class Noonfy_Admin {
 			),
 			'screens' => array(
 				'smtp'      => admin_url( 'admin.php?page=' . self::SLUG ),
-				'campaigns' => admin_url( 'admin.php?page=' . self::CAMPAIGNS ),
+				'campaigns'   => admin_url( 'admin.php?page=' . self::CAMPAIGNS ),
+				'automations' => admin_url( 'admin.php?page=' . self::AUTOMATION ),
 			),
 			'links'   => array(
 				'wooProducts'     => admin_url( 'edit.php?post_type=product' ),
@@ -137,12 +150,27 @@ class Noonfy_Admin {
 		return Noonfy_Campaigns_REST::overview() + array(
 			'settings' => Noonfy_Campaign_Settings::get(),
 			'emojis'   => Noonfy_Campaigns::EMOJIS,
-			'currency' => array(
-				'symbol'   => function_exists( 'get_woocommerce_currency_symbol' ) ? html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES ) : '$',
-				'position' => (string) get_option( 'woocommerce_currency_pos', 'left' ),
-				'decimals' => function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2,
-			),
+			'currency' => self::currency(),
 			'timezone' => wp_timezone_string(),
+		);
+	}
+
+	/** Automations screen data, read as `window.noonfyAutomations` (typed in src/automations/types.ts). */
+	private static function automations_data() {
+		return Noonfy_Automations_REST::overview() + array(
+			'emojis'           => Noonfy_Workflows::EMOJIS,
+			'currency'         => self::currency(),
+			'timezone'         => wp_timezone_string(),
+			'campaignSettings' => Noonfy_Campaign_Settings::get(), // Email footer preview.
+		);
+	}
+
+	/** @return array Store currency formatting. */
+	private static function currency() {
+		return array(
+			'symbol'   => function_exists( 'get_woocommerce_currency_symbol' ) ? html_entity_decode( get_woocommerce_currency_symbol(), ENT_QUOTES ) : '$',
+			'position' => (string) get_option( 'woocommerce_currency_pos', 'left' ),
+			'decimals' => function_exists( 'wc_get_price_decimals' ) ? wc_get_price_decimals() : 2,
 		);
 	}
 
@@ -204,6 +232,11 @@ class Noonfy_Admin {
 	/** Campaigns screen mount point. */
 	public static function render_campaigns() {
 		self::render( 'noonfy-campaigns-root' );
+	}
+
+	/** Automations screen mount point. */
+	public static function render_automations() {
+		self::render( 'noonfy-automations-root' );
 	}
 
 	/** @param string $id Mount point id. */

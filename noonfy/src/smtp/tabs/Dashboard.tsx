@@ -183,8 +183,8 @@ function ShareCard({ stats }: { stats: Stats }) {
       </div>
       <div className="nf-col" style={{ gap: 7, marginTop: 6 }}>
         {total === 0 && <div className="nf-card-sub" style={{ textAlign: 'center' }}>No email sent this month yet.</div>}
-        {slices.map(s => (
-          <div key={s.label} className="nf-row" style={{ gap: 8, fontSize: 11.5, fontWeight: 700, color: '#3C3F55' }}>
+        {slices.map((s, i) => (
+          <div key={s.label + i} className="nf-row" style={{ gap: 8, fontSize: 11.5, fontWeight: 700, color: '#3C3F55' }}>
             <span className="nf-legend-dot" style={{ background: s.color }} />
             <span className="nf-grow nf-ellipsis">{s.label}</span>
             <span className="nf-noshrink" style={{ fontWeight: 800, color: '#14152A' }}>{Math.round((s.count / total) * 100)}%</span>

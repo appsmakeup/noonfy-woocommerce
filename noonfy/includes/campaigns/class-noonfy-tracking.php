@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
  * - ?noonfy_o=RID.SIG                 open pixel
  * - ?noonfy_c=RID.SIG&u=URL           click redirect (signature covers the URL: no open redirect)
  * - ?noonfy_unsub=TOKEN               unsubscribe / preferences page; POST = one-click (RFC 8058)
+ *
+ * RID is a campaign recipient id, or "a" + an automation send id (e.g. a42) for automation emails.
  */
 class Noonfy_Tracking {
 
@@ -32,25 +34,29 @@ class Noonfy_Tracking {
 	}
 
 	/**
-	 * @param int $rid Recipient id.
+	 * @param int    $rid   Recipient (or automation send) id.
+	 * @param string $scope '' for campaigns, 'a' for automations.
 	 * @return string
 	 */
-	public static function open_url( $rid ) {
-		return add_query_arg( 'noonfy_o', $rid . '.' . self::sign( 'o' . $rid ), home_url( '/' ) );
+	public static function open_url( $rid, $scope = '' ) {
+		$ref = $scope . $rid;
+		return add_query_arg( 'noonfy_o', $ref . '.' . self::sign( 'o' . $ref ), home_url( '/' ) );
 	}
 
 	/**
-	 * @param int    $rid Recipient id.
-	 * @param string $url Destination.
+	 * @param int    $rid   Recipient (or automation send) id.
+	 * @param string $url   Destination.
+	 * @param string $scope '' for campaigns, 'a' for automations.
 	 * @return string
 	 */
-	public static function click_url( $rid, $url ) {
+	public static function click_url( $rid, $url, $scope = '' ) {
 		if ( 0 === strpos( $url, 'mailto:' ) || '' === $url ) {
 			return $url;
 		}
+		$ref = $scope . $rid;
 		return add_query_arg(
 			array(
-				'noonfy_c' => $rid . '.' . self::sign( 'c' . $rid . '|' . $url ),
+				'noonfy_c' => $ref . '.' . self::sign( 'c' . $ref . '|' . $url ),
 				'u'        => rawurlencode( $url ),
 			),
 			home_url( '/' )
@@ -80,24 +86,32 @@ class Noonfy_Tracking {
 
 	/**
 	 * @param string $param RID.SIG.
-	 * @param string $kind  'o' or 'c'.
+	 * @param string $kind  'o', 'c' or 'k' (cookie).
 	 * @param string $extra Signed extra data.
-	 * @return int Recipient id, or 0 if the signature is wrong.
+	 * @return string Verified reference ("12" or "a12"), or '' if the signature is wrong.
 	 */
 	private static function verify( $param, $kind, $extra = '' ) {
 		$parts = explode( '.', $param );
-		if ( 2 !== count( $parts ) || ! ctype_digit( $parts[0] ) ) {
-			return 0;
+		if ( 2 !== count( $parts ) || ! preg_match( '/^a?[0-9]+$/', $parts[0] ) ) {
+			return '';
 		}
-		return hash_equals( self::sign( $kind . $parts[0] . $extra ), $parts[1] ) ? (int) $parts[0] : 0;
+		return hash_equals( self::sign( $kind . $parts[0] . $extra ), $parts[1] ) ? $parts[0] : '';
+	}
+
+	/**
+	 * @param string $ref Verified reference.
+	 * @return array{0: string, 1: int} Table holding the email, and its row id.
+	 */
+	private static function target( $ref ) {
+		return 'a' === $ref[0] ? array( Noonfy_Workflows::sends_table(), (int) substr( $ref, 1 ) ) : array( Noonfy_Campaigns::recipients_table(), (int) $ref );
 	}
 
 	/** @param string $param RID.SIG. */
 	private static function handle_open( $param ) {
 		global $wpdb;
-		$rid = self::verify( $param, 'o' );
-		if ( $rid ) {
-			$table = Noonfy_Campaigns::recipients_table();
+		$ref = self::verify( $param, 'o' );
+		if ( '' !== $ref ) {
+			list( $table, $rid ) = self::target( $ref );
 			$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET opened_at = COALESCE(opened_at, %s), open_count = open_count + 1 WHERE id = %d", gmdate( 'Y-m-d H:i:s' ), $rid ) ); // phpcs:ignore WordPress.DB
 		}
 		nocache_headers();
@@ -112,25 +126,25 @@ class Noonfy_Tracking {
 	 */
 	private static function handle_click( $param, $url ) {
 		global $wpdb;
-		$rid = self::verify( $param, 'c', '|' . $url );
+		$ref = self::verify( $param, 'c', '|' . $url );
 		// The signature proves the URL is the one in the email; only http(s) destinations are followed.
-		if ( ! $rid || ! in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
+		if ( '' === $ref || ! in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
 			wp_safe_redirect( home_url( '/' ) );
 			exit;
 		}
-		$now   = gmdate( 'Y-m-d H:i:s' );
-		$table = Noonfy_Campaigns::recipients_table();
+		$now                 = gmdate( 'Y-m-d H:i:s' );
+		list( $table, $rid ) = self::target( $ref );
 		// A click implies an open (images may be blocked).
 		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET clicked_at = COALESCE(clicked_at, %s), click_count = click_count + 1, opened_at = COALESCE(opened_at, %s) WHERE id = %d", $now, $now, $rid ) ); // phpcs:ignore WordPress.DB
-		setcookie( self::COOKIE, $rid . '.' . self::sign( 'k' . $rid ), time() + self::ATTRIBUTION_DAY * DAY_IN_SECONDS, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, is_ssl(), true );
+		setcookie( self::COOKIE, $ref . '.' . self::sign( 'k' . $ref ), time() + self::ATTRIBUTION_DAY * DAY_IN_SECONDS, COOKIEPATH ? COOKIEPATH : '/', COOKIE_DOMAIN, is_ssl(), true );
 		wp_redirect( $url ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- signed destination, may be off-site.
 		exit;
 	}
 
-	/** @return int Recipient id from the click cookie, or 0. */
+	/** @return string Email reference from the click cookie ("12" campaign, "a12" automation), or ''. */
 	public static function cookie_recipient() {
 		if ( empty( $_COOKIE[ self::COOKIE ] ) ) {
-			return 0;
+			return '';
 		}
 		return self::verify( sanitize_text_field( wp_unslash( $_COOKIE[ self::COOKIE ] ) ), 'k' );
 	}
@@ -214,8 +228,9 @@ class Noonfy_Tracking {
 	}
 
 	/**
-	 * Credits a paid order to the campaign recipient who drove it: the click cookie captured at checkout,
-	 * else the same email address having opened or clicked a campaign sent in the last 5 days.
+	 * Credits a paid order to the email that drove it — a campaign or an automation email: the click
+	 * cookie captured at checkout, else the most recent email to the same address that was opened or
+	 * clicked in the last 5 days.
 	 *
 	 * @param WC_Order $order Paid order.
 	 */
@@ -224,25 +239,40 @@ class Noonfy_Tracking {
 		if ( $order->get_meta( '_noonfy_attributed' ) ) {
 			return;
 		}
-		$table = Noonfy_Campaigns::recipients_table();
-		$rid   = (int) $order->get_meta( '_noonfy_click_rid' );
 		$since = gmdate( 'Y-m-d H:i:s', time() - self::ATTRIBUTION_DAY * DAY_IN_SECONDS );
-		if ( $rid && ! $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND sent_at >= %s", $rid, $since ) ) ) { // phpcs:ignore WordPress.DB
-			$rid = 0;
+		$ref   = (string) $order->get_meta( '_noonfy_click_rid' );
+		if ( preg_match( '/^a?[0-9]+$/', $ref ) ) {
+			list( $table, $id ) = self::target( $ref );
+			if ( ! $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE id = %d AND sent_at >= %s", $id, $since ) ) ) { // phpcs:ignore WordPress.DB
+				$ref = '';
+			}
+		} else {
+			$ref = '';
 		}
-		if ( ! $rid && $order->get_billing_email() ) {
-			$rid = (int) $wpdb->get_var( // phpcs:ignore WordPress.DB
-				$wpdb->prepare(
-					"SELECT id FROM {$table} WHERE email = %s AND sent_at >= %s AND (opened_at IS NOT NULL OR clicked_at IS NOT NULL) ORDER BY sent_at DESC LIMIT 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					strtolower( $order->get_billing_email() ),
-					gmdate( 'Y-m-d H:i:s', time() - 5 * DAY_IN_SECONDS )
-				)
-			);
+		if ( '' === $ref && $order->get_billing_email() ) {
+			$email   = strtolower( $order->get_billing_email() );
+			$recent  = gmdate( 'Y-m-d H:i:s', time() - 5 * DAY_IN_SECONDS );
+			$latest  = null;
+			$sources = array( '' => Noonfy_Campaigns::recipients_table(), 'a' => Noonfy_Workflows::sends_table() );
+			foreach ( $sources as $scope => $table ) {
+				// phpcs:ignore WordPress.DB
+				$row = $wpdb->get_row( $wpdb->prepare( "SELECT id, sent_at FROM {$table} WHERE email = %s AND sent_at >= %s AND (opened_at IS NOT NULL OR clicked_at IS NOT NULL) ORDER BY sent_at DESC LIMIT 1", $email, $recent ), ARRAY_A );
+				if ( $row && ( ! $latest || $row['sent_at'] > $latest[1] ) ) {
+					$latest = array( $scope . $row['id'], $row['sent_at'] );
+				}
+			}
+			$ref = $latest ? $latest[0] : '';
 		}
-		$order->update_meta_data( '_noonfy_attributed', $rid ? $rid : 'none' );
+		$order->update_meta_data( '_noonfy_attributed', '' !== $ref ? $ref : 'none' );
 		$order->save_meta_data();
-		if ( $rid ) {
-			$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET order_id = %d, revenue = revenue + %f WHERE id = %d", $order->get_id(), (float) $order->get_total(), $rid ) ); // phpcs:ignore WordPress.DB
+		if ( '' === $ref ) {
+			return;
+		}
+		list( $table, $id ) = self::target( $ref );
+		if ( 'a' === $ref[0] ) {
+			Noonfy_Automation_Runner::credit_send( $id, $order );
+		} else {
+			$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET order_id = %d, revenue = revenue + %f WHERE id = %d", $order->get_id(), (float) $order->get_total(), $id ) ); // phpcs:ignore WordPress.DB
 		}
 	}
 }

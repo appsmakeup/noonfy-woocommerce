@@ -384,3 +384,73 @@ body.noonfy-admin #wpbody-content > .notice, body.noonfy-admin #wpbody-content >
 .nf-ab-card, .nf-ab-card:focus, .nf-ab-card:hover { display: block; color: var(--ink); }
 .nf-ab-card:hover { box-shadow: 0 8px 22px rgba(20, 21, 42, .07); }
 .nf-ab-chip { margin-left: 7px; font-size: 9px; font-weight: 800; color: var(--purple); background: var(--purple-soft); border-radius: 5px; padding: 2px 5px; vertical-align: 1px; }
+
+/* ---------- automations ---------- */
+.nf-main--flush { padding: 0; }
+.nf-template-card { transition: box-shadow .15s ease, transform .15s ease; }
+.nf-template-card:hover { box-shadow: 0 10px 28px rgba(20, 21, 42, .08); transform: translateY(-2px); }
+.nf-btn-outline:disabled { opacity: .55; cursor: default; }
+button.nf-btn-outline { font-family: inherit; }
+.nf-btn-line, .nf-btn-line:focus {
+  display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: #fff; border-radius: 9px;
+  padding: 8px 14px; font-size: 13px; font-weight: 700; color: var(--ink-2); cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.nf-btn-line:hover { border-color: var(--border-hover); color: var(--ink); }
+.nf-btn-line:disabled { opacity: .55; cursor: default; }
+
+/* Visual builder (Builder.dc.html): full-height header + palette | canvas | inspector. */
+.nf-flowbuilder { display: flex; flex-direction: column; height: calc(100vh - var(--nf-top)); min-width: 0; }
+.nf-flow-header { display: flex; align-items: center; gap: 12px; padding: 14px 22px; background: #fff; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.nf-flow-back, .nf-flow-back:focus {
+  width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  background: #fff; cursor: pointer; flex-shrink: 0; padding: 0;
+}
+.nf-flow-back:hover { border-color: var(--border-hover); }
+.nf-app .nf-flow-emoji { border: 1px solid transparent; background: transparent; font-size: 16px; padding: 2px; border-radius: 7px; cursor: pointer; min-height: 0; line-height: 1.2; }
+.nf-app .nf-flow-emoji:hover { border-color: var(--border); }
+.nf-app .nf-flow-name {
+  display: block; border: 1px solid transparent; background: transparent; padding: 0 4px; margin-left: -5px; border-radius: 6px; min-height: 0;
+  font-size: 14.5px; font-weight: 800; color: var(--ink); width: 340px; max-width: 100%; box-shadow: none; line-height: 1.4;
+}
+.nf-app .nf-flow-name:hover { border-color: var(--border); }
+.nf-app .nf-flow-name:focus { border-color: var(--border-hover); outline: none; box-shadow: none; }
+.nf-flow-hint { font-size: 11.5px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+.nf-flow-body { flex: 1; display: flex; min-height: 0; min-width: 0; }
+.nf-flow-palette { width: 200px; background: #fff; border-right: 1px solid var(--border); padding: 14px; overflow-y: auto; flex-shrink: 0; }
+.nf-flow-palette-btn {
+  display: flex; align-items: center; gap: 9px; border: 1px solid var(--border); background: #fff; border-radius: 10px; padding: 9px 10px;
+  cursor: pointer; text-align: left; width: 100%;
+}
+.nf-flow-palette-btn:hover { border-color: #C7C3F5; background: #FBFAFF; }
+.nf-flow-palette-btn:disabled { opacity: .5; cursor: default; border-color: var(--border); background: #fff; }
+.nf-flow-canvas {
+  flex: 1; min-width: 0; position: relative; overflow: auto; background-color: #F8F8FC;
+}
+.nf-flow-canvas > div { background-image: radial-gradient(#DFE1EC 1px, transparent 1px); background-size: 22px 22px; }
+.nf-flow-node {
+  position: absolute; width: 230px; background: #fff; border: 1.5px solid #E4E5EF; border-radius: 13px; padding: 11px 13px;
+  cursor: grab; user-select: none; outline: none;
+}
+.nf-flow-node:active { cursor: grabbing; }
+.nf-port { position: absolute; width: 9px; height: 9px; border-radius: 99px; background: #fff; transform: translateX(-50%); }
+.nf-port--in { left: 50%; top: -5px; border: 2px solid #C4B5FD; }
+.nf-port--out { bottom: -5px; border: 2px solid #8B5CF6; cursor: crosshair; }
+.nf-port--out::after { content: ''; position: absolute; inset: -7px; border-radius: 99px; } /* bigger grab target */
+.nf-port--out:hover { background: #8B5CF6; }
+.nf-port-label { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); font-size: 9.5px; font-weight: 800; color: #7C3AED; background: #F1EBFE; border-radius: 5px; padding: 1px 5px; white-space: nowrap; pointer-events: none; }
+.nf-edge-delete {
+  position: absolute; width: 22px; height: 22px; border-radius: 99px; border: none; background: #E02424; color: #fff; font-size: 11px;
+  cursor: pointer; box-shadow: 0 2px 6px rgba(224, 36, 36, .4); z-index: 3; padding: 0; line-height: 22px;
+}
+.nf-flow-inspector { width: 250px; background: #fff; border-left: 1px solid var(--border); padding: 16px; overflow-y: auto; flex-shrink: 0; }
+.nf-inspector-box { border: 1px solid #F3F3FA; border-radius: 10px; padding: 11px 12px; }
+.nf-inspector-box > label > span:first-child { margin-top: 10px !important; }
+.nf-btn-delete-step {
+  width: 100%; margin-top: 14px; border: 1px solid #FDE1E1; background: #fff; color: #E02424; border-radius: 9px; padding: 9px;
+  font-size: 12px; font-weight: 800; cursor: pointer;
+}
+.nf-btn-delete-step:hover { background: #FDEDED; }
+
+/* Email step editor: full-screen layer over the builder. */
+.nf-email-editor { position: fixed; top: var(--wp-admin--admin-bar--height, 32px); left: 0; right: 0; bottom: 0; z-index: 99990; background: var(--bg); display: flex; flex-direction: column; }
+.nf-email-editor-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; gap: 14px; align-items: flex-start; padding: 18px 22px 40px; }

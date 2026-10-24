@@ -17,6 +17,7 @@ class Noonfy_Campaigns {
 	const STATUSES    = array( 'draft', 'scheduled', 'sending', 'paused', 'sent', 'cancelled' );
 	const AB_WAITS    = array( 1, 2, 4, 8, 12, 24, 48 );
 	const BLOCK_TYPES = array( 'header', 'image', 'text', 'products', 'button', 'countdown', 'reviews', 'coupon', 'footer' );
+	const PRODUCT_SOURCES = array( 'manual', 'cart', 'order', 'viewed', 'cross_sells' );
 	const EMOJIS      = array( '✉️', '🌾', '⚡', '🎁', '🏺', '🌷', '📦', '📖', '🏖️', '🛍️', '🎉', '❤️', '🔥', '⭐', '🎟️', '📣' );
 
 	/** Inline HTML allowed in text blocks (edited in the builder). */
@@ -468,9 +469,15 @@ class Noonfy_Campaigns {
 			case 'products':
 				$ids                = array_values( array_unique( array_filter( array_map( 'absint', (array) ( $b['productIds'] ?? array() ) ) ) ) );
 				$out['productIds'] = array_slice( $ids, 0, 4 );
+				// Automation emails can show products from the trigger instead (see Noonfy_Automation_Runner::dynamic).
+				$out['source'] = in_array( $b['source'] ?? '', self::PRODUCT_SOURCES, true ) ? $b['source'] : 'manual';
 				break;
 			case 'button':
-				$out += array( 'label' => $text( 'label', 60 ), 'url' => $url( 'url' ) );
+				$out += array(
+					'label' => $text( 'label', 60 ),
+					'url'   => $url( 'url' ),
+					'dest'  => 'cart' === ( $b['dest'] ?? '' ) ? 'cart' : 'url', // cart: the saved-cart restore link.
+				);
 				break;
 			case 'countdown':
 				$ts           = strtotime( (string) ( $b['until'] ?? '' ) );

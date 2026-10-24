@@ -1,7 +1,7 @@
 {
   "name": "noonfy",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Noonfy AI Customer Engagement for WooCommerce: admin UI build.",
   "scripts": {
     "build": "npm run typecheck && wp-scripts build",

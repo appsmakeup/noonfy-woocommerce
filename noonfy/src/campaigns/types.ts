@@ -10,11 +10,15 @@ export interface Block {
   src?: string; alt?: string; link?: string; // image
   html?: string;                             // text
   productIds?: number[];                     // products
+  source?: ProductSource;                    // products: 'manual' or from the automation trigger
   label?: string; url?: string;              // button
+  dest?: 'url' | 'cart';                     // button: custom URL or the saved-cart restore link
   until?: string;                            // countdown (ISO)
   quote?: string; author?: string; stars?: number; // reviews
   code?: string; note?: string;              // coupon
 }
+
+export type ProductSource = 'manual' | 'cart' | 'order' | 'viewed' | 'cross_sells';
 
 export interface Content { accent: string; blocks: Block[] }
 

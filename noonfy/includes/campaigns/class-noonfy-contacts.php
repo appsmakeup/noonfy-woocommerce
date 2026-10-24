@@ -110,6 +110,7 @@ class Noonfy_Contacts {
 
 		if ( $existing ) {
 			$wpdb->update( $table, $row, array( 'id' => $existing['id'] ) ); // phpcs:ignore WordPress.DB
+			self::changed( (int) $existing['id'], $existing['marketing'], $row['marketing'] ?? $existing['marketing'] );
 			return (int) $existing['id'];
 		}
 
@@ -121,7 +122,24 @@ class Noonfy_Contacts {
 			'marketing'  => 'none',
 		);
 		$wpdb->insert( $table, $row ); // phpcs:ignore WordPress.DB
-		return (int) $wpdb->insert_id;
+		$id = (int) $wpdb->insert_id;
+		self::changed( $id, 'none', $row['marketing'] );
+		return $id;
+	}
+
+	/**
+	 * Announces consent changes (automations start welcome flows and stop on unsubscribe).
+	 *
+	 * @param int    $id   Contact id.
+	 * @param string $from Previous state.
+	 * @param string $to   New state.
+	 */
+	private static function changed( $id, $from, $to ) {
+		if ( $id && $from !== $to && 'subscribed' === $to ) {
+			do_action( 'noonfy_contact_subscribed', $id );
+		} elseif ( $id && $from !== $to && 'unsubscribed' === $to ) {
+			do_action( 'noonfy_contact_unsubscribed', $id );
+		}
 	}
 
 	/** @return string 32 random hex characters. */
@@ -161,7 +179,8 @@ class Noonfy_Contacts {
 		if ( ! in_array( $marketing, self::MARKETING, true ) ) {
 			return;
 		}
-		$now = gmdate( 'Y-m-d H:i:s' );
+		$now  = gmdate( 'Y-m-d H:i:s' );
+		$from = (string) $wpdb->get_var( $wpdb->prepare( 'SELECT marketing FROM ' . self::table() . ' WHERE id = %d', (int) $id ) ); // phpcs:ignore WordPress.DB
 		$wpdb->update( // phpcs:ignore WordPress.DB
 			self::table(),
 			array(
@@ -172,6 +191,7 @@ class Noonfy_Contacts {
 			),
 			array( 'id' => (int) $id )
 		);
+		self::changed( (int) $id, $from, $marketing );
 	}
 
 	/**

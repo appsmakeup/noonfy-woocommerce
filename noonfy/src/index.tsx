@@ -1,4 +1,5 @@
 import { createRoot, StrictMode } from '@wordpress/element';
+import { AutomationsPage } from './automations/AutomationsPage';
 import { CampaignsPage } from './campaigns/CampaignsPage';
 import { SmtpPage } from './smtp/SmtpPage';
 // Manrope is bundled locally (no request to Google Fonts from wp-admin).
@@ -13,6 +14,7 @@ import './styles.css';
 const screens = [
   ['noonfy-smtp-root', SmtpPage],
   ['noonfy-campaigns-root', CampaignsPage],
+  ['noonfy-automations-root', AutomationsPage],
 ] as const;
 
 for (const [id, Screen] of screens) {

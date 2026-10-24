@@ -9,14 +9,17 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 global $wpdb;
 
-foreach ( array( 'noonfy_smtp_settings', 'noonfy_smtp_connections', 'noonfy_db_version', 'noonfy_rr_index', 'noonfy_campaign_settings' ) as $noonfy_option ) {
+foreach ( array( 'noonfy_smtp_settings', 'noonfy_smtp_connections', 'noonfy_db_version', 'noonfy_rr_index', 'noonfy_campaign_settings', 'noonfy_automation_settings', 'noonfy_live_triggers', 'noonfy_automation_lock' ) as $noonfy_option ) {
 	delete_option( $noonfy_option );
 }
 wp_clear_scheduled_hook( 'noonfy_purge_email_log' );
 wp_unschedule_hook( 'noonfy_campaign_start' );
 wp_unschedule_hook( 'noonfy_campaign_batch' );
 wp_unschedule_hook( 'noonfy_campaign_decide' );
+wp_unschedule_hook( 'noonfy_automations_run' );
+wp_unschedule_hook( 'noonfy_automations_run_now' );
+wp_unschedule_hook( 'noonfy_automations_daily' );
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE 'noonfy\\_campaign\\_lock\\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
-foreach ( array( 'noonfy_email_log', 'noonfy_campaign_recipients', 'noonfy_campaigns', 'noonfy_contacts' ) as $noonfy_table ) {
+foreach ( array( 'noonfy_email_log', 'noonfy_campaign_recipients', 'noonfy_campaigns', 'noonfy_automation_events', 'noonfy_automation_sends', 'noonfy_enrollments', 'noonfy_workflows', 'noonfy_carts', 'noonfy_product_views', 'noonfy_contacts' ) as $noonfy_table ) {
 	$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}{$noonfy_table}" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 }
